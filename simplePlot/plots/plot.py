@@ -1,5 +1,5 @@
 import ROOT
-ROOT.gROOT.LoadMacro("$CMSSW_BASE/src/Stops-dilepton/simplePlot/scripts/tdrstyle.C")
+ROOT.gROOT.LoadMacro("$CMSSW_BASE/src/StopsDilepton/simplePlot/scripts/tdrstyle.C")
 ROOT.setTDRStyle()
 
 from math import *
@@ -10,17 +10,17 @@ from math import *
 preselection = 'met_pt>50&&Sum$((Jet_pt)*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>100&&(Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)>=2)'
 
 #load all the samples
-from Workspace.OSDLAnalysis.cmgTuplesPostProcessed_PHYS14 import *
+from StopsDilepton.simplePlot.cmgTuplesPostProcessed_PHYS14 import *
 backgrounds = [TTJets, WJetsHTToLNu, TTVH, singleTop, DY]#, QCD]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
 
 #get the TChains for each sample
-from Workspace.OSDLAnalysis.helpers import getChain
+from StopsDilepton.simplePlot.helpers import getChain
 for s in backgrounds+signals:
   s['chain'] = getChain(s,histname="")
 
 #make MET plot in each sample: 
-from Workspace.OSDLAnalysis.helpers import getEList, getVarValue
+from StopsDilepton.simplePlot.helpers import getEList, getVarValue
 metPlots={}
 for s in backgrounds+signals:
   metPlots[s["name"]] = ROOT.TH1F("met_"+s["name"], "met_"+s["name"], 100,0,500)
@@ -51,6 +51,8 @@ l=ROOT.TLegend(0.6,0.6,1.0,1.0)
 bkg_stack = ROOT.THStack("bkgs","bkgs")
 for b in [WJetsHTToLNu, TTVH, singleTop, TTJets, DY]:
   metPlots[b["name"]].SetFillColor(b["color"])
+  metPlots[b["name"]].GetXaxis().SetTitle('#slash{E}_{T} (GeV)')
+  metPlots[b["name"]].GetYaxis().SetTitle("Events / 5 GeV")
   bkg_stack.Add(metPlots[b["name"]],"h")
   l.Add(metPlots[b["name"]], b["name"])
 
