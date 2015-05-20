@@ -23,7 +23,7 @@ for s in backgrounds+signals:
 from StopsDilepton.simplePlot.helpers import getEList, getVarValue
 metPlots={}
 for s in backgrounds+signals:
-  metPlots[s["name"]] = ROOT.TH1F("met_"+s["name"], "met_"+s["name"], 100,0,500)
+  metPlots[s["name"]] = ROOT.TH1F("met_"+s["name"], "met_"+s["name"], 25,0,500)
   #Using Draw command
   print "Obtain MET plot from %s" % s["name"]
   s["chain"].Draw("met_pt>>met_"+s["name"], "weight*("+preselection+")","goff")
@@ -48,20 +48,25 @@ DY["color"]=ROOT.kBlue
 
 #Make a stack for backgrounds
 l=ROOT.TLegend(0.6,0.6,1.0,1.0)
+l.SetFillColor(0)
+l.SetShadowColor(ROOT.kWhite)
+l.SetBorderSize(1)
 bkg_stack = ROOT.THStack("bkgs","bkgs")
 for b in [WJetsHTToLNu, TTVH, singleTop, TTJets, DY]:
   metPlots[b["name"]].SetFillColor(b["color"])
-  metPlots[b["name"]].GetXaxis().SetTitle('#slash{E}_{T} (GeV)')
-  metPlots[b["name"]].GetYaxis().SetTitle("Events / 5 GeV")
   bkg_stack.Add(metPlots[b["name"]],"h")
-  l.Add(metPlots[b["name"]], b["name"])
+  l.AddEntry(metPlots[b["name"]], b["name"])
 
 #Plot!
 signal = "SMS_T2tt_2J_mStop425_mLSP325"#May chose different signal here
 c1 = ROOT.TCanvas()
 bkg_stack.Draw()
+bkg_stack.GetXaxis().SetTitle('#slash{E}_{T} (GeV)')
+bkg_stack.GetYaxis().SetTitle("Events / 5 GeV")
 c1.SetLogy()
-metPlots[signal].Draw("same")
-l.Add(metPlots[signal], signal)
+signalPlot = metPlots[signal].Clone()
+signalPlot.Scale(100)
+signalPlot.Draw("same")
+l.AddEntry(signalPlot, signal+" x 100")
 l.Draw()
 c1.Print("/afs/hephy.at/user/r/rschoefbeck/www/etc/plotForWard.png")
