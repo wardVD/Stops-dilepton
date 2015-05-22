@@ -73,3 +73,5 @@ def getEList(chain, cut, newname='eListTMP'):
   del elistTMP_t
   return elistTMP
 
+def getObjDict(c, prefix, variables, i):
+ return {var: c.GetLeaf(prefix+var).GetValue(i) for var in variables}
