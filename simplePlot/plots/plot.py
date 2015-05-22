@@ -53,8 +53,12 @@ for s in backgrounds+signals:
     leptons = getLeptons(chain) 
     muons = filter(looseMuID, leptons)    
     if len(muons)==2 and muons[0]['pdgId']*muons[1]['pdgId']<0:
-      mt2 = calcMT2.mt2(met, metPhi, muons[0]['pt'], muons[0]['phi'], muons[1]['pt'], muons[1]['phi']) 
-      mt2Plots[s["name"]].Fill(met, weight)
+      l0pt, l0eta, l0phi = muons[0]['pt'],  muons[0]['eta'],  muons[0]['phi']
+      l1pt, l1eta, l1phi = muons[1]['pt'],  muons[1]['eta'],  muons[1]['phi']
+      mll = sqrt(2.*l0pt*l1pt*(cosh(l0eta-l1eta)-cos(l0phi-l1phi)))
+      if mll>20 and abs(mll-90.2)>15:
+        mt2 = calcMT2.mt2(met, metPhi, l0pt, l0phi, l1pt, l1phi)
+        mt2Plots[s["name"]].Fill(mt2, weight)
   del eList
 
 #Some coloring
@@ -70,18 +74,20 @@ l.SetFillColor(0)
 l.SetShadowColor(ROOT.kWhite)
 l.SetBorderSize(1)
 bkg_stack = ROOT.THStack("bkgs","bkgs")
-for b in [WJetsHTToLNu, TTVH, singleTop, TTJets, DY]:
+for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
   mt2Plots[b["name"]].SetFillColor(b["color"])
+  mt2Plots[b["name"]].SetMarkerColor(b["color"])
+  mt2Plots[b["name"]].SetMarkerSize(0)
   bkg_stack.Add(mt2Plots[b["name"]],"h")
   l.AddEntry(mt2Plots[b["name"]], b["name"])
 
 #Plot!
-signal = "SMS_T2tt_2J_mStop425_mLSP325"#May chose different signal here
+signal = "SMS_T2tt_2J_mStop650_mLSP325"#May chose different signal here
 c1 = ROOT.TCanvas()
 bkg_stack.Draw()
 #bkg_stack.GetXaxis().SetTitle('#slash{E}_{T} (GeV)')
 bkg_stack.GetXaxis().SetTitle('M_{T,2} (GeV)')
-bkg_stack.GetYaxis().SetTitle("Events / 10 GeV")
+bkg_stack.GetYaxis().SetTitle("Events / %i GeV"%( (binning[2]-binning[1])/binning[0]) )
 c1.SetLogy()
 signalPlot = mt2Plots[signal].Clone()
 signalPlot.Scale(100)
