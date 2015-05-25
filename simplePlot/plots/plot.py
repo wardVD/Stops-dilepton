@@ -13,7 +13,7 @@ from StopsDilepton.tools.localInfo import *
 #For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
 preselection = 'met_pt>40&&Sum$((Jet_pt)*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>100&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)>=1&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>15)>=2'
 
-reduceStat = 10
+reduceStat = 1
 
 #load all the samples
 from StopsDilepton.simplePlot.cmgTuplesPostProcessed_PHYS14 import *
@@ -25,7 +25,7 @@ for s in backgrounds+signals:
   s['chain'] = getChain(s,histname="")
 
 #binning of plot
-binning = [25,0,250]
+binning = [25,25,275]
 
 #make plot in each sample: 
 mt2Plots={}
