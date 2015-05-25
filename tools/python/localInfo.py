@@ -1,6 +1,6 @@
 import os
 if os.environ['USER'] in ['ward']:
-  plotDir = "."
+  plotDir = "/afs/cern.ch/user/w/wvandrie/www/Stops/"
   dataDir = "~/eos/cms/store/cmst3/group/susy/schoef/postProcessed_Phys14V3_diLep" #needs EOS mount on lxplus at ~/eos
 if os.environ['USER'] in ['didar']:
   plotDir = "."
