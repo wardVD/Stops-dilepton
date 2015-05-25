@@ -1,6 +1,6 @@
 import copy, os, sys
-
-dir = "~/eos/cms/store/cmst3/group/susy/schoef/postProcessed_Phys14V3_diLep"
+from StopsDilepton.tools.localInfo import dataDir
+dir = dataDir 
 
 TTJets={\
 "name" : "ttJets",
