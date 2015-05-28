@@ -16,7 +16,7 @@ preselection = 'met_pt>40&&Sum$((Jet_pt)*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>
 reduceStat = 1
 
 #load all the samples
-from StopsDilepton.simplePlot.cmgTuplesPostProcessed_PHYS14 import *
+from StopsDilepton.plots.cmgTuplesPostProcessed_PHYS14 import *
 backgrounds = [TTJets, WJetsHTToLNu, TTVH, singleTop, DY]#, QCD]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
 
@@ -95,3 +95,4 @@ signalPlot.Draw("same")
 l.AddEntry(signalPlot, signal+" x 100")
 l.Draw()
 c1.Print(plotDir+"/mt2.png")
+
