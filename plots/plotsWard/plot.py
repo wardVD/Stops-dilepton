@@ -25,12 +25,18 @@ for s in backgrounds+signals:
   s['chain'] = getChain(s,histname="")
 
 #binning of plot
-binning = [25,25,275]
+#binning = [25,25,275]
 
 #make plot in each sample: 
-mt2Plots={}
+
+plots = {\
+  'mt2': {'name':'mt2', 'binning': [25,25,275], 'histo':{}},
+  'met': {'name':'met', 'binning': [25,25,525], 'histo':{}},
+}
+
 for s in backgrounds+signals:
-  mt2Plots[s["name"]] = ROOT.TH1F("met_"+s["name"], "met_"+s["name"], *binning)
+  for pk in plots.keys():
+    plots[pk]['histo'][s["name"]] = ROOT.TH1F(plots[pk]['name']+"_"+s["name"], plots[pk]['name']+"_"+s["name"], *plots[pk]['binning'])
   chain = s["chain"]
 #  #Using Draw command
 #  print "Obtain MET plot from %s" % s["name"]
@@ -58,8 +64,10 @@ for s in backgrounds+signals:
       mll = sqrt(2.*l0pt*l1pt*(cosh(l0eta-l1eta)-cos(l0phi-l1phi)))
       if mll>20 and abs(mll-90.2)>15:
         mt2 = calcMT2.mt2(met, metPhi, l0pt, l0phi, l1pt, l1phi)
-        mt2Plots[s["name"]].Fill(mt2, weight)
+        plots['mt2']['histo'][s["name"]].Fill(mt2, weight)
+        plots['met']['histo'][s["name"]].Fill(met, weight)
   del eList
+
 
 #Some coloring
 TTJets["color"]=ROOT.kRed
@@ -68,31 +76,33 @@ TTVH["color"]=ROOT.kMagenta
 singleTop["color"]=ROOT.kOrange
 DY["color"]=ROOT.kBlue
 
-#Make a stack for backgrounds
-l=ROOT.TLegend(0.6,0.6,1.0,1.0)
-l.SetFillColor(0)
-l.SetShadowColor(ROOT.kWhite)
-l.SetBorderSize(1)
-bkg_stack = ROOT.THStack("bkgs","bkgs")
-for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
-  mt2Plots[b["name"]].SetFillColor(b["color"])
-  mt2Plots[b["name"]].SetMarkerColor(b["color"])
-  mt2Plots[b["name"]].SetMarkerSize(0)
-  bkg_stack.Add(mt2Plots[b["name"]],"h")
-  l.AddEntry(mt2Plots[b["name"]], b["name"])
 
+for pk in plots.keys():
+#Make a stack for backgrounds
+  l=ROOT.TLegend(0.6,0.6,1.0,1.0)
+  l.SetFillColor(0)
+  l.SetShadowColor(ROOT.kWhite)
+  l.SetBorderSize(1)
+  bkg_stack = ROOT.THStack("bkgs","bkgs")
+  for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
+    plots[pk]['histo'][b["name"]].SetFillColor(b["color"])
+    plots[pk]['histo'][b["name"]].SetMarkerColor(b["color"])
+    plots[pk]['histo'][b["name"]].SetMarkerSize(0)
+    bkg_stack.Add(plots[pk]['histo'][b["name"]],"h")
+    l.AddEntry(plots[pk]['histo'][b["name"]], b["name"])
+    
 #Plot!
-signal = "SMS_T2tt_2J_mStop650_mLSP325"#May chose different signal here
-c1 = ROOT.TCanvas()
-bkg_stack.Draw()
+  signal = "SMS_T2tt_2J_mStop650_mLSP325"#May chose different signal here
+  c1 = ROOT.TCanvas()
+  bkg_stack.Draw()
 #bkg_stack.GetXaxis().SetTitle('#slash{E}_{T} (GeV)')
-bkg_stack.GetXaxis().SetTitle('M_{T,2} (GeV)')
-bkg_stack.GetYaxis().SetTitle("Events / %i GeV"%( (binning[2]-binning[1])/binning[0]) )
-c1.SetLogy()
-signalPlot = mt2Plots[signal].Clone()
-signalPlot.Scale(100)
-signalPlot.Draw("same")
-l.AddEntry(signalPlot, signal+" x 100")
-l.Draw()
-c1.Print(plotDir+"/mt2.png")
+  bkg_stack.GetXaxis().SetTitle(plots[pk]['name'] +' (GeV)')
+  bkg_stack.GetYaxis().SetTitle("Events / %i GeV"%( (plots[pk]['binning'][2]-plots[pk]['binning'][1])/plots[pk]['binning'][0]) )
+  c1.SetLogy()
+  signalPlot = plots[pk]['histo'][signal].Clone()
+  signalPlot.Scale(100)
+  signalPlot.Draw("same")
+  l.AddEntry(signalPlot, signal+" x 100")
+  l.Draw()
+  c1.Print(plotDir+"/"+plots[pk]['name']+".png")
 

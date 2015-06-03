@@ -12,7 +12,6 @@ void tdrGrid(bool gridOn) {
 void fixOverlay() {
   gPad->RedrawAxis();
 }
-
 TStyle * setTDRStyle() {
   TStyle *tdrStyle = new TStyle("tdrStyle","Style for P-TDR");
 
