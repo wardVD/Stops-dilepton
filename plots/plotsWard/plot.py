@@ -6,7 +6,7 @@ from math import *
 from StopsDilepton.tools.mt2Calculator import mt2Calculator
 mt2Calc = mt2Calculator()
 from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue
-from StopsDilepton.tools.objectSelection import getLeptons, looseMuID 
+from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID
 from StopsDilepton.tools.localInfo import *
 
 #preselection: MET>50, HT>100, n_bjets>=2
@@ -31,8 +31,8 @@ for s in backgrounds+signals:
 #make plot in each sample: 
 
 plots = {\
-  'mt2': {'name':'mt2', 'binning': [25,25,275], 'histo':{}},
-  'met': {'name':'met', 'binning': [25,25,525], 'histo':{}},
+  'mt2_mumu': {'name':'mt2', 'binning': [25,25,275], 'histo':{}},
+  'met_mumu': {'name':'met', 'binning': [50,25,525], 'histo':{}},
 }
 
 for s in backgrounds+signals:
@@ -58,18 +58,24 @@ for s in backgrounds+signals:
     metPhi = getVarValue(chain, "met_phi")
     #Leptons 
     allLeptons = getLeptons(chain) 
-    muons = filter(looseMuID, leptons)    
-    if len(muons)==2 and muons[0]['pdgId']*muons[1]['pdgId']<0:
-      l0pt, l0eta, l0phi = muons[0]['pt'],  muons[0]['eta'],  muons[0]['phi']
-      l1pt, l1eta, l1phi = muons[1]['pt'],  muons[1]['eta'],  muons[1]['phi']
-      mll = sqrt(2.*l0pt*l1pt*(cosh(l0eta-l1eta)-cos(l0phi-l1phi)))
-      if mll>20 and abs(mll-90.2)>15:
-        mt2Calc.setMet(met,metPhi)
-        mt2Calc.setLeptons(l0pt, l0eta, l0phi, l1pt, l1eta, l1phi)
+    muons = filter(looseMuID, allLeptons)    
+    electrons = filter(looseEleID, allLeptons)
+    leptons = {\
+      'mu': muons,
+      #'el':electrons,
+      }
+    for lep in leptons.keys():
+      if len(leptons[lep])==2 and leptons[lep][0]['pdgId']*leptons[lep][1]['pdgId']<0:
+        l0pt, l0eta, l0phi = leptons[lep][0]['pt'],  leptons[lep][0]['eta'],  leptons[lep][0]['phi']
+        l1pt, l1eta, l1phi = leptons[lep][1]['pt'],  leptons[lep][1]['eta'],  leptons[lep][1]['phi']
+        mll = sqrt(2.*l0pt*l1pt*(cosh(l0eta-l1eta)-cos(l0phi-l1phi)))
+        if mll>20 and abs(mll-90.2)>15:
+          mt2Calc.setMet(met,metPhi)
+          mt2Calc.setLeptons(l0pt, l0eta, l0phi, l1pt, l1eta, l1phi)
         
-        mt2ll = mt2Calc.mt2ll()
-        plots['mt2']['histo'][s["name"]].Fill(mt2ll, weight)
-        plots['met']['histo'][s["name"]].Fill(met, weight)
+          mt2ll = mt2Calc.mt2ll()
+          plots['mt2_mumu']['histo'][s["name"]].Fill(mt2ll, weight)
+          plots['met_mumu']['histo'][s["name"]].Fill(met, weight)
   del eList
 
 
