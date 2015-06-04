@@ -26,7 +26,7 @@ def looseMuID(l, ptCut=20, absEtaCut=2.4):
 def looseEleID(l, ptCut=20, absEtaCut=2.4):
   return \
     abs(l["pdgId"])==11\
-    and l["LepGood_eleMVAId"]==2 and l["miniRelIso"]<0.4 and l["sip3d"]<4.0\
+    and l["eleMVAId"]==2 and l["miniRelIso"]<0.4 and l["sip3d"]<4.0\
     and l["pt"]>=ptCut and abs(l["eta"])<absEtaCut
 
 
