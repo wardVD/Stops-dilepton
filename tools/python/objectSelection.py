@@ -17,7 +17,7 @@ def getLeptons(c):
   return [getObjDict(c, 'LepGood_', ['eta','pt','phi','charge', 'dxy', 'dz', 'relIso03','tightId', 'pdgId', 'mediumMuonId', 'miniRelIso', 'sip3d'], i) for i in range(int(getVarValue(c, 'nLepGood')))]
 #  return filter(lambda m:abs(m['pdgId'])==13, res)
 
-def looseMuID(l, ptCut=15, absEtaCut=2.4):
+def looseMuID(l, ptCut=20, absEtaCut=2.4):
   return \
     abs(l["pdgId"])==13\
     and l["mediumMuonId"]==1 and l["miniRelIso"]<0.4 and l["sip3d"]<4.0\
