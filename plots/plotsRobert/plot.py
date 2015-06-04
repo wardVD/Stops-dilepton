@@ -3,7 +3,9 @@ ROOT.gROOT.LoadMacro("$CMSSW_BASE/src/StopsDilepton/tools/scripts/tdrstyle.C")
 ROOT.setTDRStyle()
 
 from math import *
-from StopsDilepton.tools import mt2 as calcMT2
+from StopsDilepton.tools.mt2Calculator import mt2Calculator
+mt2Calc = mt2Calculator()
+
 from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue
 from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, getJets 
 from StopsDilepton.tools.localInfo import *
@@ -26,8 +28,10 @@ for s in backgrounds+signals:
 
 #plots
 plots = {\
-  'mt2': {'name':'mt2', 'binning': [25,25,275], 'histo':{}},
-  'mt2b':{'name':'mt2b', 'binning': [25,25,275], 'histo':{}},
+  'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'mt2ll', 'binning': [25,25,275], 'histo':{}},
+  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'mt2bb', 'binning': [22,25,575], 'histo':{}},
+  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'mt2blbl', 'binning': [22,25,575], 'histo':{}},
+  'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': [25,0,25], 'histo':{}},
 }
 
 #make plot in each sample: 
@@ -47,6 +51,7 @@ for s in backgrounds+signals:
   for ev in range(nEvents):
     if ev%10000==0:print "At %i/%i"%(ev,nEvents)
     chain.GetEntry(eList.GetEntry(ev))
+    mt2Calc.reset()
     #event weight (L= 4fb^-1)
     weight = reduceStat*getVarValue(chain, "weight")
     #MET
@@ -60,17 +65,21 @@ for s in backgrounds+signals:
       l1pt, l1eta, l1phi = muons[1]['pt'],  muons[1]['eta'],  muons[1]['phi']
       mll = sqrt(2.*l0pt*l1pt*(cosh(l0eta-l1eta)-cos(l0phi-l1phi)))
       if mll>20 and abs(mll-90.2)>15:
-        mt2 = calcMT2.mt2(met, metPhi, l0pt, l0phi, l1pt, l1phi)
-        plots['mt2']['histo'][s["name"]].Fill(mt2, weight)
+        mt2Calc.setMet(met,metPhi)
+        mt2Calc.setLeptons(l0pt, l0eta, l0phi, l1pt, l1eta, l1phi)
+        
+        mt2ll = mt2Calc.mt2ll()
+        plots['mt2ll']['histo'][s["name"]].Fill(mt2ll, weight)
         jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(chain))
+        ht = sum([j['pt'] for j in jets])
+        plots['kinMetSig']['histo'][s["name"]].Fill(met/sqrt(ht), weight)
         bjets = filter(lambda j:j['btagCSV']>0.814, jets)
         if len(bjets)==2:
-          mx = met*cos(metPhi) + l0pt*cos(l0phi) + l1pt*cos(l1phi)
-          my = met*cos(metPhi) + l0pt*cos(l0phi) + l1pt*cos(l1phi)
-          mt  = sqrt(mx**2+my**2)
-          mphi= atan2(my,mx)
-          mt2b = calcMT2.mt2(mt, mphi, bjets[0]['pt'], bjets[0]['phi'],  bjets[1]['pt'], bjets[1]['phi'])
-          plots['mt2b']['histo'][s["name"]].Fill(mt2b, weight)
+          mt2Calc.setBJets(bjets[0]['pt'], bjets[0]['eta'], bjets[0]['phi'], bjets[1]['pt'], bjets[1]['eta'], bjets[1]['phi'])
+          mt2bb   = mt2Calc.mt2bb()
+          mt2blbl = mt2Calc.mt2blbl()
+          plots['mt2bb']['histo'][s["name"]].Fill(mt2bb, weight)
+          plots['mt2blbl']['histo'][s["name"]].Fill(mt2blbl, weight)
         else:
           print "Preselection and b-jet selection inconsistent"
         
@@ -101,7 +110,7 @@ for pk in plots.keys():
   c1 = ROOT.TCanvas()
   bkg_stack.Draw()
   #bkg_stack.GetXaxis().SetTitle('#slash{E}_{T} (GeV)')
-  bkg_stack.GetXaxis().SetTitle('M_{T,2} (GeV)')
+  bkg_stack.GetXaxis().SetTitle(plots[pk]['title'])
   binning = plots[pk]['binning']
   bkg_stack.GetYaxis().SetTitle("Events / %i GeV"%( (binning[2]-binning[1])/binning[0]) )
   c1.SetLogy()

@@ -3,7 +3,8 @@ ROOT.gROOT.LoadMacro("$CMSSW_BASE/src/StopsDilepton/tools/scripts/tdrstyle.C")
 ROOT.setTDRStyle()
 
 from math import *
-from StopsDilepton.tools import mt2 as calcMT2
+from StopsDilepton.tools.mt2Calculator import mt2Calculator
+mt2Calc = mt2Calculator()
 from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue
 from StopsDilepton.tools.objectSelection import getLeptons, looseMuID 
 from StopsDilepton.tools.localInfo import *
@@ -63,8 +64,11 @@ for s in backgrounds+signals:
       l1pt, l1eta, l1phi = muons[1]['pt'],  muons[1]['eta'],  muons[1]['phi']
       mll = sqrt(2.*l0pt*l1pt*(cosh(l0eta-l1eta)-cos(l0phi-l1phi)))
       if mll>20 and abs(mll-90.2)>15:
-        mt2 = calcMT2.mt2(met, metPhi, l0pt, l0phi, l1pt, l1phi)
-        plots['mt2']['histo'][s["name"]].Fill(mt2, weight)
+        mt2Calc.setMet(met,metPhi)
+        mt2Calc.setLeptons(l0pt, l0eta, l0phi, l1pt, l1eta, l1phi)
+        
+        mt2ll = mt2Calc.mt2ll()
+        plots['mt2']['histo'][s["name"]].Fill(mt2ll, weight)
         plots['met']['histo'][s["name"]].Fill(met, weight)
   del eList
 
