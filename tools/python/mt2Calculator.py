@@ -58,7 +58,7 @@ class mt2Calculator:
     self.mt2.set_mn(self.mt2Mass)
     self.mt2.set_momenta(b1, b2, pmiss)
     return self.mt2.get_mt2()
-#MT2blbl (treating leptons invisibly, endpoint at top mass) 
+#MT2blbl (Brians variant) 
   def mt2blbl(self, strategy="minMaxMass"):
     assert self.met and self.lepton1 and self.lepton2 and self.bjet1 and self.bjet2, "Incomplete specification, need met/lepton1/lepton2/bjet1/bjet2"
 
