@@ -57,7 +57,7 @@ for s in backgrounds+signals:
     met = getVarValue(chain, "met_pt")
     metPhi = getVarValue(chain, "met_phi")
     #Leptons 
-    leptons = getLeptons(chain) 
+    allLeptons = getLeptons(chain) 
     muons = filter(looseMuID, leptons)    
     if len(muons)==2 and muons[0]['pdgId']*muons[1]['pdgId']<0:
       l0pt, l0eta, l0phi = muons[0]['pt'],  muons[0]['eta'],  muons[0]['phi']
