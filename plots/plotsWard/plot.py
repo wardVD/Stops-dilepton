@@ -34,7 +34,7 @@ plots = {\
   'mumu':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': [25,25,275], 'histo':{}},
   'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': [25,25,275], 'histo':{}},
-  'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': [25,25,525], 'histo':{}},
+  'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': [25,25,575], 'histo':{}},
   'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'mt2bb', 'binning': [25,25,575], 'histo':{}},
   'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'mt2blbl', 'binning': [25,25,575], 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': [25,0,25], 'histo':{}},
@@ -44,7 +44,7 @@ plots = {\
   'elel':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': [25,25,275], 'histo':{}},
   'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': [25,25,275], 'histo':{}},
-  'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': [25,25,525], 'histo':{}},
+  'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': [25,25,575], 'histo':{}},
   'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'mt2bb', 'binning': [25,25,575], 'histo':{}},
   'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'mt2blbl', 'binning': [25,25,575], 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': [25,0,25], 'histo':{}},
@@ -54,7 +54,7 @@ plots = {\
   'elmu':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': [25,25,275], 'histo':{}},
   'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': [25,25,275], 'histo':{}},
-  'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': [25,25,525], 'histo':{}},
+  'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': [25,25,575], 'histo':{}},
   'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'mt2bb', 'binning': [25,25,575], 'histo':{}},
   'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'mt2blbl', 'binning': [25,25,575], 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': [25,0,25], 'histo':{}},
@@ -119,9 +119,6 @@ for s in backgrounds+signals:
       if twoleptons and mll>20 and abs(mll-90.2)>15:
         plots[leptons[lep]['name']]['leadingjetpt']['histo'][s["name"]].Fill(leadingjetpt, weight)
         plots[leptons[lep]['name']]['subleadingjetpt']['histo'][s["name"]].Fill(subleadingjetpt, weight)
-          #get jets
-          #jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(chain))
-          #print jets
         mt2Calc.setMet(met,metPhi)
         mt2Calc.setLeptons(l0pt, l0eta, l0phi, l1pt, l1eta, l1phi)
         
