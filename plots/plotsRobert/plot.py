@@ -5,16 +5,17 @@ ROOT.setTDRStyle()
 from math import *
 from StopsDilepton.tools.mt2Calculator import mt2Calculator
 mt2Calc = mt2Calculator()
-
+from StopsDilepton.tools.mtautau import mtautau as mtautau_
 from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue
-from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, getJets 
+from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets 
 from StopsDilepton.tools.localInfo import *
 
 #preselection: MET>50, HT>100, n_bjets>=2
 #Once we decided in HT definition and b-tag WP we add those variables to the tuple.
 #For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
-preselection = 'met_pt>40&&Sum$((Jet_pt)*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>100&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)==2&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>15)>=2'
 
+#preselection = 'met_pt>40&&Sum$((Jet_pt)*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>100&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)==2&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
+preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)>0&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)>=2'
 reduceStat = 1
 
 #load all the samples
@@ -28,10 +29,14 @@ for s in backgrounds+signals:
 
 #plots
 plots = {\
-  'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'mt2ll', 'binning': [25,25,275], 'histo':{}},
-  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'mt2bb', 'binning': [22,25,575], 'histo':{}},
-  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'mt2blbl', 'binning': [22,25,575], 'histo':{}},
-  'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': [25,0,25], 'histo':{}},
+  'met': {'title':'#slash{E}_{T} (GeV)', 'name':'met', 'binning': [26,0,520], 'histo':{}},
+  'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'mt2ll', 'binning': [26,0,520], 'histo':{}},
+  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'mt2bb', 'binning': [26,0,520], 'histo':{}},
+  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'mt2blbl', 'binning': [26,0,520], 'histo':{}},
+  'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': [35,0,35], 'histo':{}},
+  'mtautau': {'title':'M_{#tau#tau} (GeV)', 'name':'mtautau', 'binning': [50,0,1000], 'histo':{}},
+  'alpha0': {'title':'#alpha_{0}', 'name':'alpha0', 'binning': [50,-10,10], 'histo':{}},
+  'alpha1': {'title':'#alpha_{1}', 'name':'alpha1', 'binning': [50,-10,10], 'histo':{}},
 }
 
 #make plot in each sample: 
@@ -59,27 +64,30 @@ for s in backgrounds+signals:
     metPhi = getVarValue(chain, "met_phi")
     #Leptons 
     leptons = getLeptons(chain) 
-    muons = filter(looseMuID, leptons)  
-    if len(muons)==2 and muons[0]['pdgId']*muons[1]['pdgId']<0:
-      l0pt, l0eta, l0phi = muons[0]['pt'],  muons[0]['eta'],  muons[0]['phi']
-      l1pt, l1eta, l1phi = muons[1]['pt'],  muons[1]['eta'],  muons[1]['phi']
+    leptons = filter(lambda l: looseMuID(l) or looseEleID(l), leptons)
+    if len(leptons)==2 and leptons[0]['pdgId']*leptons[1]['pdgId']<0 and abs(leptons[0]['pdgId'])==abs(leptons[1]['pdgId']): #OSSF choice
+      l0pt, l0eta, l0phi = leptons[0]['pt'],  leptons[0]['eta'],  leptons[0]['phi']
+      l1pt, l1eta, l1phi = leptons[1]['pt'],  leptons[1]['eta'],  leptons[1]['phi']
       mll = sqrt(2.*l0pt*l1pt*(cosh(l0eta-l1eta)-cos(l0phi-l1phi)))
       if mll>20 and abs(mll-90.2)>15:
-        mt2Calc.setMet(met,metPhi)
-        mt2Calc.setLeptons(l0pt, l0eta, l0phi, l1pt, l1eta, l1phi)
-        
-        mt2ll = mt2Calc.mt2ll()
-        plots['mt2ll']['histo'][s["name"]].Fill(mt2ll, weight)
         jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(chain))
-        ht = sum([j['pt'] for j in jets])
-        plots['kinMetSig']['histo'][s["name"]].Fill(met/sqrt(ht), weight)
         bjets = filter(lambda j:j['btagCSV']>0.814, jets)
         if len(bjets)==2:
+          mt2Calc.setMet(met,metPhi)
+          mt2Calc.setLeptons(l0pt, l0eta, l0phi, l1pt, l1eta, l1phi)
+          mt2ll = mt2Calc.mt2ll()
+          plots['mt2ll']['histo'][s["name"]].Fill(mt2ll, weight)
+          ht = sum([j['pt'] for j in jets])
+          plots['kinMetSig']['histo'][s["name"]].Fill(met/sqrt(ht), weight)
           mt2Calc.setBJets(bjets[0]['pt'], bjets[0]['eta'], bjets[0]['phi'], bjets[1]['pt'], bjets[1]['eta'], bjets[1]['phi'])
           mt2bb   = mt2Calc.mt2bb()
           mt2blbl = mt2Calc.mt2blbl()
           plots['mt2bb']['histo'][s["name"]].Fill(mt2bb, weight)
           plots['mt2blbl']['histo'][s["name"]].Fill(mt2blbl, weight)
+          mtautau, alpha_0, alpha_1 = mtautau_(met,metPhi, l0pt, l0eta, l0phi, l1pt, l1eta, l1phi, retAll=True)
+          plots['mtautau']['histo'][s["name"]].Fill(mtautau, weight)
+          plots['alpha0']['histo'][s["name"]].Fill(alpha_0, weight)
+          plots['alpha1']['histo'][s["name"]].Fill(alpha_1, weight)
         else:
           print "Preselection and b-jet selection inconsistent"
         
@@ -108,6 +116,7 @@ for pk in plots.keys():
   #Plot!
   signal = "SMS_T2tt_2J_mStop650_mLSP325"#May chose different signal here
   c1 = ROOT.TCanvas()
+  bkg_stack.GetYaxis().SetRangeUser(10**-2.5, 2*bkg_stack.GetMaximum())
   bkg_stack.Draw()
   #bkg_stack.GetXaxis().SetTitle('#slash{E}_{T} (GeV)')
   bkg_stack.GetXaxis().SetTitle(plots[pk]['title'])
