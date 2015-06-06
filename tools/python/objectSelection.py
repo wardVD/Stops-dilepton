@@ -29,6 +29,14 @@ def looseEleID(l, ptCut=20, absEtaCut=2.4):
     and l["eleMVAId"]==1 and l["miniRelIso"]<0.4 and l["sip3d"]<4.0\
     and l["pt"]>=ptCut and abs(l["eta"])<absEtaCut
 
+def ele_ID_eta(r,nLep,ele_MVAID_cuts):
+  if abs(r.LepGood_eta[nLep]) < 0.8 and r.LepGood_mvaIdPhys14[nLep] > ele_MVAID_cuts['eta08'] : return True
+  elif abs(r.LepGood_eta[nLep]) > 0.8 and abs(r.LepGood_eta[nLep]) < 1.44 and r.LepGood_mvaIdPhys14[nLep] > ele_MVAID_cuts['eta104'] : return True
+  elif abs(r.LepGood_eta[nLep]) > 1.57 and r.LepGood_mvaIdPhys14[nLep] > ele_MVAID_cuts['eta204'] : return True
+  return False
+
+def cmgLooseEleID(r, nLep, ptCut , absEtaCut, ele_MVAID_cuts):
+  return r.LepGood_pt[nLep]>=ptCut and (abs(r.LepGood_eta[nLep])<1.44 or abs(r.LepGood_eta[nLep])>1.57) and abs(r.LepGood_eta[nLep])<absEtaCut and r.LepGood_miniRelIso[nLep]<0.4 and ele_ID_eta(r,nLep,ele_MVAID_cuts) and r.LepGood_lostHits[nLep]<=1 and r.LepGood_convVeto[nLep] and r.LepGood_sip3d[nLep] < 4.0 
 
 #def ele_ID_eta(r,nLep,ele_MVAID_cuts):
 #  if abs(r.LepGood_eta[nLep]) < 0.8 and r.LepGood_mvaIdPhys14[nLep] > ele_MVAID_cuts['eta08'] : return True

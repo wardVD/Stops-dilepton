@@ -6,7 +6,7 @@ from math import *
 from StopsDilepton.tools.mt2Calculator import mt2Calculator
 mt2Calc = mt2Calculator()
 from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue
-from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets
+from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets, ele_ID_eta
 from StopsDilepton.tools.localInfo import *
 
 #preselection: MET>50, HT>100, n_bjets>=2
@@ -106,7 +106,9 @@ for s in backgrounds+signals:
     #Leptons 
     allLeptons = getLeptons(chain) 
     muons = filter(looseMuID, allLeptons)    
-    electrons = filter(looseEleID, allLeptons)
+    #electrons = filter(looseEleID, allLeptons)
+    electrons = filter(lambda i:(abs(allLeptons[i]['pdgId']==11 and allLeptons[i]['miniRelIso']<0.1 and ele_ID_eta(allLeptons,nLep=i,ele_MVAID_cuts={'eta08':0.73 , 'eta104':0.57,'eta204':  0.05}) and allLeptons[i]['tightId']>=3)),allLeptons)
+
     leptons = {\
       'mu':   {'name': 'mumu', 'file': muons},
       'el':   {'name': 'elel', 'file': electrons},
