@@ -14,7 +14,7 @@ def getGenPartsAll(c):
   return [getObjDict(c, 'genPartAll_', ['eta','pt','phi','charge', 'pdgId', 'motherId', 'grandmotherId'], i) for i in range(int(getVarValue(c, 'ngenPartAll')))]
 
 def getLeptons(c):
-  return [getObjDict(c, 'LepGood_', ['eta','pt','phi','charge', 'dxy', 'dz', 'relIso03','tightId', 'pdgId', 'mediumMuonId', 'miniRelIso', 'sip3d'], i) for i in range(int(getVarValue(c, 'nLepGood')))]
+  return [getObjDict(c, 'LepGood_', ['eta','pt','phi','charge', 'dxy', 'dz', 'relIso03','tightId', 'pdgId', 'mediumMuonId', 'eleMVAId', 'miniRelIso', 'sip3d'], i) for i in range(int(getVarValue(c, 'nLepGood')))]
 #  return filter(lambda m:abs(m['pdgId'])==13, res)
 
 def looseMuID(l, ptCut=20, absEtaCut=2.4):
@@ -22,6 +22,13 @@ def looseMuID(l, ptCut=20, absEtaCut=2.4):
     abs(l["pdgId"])==13\
     and l["mediumMuonId"]==1 and l["miniRelIso"]<0.4 and l["sip3d"]<4.0\
     and l["pt"]>=ptCut and abs(l["eta"])<absEtaCut
+
+def looseEleID(l, ptCut=20, absEtaCut=2.4):
+  return \
+    abs(l["pdgId"])==11\
+    and l["eleMVAId"]==1 and l["miniRelIso"]<0.4 and l["sip3d"]<4.0\
+    and l["pt"]>=ptCut and abs(l["eta"])<absEtaCut
+
 
 #def ele_ID_eta(r,nLep,ele_MVAID_cuts):
 #  if abs(r.LepGood_eta[nLep]) < 0.8 and r.LepGood_mvaIdPhys14[nLep] > ele_MVAID_cuts['eta08'] : return True
