@@ -6,7 +6,7 @@ from math import *
 from StopsDilepton.tools.mt2Calculator import mt2Calculator
 mt2Calc = mt2Calculator()
 from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue
-from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets
+from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets, ele_ID_eta
 from StopsDilepton.tools.localInfo import *
 
 #preselection: MET>50, HT>100, n_bjets>=2
@@ -19,6 +19,7 @@ reduceStat = 1
 #load all the samples
 from StopsDilepton.plots.cmgTuplesPostProcessed_PHYS14 import *
 backgrounds = [TTJets, WJetsHTToLNu, TTVH, singleTop, DY]#, QCD]
+#backgrounds = [TTVH]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
 
 #get the TChains for each sample
@@ -63,6 +64,20 @@ plots = {\
   },
 }
 
+#adding SF
+plotsSF = {\
+  'SF':{\
+  'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': [25,25,275], 'histo':{}},
+  'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': [25,25,275], 'histo':{}},
+  'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': [25,25,575], 'histo':{}},
+  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'mt2bb', 'binning': [25,25,575], 'histo':{}},
+  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'mt2blbl', 'binning': [25,25,575], 'histo':{}},
+  'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': [25,0,25], 'histo':{}},
+  'leadingjetpt': {'title':'leading jet p_{T} (GeV)', 'name':'leadingjetpt', 'binning': [25,25,575], 'histo':{}},
+  'subleadingjetpt': {'title':'subleading jet p_{T} (GeV)', 'name':'subleadingjetpt', 'binning': [25,25,575], 'histo':{}},
+  },
+}
+
 for s in backgrounds+signals:
   for pk in plots.keys():
     for plot in plots[pk].keys():
@@ -92,6 +107,10 @@ for s in backgrounds+signals:
     allLeptons = getLeptons(chain) 
     muons = filter(looseMuID, allLeptons)    
     electrons = filter(looseEleID, allLeptons)
+    if len(allLeptons) > 0:
+      print allLeptons[0]
+      electrons = filter(lambda i:(abs(allLeptons[i]['pdgId']==11 and allLeptons[i]['miniRelIso']<0.1 and ele_ID_eta(allLeptons,nLep=i,ele_MVAID_cuts={'eta08':0.73 , 'eta104':0.57,'eta204':  0.05}) and allLeptons[i]['tightId']>=3)),allLeptons)
+
     leptons = {\
       'mu':   {'name': 'mumu', 'file': muons},
       'el':   {'name': 'elel', 'file': electrons},
@@ -115,7 +134,6 @@ for s in backgrounds+signals:
           l1pt, l1eta, l1phi = leptons[lep]['file'][1][0]['pt'],  leptons[lep]['file'][1][0]['eta'],  leptons[lep]['file'][1][0]['phi']
           mll = sqrt(2.*l0pt*l1pt*(cosh(l0eta-l1eta)-cos(l0phi-l1phi)))
           plots[leptons[lep]['name']]['mll']['histo'][s["name"]].Fill(mll,weight) #mll as n-1 plot without Z-mass cut
-   
       if twoleptons and mll>20 and abs(mll-90.2)>15:
         plots[leptons[lep]['name']]['leadingjetpt']['histo'][s["name"]].Fill(leadingjetpt, weight)
         plots[leptons[lep]['name']]['subleadingjetpt']['histo'][s["name"]].Fill(subleadingjetpt, weight)
@@ -157,6 +175,7 @@ for pk in plots.keys():
     l.SetBorderSize(1)
     bkg_stack = ROOT.THStack("bkgs","bkgs")
     for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
+    #for b in [TTVH]:
       plots[pk][plot]['histo'][b["name"]].SetFillColor(b["color"])
       plots[pk][plot]['histo'][b["name"]].SetMarkerColor(b["color"])
       plots[pk][plot]['histo'][b["name"]].SetMarkerSize(0)
@@ -182,3 +201,33 @@ for pk in plots.keys():
       c1.Print(plotDir+"/"+plots[pk][plot]['name']+"_elel.png")
     if (pk =='elmu'):
       c1.Print(plotDir+"/"+plots[pk][plot]['name']+"_elmu.png")
+
+
+for plot in plotsSF['SF'].keys():
+  bkg_stack_SF = ROOT.THStack("bkgs_SF","bkgs_SF")
+  l=ROOT.TLegend(0.6,0.6,1.0,1.0)
+  l.SetFillColor(0)
+  l.SetShadowColor(ROOT.kWhite)
+  l.SetBorderSize(1)
+  for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
+  #for b in [TTVH]:
+    bkgforstack = plots['elel'][plot]['histo'][b["name"]]
+    bkgforstack.Add(plots['mumu'][plot]['histo'][b["name"]])
+    bkg_stack_SF.Add(bkgforstack,"h")
+    l.AddEntry(plots['elel'][plot]['histo'][b["name"]], b["name"])
+  
+  signal = "SMS_T2tt_2J_mStop650_mLSP325"#May chose different signal here
+  c1 = ROOT.TCanvas()
+  bkg_stack_SF.Draw()
+#bkg_stack.GetXaxis().SetTitle('#slash{E}_{T} (GeV)')
+  bkg_stack_SF.GetXaxis().SetTitle(plotsSF['SF'][plot]['title'])
+  bkg_stack_SF.GetYaxis().SetTitle("Events / %i GeV"%( (plotsSF['SF'][plot]['binning'][2]-plotsSF['SF'][plot]['binning'][1])/plotsSF['SF'][plot]['binning'][0]) )
+  c1.SetLogy()
+  signalPlot = plots['elel'][plot]['histo'][signal].Clone()
+  signalPlot.Add(plots['mumu'][plot]['histo'][signal])
+  signalPlot.Scale(100)
+  signalPlot.Draw("same")
+  l.AddEntry(signalPlot, signal+" x 100")
+  l.Draw()
+  c1.Print(plotDir+"/"+plotsSF['SF'][plot]['name']+"_SF.png")
+    
