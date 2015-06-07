@@ -216,8 +216,8 @@ for plot in plotsSF['SF'].keys():
   
   signal = "SMS_T2tt_2J_mStop650_mLSP325"#May chose different signal here
   c1 = ROOT.TCanvas()
-  bkg_stack.SetMaximum(2*bkg_stack.GetMaximum())
-  bkg_stack.SetMinimum(10**-1.5)
+  bkg_stack_SF.SetMaximum(2*bkg_stack.GetMaximum())
+  bkg_stack_SF.SetMinimum(10**-1.5)
   bkg_stack_SF.Draw()
   bkg_stack_SF.GetXaxis().SetTitle(plotsSF['SF'][plot]['title'])
   bkg_stack_SF.GetYaxis().SetTitle("Events / %i GeV"%( (plotsSF['SF'][plot]['binning'][2]-plotsSF['SF'][plot]['binning'][1])/plotsSF['SF'][plot]['binning'][0]) )
