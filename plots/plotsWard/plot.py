@@ -106,8 +106,10 @@ for s in backgrounds+signals:
     #Leptons 
     allLeptons = getLeptons(chain) 
     muons = filter(looseMuID, allLeptons)    
-    #electrons = filter(looseEleID, allLeptons)
-    electrons = filter(lambda i:(abs(allLeptons[i]['pdgId']==11 and allLeptons[i]['miniRelIso']<0.1 and ele_ID_eta(allLeptons,nLep=i,ele_MVAID_cuts={'eta08':0.73 , 'eta104':0.57,'eta204':  0.05}) and allLeptons[i]['tightId']>=3)),allLeptons)
+    electrons = filter(looseEleID, allLeptons)
+    if len(allLeptons) > 0:
+      print allLeptons[0]
+      electrons = filter(lambda i:(abs(allLeptons[i]['pdgId']==11 and allLeptons[i]['miniRelIso']<0.1 and ele_ID_eta(allLeptons,nLep=i,ele_MVAID_cuts={'eta08':0.73 , 'eta104':0.57,'eta204':  0.05}) and allLeptons[i]['tightId']>=3)),allLeptons)
 
     leptons = {\
       'mu':   {'name': 'mumu', 'file': muons},
