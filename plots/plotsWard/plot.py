@@ -107,9 +107,6 @@ for s in backgrounds+signals:
     allLeptons = getLeptons(chain) 
     muons = filter(looseMuID, allLeptons)    
     electrons = filter(looseEleID, allLeptons)
-    if len(allLeptons) > 0:
-      print allLeptons[0]
-      electrons = filter(lambda i:(abs(allLeptons[i]['pdgId']==11 and allLeptons[i]['miniRelIso']<0.1 and ele_ID_eta(allLeptons,nLep=i,ele_MVAID_cuts={'eta08':0.73 , 'eta104':0.57,'eta204':  0.05}) and allLeptons[i]['tightId']>=3)),allLeptons)
 
     leptons = {\
       'mu':   {'name': 'mumu', 'file': muons},
@@ -182,11 +179,12 @@ for pk in plots.keys():
       bkg_stack.Add(plots[pk][plot]['histo'][b["name"]],"h")
       l.AddEntry(plots[pk][plot]['histo'][b["name"]], b["name"])
     
-#Plot!
+    #Plot!
     signal = "SMS_T2tt_2J_mStop650_mLSP325"#May chose different signal here
     c1 = ROOT.TCanvas()
+    bkg_stack.SetMaximum(2*bkg_stack.GetMaximum())
+    bkg_stack.SetMinimum(10**-1.5)
     bkg_stack.Draw()
-#bkg_stack.GetXaxis().SetTitle('#slash{E}_{T} (GeV)')
     bkg_stack.GetXaxis().SetTitle(plots[pk][plot]['title'])
     bkg_stack.GetYaxis().SetTitle("Events / %i GeV"%( (plots[pk][plot]['binning'][2]-plots[pk][plot]['binning'][1])/plots[pk][plot]['binning'][0]) )
     c1.SetLogy()
@@ -218,8 +216,9 @@ for plot in plotsSF['SF'].keys():
   
   signal = "SMS_T2tt_2J_mStop650_mLSP325"#May chose different signal here
   c1 = ROOT.TCanvas()
+  bkg_stack.SetMaximum(2*bkg_stack.GetMaximum())
+  bkg_stack.SetMinimum(10**-1.5)
   bkg_stack_SF.Draw()
-#bkg_stack.GetXaxis().SetTitle('#slash{E}_{T} (GeV)')
   bkg_stack_SF.GetXaxis().SetTitle(plotsSF['SF'][plot]['title'])
   bkg_stack_SF.GetYaxis().SetTitle("Events / %i GeV"%( (plotsSF['SF'][plot]['binning'][2]-plotsSF['SF'][plot]['binning'][1])/plotsSF['SF'][plot]['binning'][0]) )
   c1.SetLogy()
