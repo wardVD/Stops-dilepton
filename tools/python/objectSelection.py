@@ -14,20 +14,45 @@ def getGenPartsAll(c):
   return [getObjDict(c, 'genPartAll_', ['eta','pt','phi','charge', 'pdgId', 'motherId', 'grandmotherId'], i) for i in range(int(getVarValue(c, 'ngenPartAll')))]
 
 def getLeptons(c):
-  return [getObjDict(c, 'LepGood_', ['eta','pt','phi','charge', 'dxy', 'dz', 'relIso03','tightId', 'pdgId', 'mediumMuonId', 'eleMVAId', 'miniRelIso', 'sip3d'], i) for i in range(int(getVarValue(c, 'nLepGood')))]
+  return [getObjDict(c, 'LepGood_', ['eta','pt','phi','charge', 'dxy', 'dz', 'relIso03','tightId', 'pdgId', 'mediumMuonId', 'eleMVAId', 'miniRelIso', 'sip3d', 'mvaIdPhys14', 'convVeto', 'lostHits'], i) for i in range(int(getVarValue(c, 'nLepGood')))]
 #  return filter(lambda m:abs(m['pdgId'])==13, res)
 
 def looseMuID(l, ptCut=20, absEtaCut=2.4):
   return \
-    abs(l["pdgId"])==13\
-    and l["mediumMuonId"]==1 and l["miniRelIso"]<0.4 and l["sip3d"]<4.0\
-    and l["pt"]>=ptCut and abs(l["eta"])<absEtaCut
+    l["pt"]>=ptCut\
+    and abs(l["pdgId"])==13\
+    and abs(l["eta"])<absEtaCut\
+    and l["mediumMuonId"]==1 \
+    and l["miniRelIso"]<0.4 \
+    and l["sip3d"]<4.0\
+    and l["dxy"]<0.05\
+    and l["dz"]<0.1\
+
+def mvaIDPhys14(l):
+  if abs(l["eta"]) < 0.8 and l["mvaIdPhys14"] > 0.73 : return True
+  elif abs(l["eta"]) >= 0.8 and abs(l["eta"]) < 1.44 and l["mvaIdPhys14"] > 0.57 : return True
+  elif abs(l["eta"]) > 1.57 and l["mvaIdPhys14"]  > 0.05 : return True
+  else: return False
 
 def looseEleID(l, ptCut=20, absEtaCut=2.4):
   return \
-    abs(l["pdgId"])==11\
-    and l["eleMVAId"]==1 and l["miniRelIso"]<0.4 and l["sip3d"]<4.0\
-    and l["pt"]>=ptCut and abs(l["eta"])<absEtaCut
+    l["pt"]>=ptCut\
+    and abs(l["eta"])<absEtaCut\
+    and  not (abs(l["eta"])>1.44 and abs(l["eta"])<1.57)\
+    and abs(l["pdgId"])==11\
+    and mvaIDPhys14(l)\
+    and l["miniRelIso"]<0.4\
+    and l["convVeto"]\
+    and l["lostHits"]==0\
+    and l["sip3d"] < 4.0\
+    and l["dxy"] < 0.05\
+    and l["dz"] < 0.1\
+
+#def looseEleID(l, ptCut=20, absEtaCut=2.4):
+#  return \
+#    abs(l["pdgId"])==11\
+#    and l["eleMVAId"]==1 and l["miniRelIso"]<0.4 and l["sip3d"]<4.0\
+#    and l["pt"]>=ptCut and abs(l["eta"])<absEtaCut
 
 
 #def ele_ID_eta(r,nLep,ele_MVAID_cuts):
