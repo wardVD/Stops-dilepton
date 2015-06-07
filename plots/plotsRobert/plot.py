@@ -65,8 +65,6 @@ for s in backgrounds+signals:
     metPhi = getVarValue(chain, "met_phi")
     #Leptons 
     leptons = filter(lambda l: looseMuID(l) or looseEleID(l), getLeptons(chain))
-#    leptons = filter(lambda l: looseEleID(l), getLeptons(chain))
-    print leptons
     if len(leptons)==2 and leptons[0]['pdgId']*leptons[1]['pdgId']<0 and abs(leptons[0]['pdgId'])==abs(leptons[1]['pdgId']): #OSSF choice
       l0pt, l0eta, l0phi = leptons[0]['pt'],  leptons[0]['eta'],  leptons[0]['phi']
       l1pt, l1eta, l1phi = leptons[1]['pt'],  leptons[1]['eta'],  leptons[1]['phi']
