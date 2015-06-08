@@ -40,7 +40,6 @@ def looseEleID(l, ptCut=20, absEtaCut=2.4):
   return \
     l["pt"]>=ptCut\
     and abs(l["eta"])<absEtaCut\
-    #and  not (abs(l["eta"])>1.44 and abs(l["eta"])<1.57)\
     and abs(l["pdgId"])==11\
     and mvaIDPhys14(l)\
     and l["miniRelIso"]<0.4\
