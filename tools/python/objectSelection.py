@@ -30,15 +30,17 @@ def looseMuID(l, ptCut=20, absEtaCut=2.4):
 
 def mvaIDPhys14(l):
   if abs(l["eta"]) < 0.8 and l["mvaIdPhys14"] > 0.73 : return True
-  elif abs(l["eta"]) >= 0.8 and abs(l["eta"]) < 1.44 and l["mvaIdPhys14"] > 0.57 : return True
-  elif abs(l["eta"]) > 1.57 and l["mvaIdPhys14"]  > 0.05 : return True
+  #elif abs(l["eta"]) >= 0.8 and abs(l["eta"]) < 1.44 and l["mvaIdPhys14"] > 0.57 : return True
+  #elif abs(l["eta"]) > 1.57 and l["mvaIdPhys14"]  > 0.05 : return True
+  elif abs(l["eta"]) >= 0.8 and abs(l["eta"]) < 1.479 and l["mvaIdPhys14"] > 0.57 : return True
+  elif abs(l["eta"]) > 1.479 and l["mvaIdPhys14"]  > 0.05 : return True
   else: return False
 
 def looseEleID(l, ptCut=20, absEtaCut=2.4):
   return \
     l["pt"]>=ptCut\
     and abs(l["eta"])<absEtaCut\
-    and  not (abs(l["eta"])>1.44 and abs(l["eta"])<1.57)\
+    #and  not (abs(l["eta"])>1.44 and abs(l["eta"])<1.57)\
     and abs(l["pdgId"])==11\
     and mvaIDPhys14(l)\
     and l["miniRelIso"]<0.4\

@@ -34,30 +34,30 @@ for s in backgrounds+signals:
 plots = {\
   'mumu':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': [25,25,275], 'histo':{}},
-  'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': [25,25,275], 'histo':{}},
+  'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': [25,0,275], 'histo':{}},
   'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': [25,25,575], 'histo':{}},
-  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'mt2bb', 'binning': [25,25,575], 'histo':{}},
-  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'mt2blbl', 'binning': [25,25,575], 'histo':{}},
+  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'mt2bb', 'binning': [25,0,550], 'histo':{}},
+  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'mt2blbl', 'binning': [25,0,550], 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': [25,0,25], 'histo':{}},
   'leadingjetpt': {'title':'leading jet p_{T} (GeV)', 'name':'leadingjetpt', 'binning': [25,25,575], 'histo':{}},
   'subleadingjetpt': {'title':'subleading jet p_{T} (GeV)', 'name':'subleadingjetpt', 'binning': [25,25,575], 'histo':{}},
   },
   'elel':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': [25,25,275], 'histo':{}},
-  'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': [25,25,275], 'histo':{}},
+  'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': [25,0,275], 'histo':{}},
   'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': [25,25,575], 'histo':{}},
-  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'mt2bb', 'binning': [25,25,575], 'histo':{}},
-  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'mt2blbl', 'binning': [25,25,575], 'histo':{}},
+  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'mt2bb', 'binning': [25,0,550], 'histo':{}},
+  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'mt2blbl', 'binning': [25,0,550], 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': [25,0,25], 'histo':{}},
   'leadingjetpt': {'title':'leading jet p_{T} (GeV)', 'name':'leadingjetpt', 'binning': [25,25,575], 'histo':{}},
   'subleadingjetpt': {'title':'subleading jet p_{T} (GeV)', 'name':'subleadingjetpt', 'binning': [25,25,575], 'histo':{}},
   },
   'elmu':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': [25,25,275], 'histo':{}},
-  'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': [25,25,275], 'histo':{}},
+  'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': [25,0,275], 'histo':{}},
   'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': [25,25,575], 'histo':{}},
-  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'mt2bb', 'binning': [25,25,575], 'histo':{}},
-  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'mt2blbl', 'binning': [25,25,575], 'histo':{}},
+  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'mt2bb', 'binning': [25,0,550], 'histo':{}},
+  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'mt2blbl', 'binning': [25,0,550], 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': [25,0,25], 'histo':{}},
   'leadingjetpt': {'title':'leading jet p_{T} (GeV)', 'name':'leadingjetpt', 'binning': [25,25,575], 'histo':{}},
   'subleadingjetpt': {'title':'subleading jet p_{T} (GeV)', 'name':'subleadingjetpt', 'binning': [25,25,575], 'histo':{}},
@@ -68,10 +68,10 @@ plots = {\
 plotsSF = {\
   'SF':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': [25,25,275], 'histo':{}},
-  'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': [25,25,275], 'histo':{}},
+  'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': [25,0,275], 'histo':{}},
   'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': [25,25,575], 'histo':{}},
-  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'mt2bb', 'binning': [25,25,575], 'histo':{}},
-  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'mt2blbl', 'binning': [25,25,575], 'histo':{}},
+  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'mt2bb', 'binning': [25,0,550], 'histo':{}},
+  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'mt2blbl', 'binning': [25,0,550], 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': [25,0,25], 'histo':{}},
   'leadingjetpt': {'title':'leading jet p_{T} (GeV)', 'name':'leadingjetpt', 'binning': [25,25,575], 'histo':{}},
   'subleadingjetpt': {'title':'subleading jet p_{T} (GeV)', 'name':'subleadingjetpt', 'binning': [25,25,575], 'histo':{}},
@@ -170,6 +170,7 @@ for pk in plots.keys():
     l.SetFillColor(0)
     l.SetShadowColor(ROOT.kWhite)
     l.SetBorderSize(1)
+    l.SetTextSize(0.03)
     bkg_stack = ROOT.THStack("bkgs","bkgs")
     for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
     #for b in [TTVH]:
@@ -180,7 +181,7 @@ for pk in plots.keys():
       l.AddEntry(plots[pk][plot]['histo'][b["name"]], b["name"])
     
     #Plot!
-    signal = "SMS_T2tt_2J_mStop650_mLSP325"#May chose different signal here
+    signal = {'path': "SMS_T2tt_2J_mStop650_mLSP325", 'name': "T2tt (St: 650, LSP: 325)"} #May chose different signal here
     c1 = ROOT.TCanvas()
     bkg_stack.SetMaximum(2*bkg_stack.GetMaximum())
     bkg_stack.SetMinimum(10**-1.5)
@@ -188,10 +189,10 @@ for pk in plots.keys():
     bkg_stack.GetXaxis().SetTitle(plots[pk][plot]['title'])
     bkg_stack.GetYaxis().SetTitle("Events / %i GeV"%( (plots[pk][plot]['binning'][2]-plots[pk][plot]['binning'][1])/plots[pk][plot]['binning'][0]) )
     c1.SetLogy()
-    signalPlot = plots[pk][plot]['histo'][signal].Clone()
+    signalPlot = plots[pk][plot]['histo'][signal['path']].Clone()
     signalPlot.Scale(100)
     signalPlot.Draw("same")
-    l.AddEntry(signalPlot, signal+" x 100")
+    l.AddEntry(signalPlot, signal['name']+" x 100")
     l.Draw()
     if (pk == 'mumu'):
       c1.Print(plotDir+"/"+plots[pk][plot]['name']+"_mumu.png")
@@ -207,6 +208,7 @@ for plot in plotsSF['SF'].keys():
   l.SetFillColor(0)
   l.SetShadowColor(ROOT.kWhite)
   l.SetBorderSize(1)
+  l.SetTextSize(0.03)
   for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
   #for b in [TTVH]:
     bkgforstack = plots['elel'][plot]['histo'][b["name"]]
@@ -214,7 +216,7 @@ for plot in plotsSF['SF'].keys():
     bkg_stack_SF.Add(bkgforstack,"h")
     l.AddEntry(plots['elel'][plot]['histo'][b["name"]], b["name"])
   
-  signal = "SMS_T2tt_2J_mStop650_mLSP325"#May chose different signal here
+  signal = {'path': "SMS_T2tt_2J_mStop650_mLSP325", 'name': "T2tt (St: 650, LSP: 325)"} #May chose different signal here
   c1 = ROOT.TCanvas()
   bkg_stack_SF.SetMaximum(2*bkg_stack.GetMaximum())
   bkg_stack_SF.SetMinimum(10**-1.5)
@@ -222,11 +224,11 @@ for plot in plotsSF['SF'].keys():
   bkg_stack_SF.GetXaxis().SetTitle(plotsSF['SF'][plot]['title'])
   bkg_stack_SF.GetYaxis().SetTitle("Events / %i GeV"%( (plotsSF['SF'][plot]['binning'][2]-plotsSF['SF'][plot]['binning'][1])/plotsSF['SF'][plot]['binning'][0]) )
   c1.SetLogy()
-  signalPlot = plots['elel'][plot]['histo'][signal].Clone()
-  signalPlot.Add(plots['mumu'][plot]['histo'][signal])
+  signalPlot = plots['elel'][plot]['histo'][signal['path']].Clone()
+  signalPlot.Add(plots['mumu'][plot]['histo'][signal['path']])
   signalPlot.Scale(100)
   signalPlot.Draw("same")
-  l.AddEntry(signalPlot, signal+" x 100")
+  l.AddEntry(signalPlot, signal['name']+" x 100")
   l.Draw()
   c1.Print(plotDir+"/"+plotsSF['SF'][plot]['name']+"_SF.png")
     
