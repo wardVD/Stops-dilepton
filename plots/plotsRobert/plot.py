@@ -17,6 +17,7 @@ from StopsDilepton.tools.localInfo import *
 #preselection = 'met_pt>40&&Sum$((Jet_pt)*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>100&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)==2&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
 preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)==2&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)>=2'
 prefix="def"
+#prefix="mt2ll-120"
 reduceStat = 1
 
 #load all the samples
@@ -35,7 +36,8 @@ plots = {\
   'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'mt2bb', 'binning': [26,0,520], 'histo':{}},
   'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'mt2blbl', 'binning': [26,0,520], 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': [35,0,35], 'histo':{}},
-  'mtautau': {'title':'M_{#tau#tau} (GeV)', 'name':'mtautau', 'binning': [50,0,1000], 'histo':{}},
+  'mtautau_zoomed': {'title':'M_{#tau#tau} (GeV)', 'name':'mtautau_zoomed', 'binning': [50,0,200], 'histo':{}},
+  'mtautau': {'title':'M_{#tau#tau} (GeV)', 'name':'mtautau', 'binning': [50,0,2000], 'histo':{}},
   'alpha0': {'title':'#alpha_{0}', 'name':'alpha0', 'binning': [50,-10,10], 'histo':{}},
   'alpha1': {'title':'#alpha_{1}', 'name':'alpha1', 'binning': [50,-10,10], 'histo':{}},
 }
@@ -88,6 +90,7 @@ for s in backgrounds+signals:
             plots['mt2blbl']['histo'][s["name"]].Fill(mt2blbl, weight)
             mtautau, alpha_0, alpha_1 = mtautau_(met,metPhi, l0pt, l0eta, l0phi, l1pt, l1eta, l1phi, retAll=True)
             plots['mtautau']['histo'][s["name"]].Fill(mtautau, weight)
+            plots['mtautau_zoomed']['histo'][s["name"]].Fill(mtautau, weight)
             plots['alpha0']['histo'][s["name"]].Fill(alpha_0, weight)
             plots['alpha1']['histo'][s["name"]].Fill(alpha_1, weight)
 
