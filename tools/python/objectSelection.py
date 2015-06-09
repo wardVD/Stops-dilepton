@@ -23,7 +23,7 @@ def looseMuID(l, ptCut=20, absEtaCut=2.4):
     and abs(l["pdgId"])==13\
     and abs(l["eta"])<absEtaCut\
     and l["mediumMuonId"]==1 \
-    and l["miniRelIso"]<0.4 \
+    and l["miniRelIso"]<0.2 \
     and l["sip3d"]<4.0\
     and l["dxy"]<0.05\
     and l["dz"]<0.1\
@@ -42,7 +42,7 @@ def looseEleID(l, ptCut=20, absEtaCut=2.4):
     and abs(l["eta"])<absEtaCut\
     and abs(l["pdgId"])==11\
     and mvaIDPhys14(l)\
-    and l["miniRelIso"]<0.4\
+    and l["miniRelIso"]<0.2\
     and l["convVeto"]\
     and l["lostHits"]==0\
     and l["sip3d"] < 4.0\

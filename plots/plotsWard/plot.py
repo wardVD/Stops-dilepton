@@ -18,16 +18,13 @@ reduceStat = 1
 
 #load all the samples
 from StopsDilepton.plots.cmgTuplesPostProcessed_PHYS14 import *
-#backgrounds = [TTJets, WJetsHTToLNu, TTVH, singleTop, DY]#, QCD]
-backgrounds = [TTVH]
+backgrounds = [TTJets, WJetsHTToLNu, TTVH, singleTop, DY]#, QCD]
+#backgrounds = [TTVH]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
 
 #get the TChains for each sample
 for s in backgrounds+signals:
   s['chain'] = getChain(s,histname="")
-
-#binning of plot
-#binning = [25,25,275]
  
 #binning
 mllbinning = [25,25,275] 
@@ -51,7 +48,7 @@ plots = {\
   'leadingjetpt': {'title':'leading jet p_{T} (GeV)', 'name':'leadingjetpt', 'binning': leadingjetptbinning, 'histo':{}},
   'subleadingjetpt': {'title':'subleading jet p_{T} (GeV)', 'name':'subleadingjetpt', 'binning': subleadingjetptbinning, 'histo':{}},
   },
-  'elel':{\
+  'ee':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': mllbinning, 'histo':{}},
   'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': mt2llbinning, 'histo':{}},
   'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': metbinning, 'histo':{}},
@@ -61,7 +58,7 @@ plots = {\
   'leadingjetpt': {'title':'leading jet p_{T} (GeV)', 'name':'leadingjetpt', 'binning': leadingjetptbinning, 'histo':{}},
   'subleadingjetpt': {'title':'subleading jet p_{T} (GeV)', 'name':'subleadingjetpt', 'binning': subleadingjetptbinning, 'histo':{}},
   },
-  'elmu':{\
+  'emu':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': mllbinning, 'histo':{}},
   'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': mt2llbinning, 'histo':{}},
   'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': metbinning, 'histo':{}},
@@ -116,13 +113,13 @@ for s in backgrounds+signals:
 
     leptons = {\
       'mu':   {'name': 'mumu', 'file': muons},
-      'el':   {'name': 'elel', 'file': electrons},
-      'elmu': {'name': 'elmu', 'file': [electrons,muons]},
+      'e':   {'name': 'ee', 'file': electrons},
+      'emu': {'name': 'emu', 'file': [electrons,muons]},
       }
     for lep in leptons.keys():
       twoleptons = False
       #Same Flavor
-      if lep != 'elmu':
+      if lep != 'emu':
         if len(leptons[lep]['file'])==2 and leptons[lep]['file'][0]['pdgId']*leptons[lep]['file'][1]['pdgId']<0:
           twoleptons = True
           l0pt, l0eta, l0phi = leptons[lep]['file'][0]['pt'],  leptons[lep]['file'][0]['eta'],  leptons[lep]['file'][0]['phi']
@@ -130,7 +127,7 @@ for s in backgrounds+signals:
           mll = sqrt(2.*l0pt*l1pt*(cosh(l0eta-l1eta)-cos(l0phi-l1phi)))
           plots[leptons[lep]['name']]['mll']['histo'][s["name"]].Fill(mll,weight) #mll as n-1 plot without Z-mass cut
       #Opposite Flavor
-      if lep == 'elmu':
+      if lep == 'emu':
         if len(leptons[lep]['file'][0])==1 and len(leptons[lep]['file'][1])==1 and leptons[lep]['file'][0][0]['pdgId']*leptons[lep]['file'][1][0]['pdgId']<0:
           twoleptons = True
           l0pt, l0eta, l0phi = leptons[lep]['file'][0][0]['pt'],  leptons[lep]['file'][0][0]['eta'],  leptons[lep]['file'][0][0]['phi']
@@ -169,7 +166,7 @@ singleTop["color"]=ROOT.kOrange
 DY["color"]=ROOT.kBlue
 
 #Plotvariables
-signal = {'path': "SMS_T2tt_2J_mStop650_mLSP325", 'name': "T2tt (St: 650, LSP: 325)"} #May chose different signal here
+signal = {'path': ["SMS_T2tt_2J_mStop425_mLSP325","SMS_T2tt_2J_mStop650_mLSP325"], 'name': ["T2tt (St: 425, LSP: 325)","T2tt (St: 650, LSP: 325)"]} #May chose different signal here
 yminimum = 10**-1.5
 legendtextsize = 0.025
 signalscaling = 100
@@ -183,8 +180,8 @@ for pk in plots.keys():
     l.SetBorderSize(1)
     l.SetTextSize(legendtextsize)
     bkg_stack = ROOT.THStack("bkgs","bkgs")
-    #for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
-    for b in [TTVH]:
+    for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
+    #for b in [TTVH]:
       plots[pk][plot]['histo'][b["name"]].SetFillColor(b["color"])
       plots[pk][plot]['histo'][b["name"]].SetMarkerColor(b["color"])
       plots[pk][plot]['histo'][b["name"]].SetMarkerSize(0)
@@ -199,17 +196,28 @@ for pk in plots.keys():
     bkg_stack.GetXaxis().SetTitle(plots[pk][plot]['title'])
     bkg_stack.GetYaxis().SetTitle("Events / %i GeV"%( (plots[pk][plot]['binning'][2]-plots[pk][plot]['binning'][1])/plots[pk][plot]['binning'][0]) )
     c1.SetLogy()
-    signalPlot = plots[pk][plot]['histo'][signal['path']].Clone()
-    signalPlot.Scale(signalscaling)
-    signalPlot.Draw("same")
-    l.AddEntry(signalPlot, signal['name']+" x " + str(signalscaling), "l")
+    signalPlot_1 = plots[pk][plot]['histo'][signal['path'][0]].Clone()
+    signalPlot_2 = plots[pk][plot]['histo'][signal['path'][1]].Clone()
+    signalPlot_1.Scale(signalscaling)
+    signalPlot_2.Scale(signalscaling)
+    signalPlot_1.SetLineColor(ROOT.kBlack)
+    signalPlot_2.SetLineColor(ROOT.kCyan)
+    signalPlot_1.Draw("same")
+    signalPlot_2.Draw("same")
+    l.AddEntry(signalPlot_1, signal['name'][0]+" x " + str(signalscaling), "l")
+    l.AddEntry(signalPlot_2, signal['name'][1]+" x " + str(signalscaling), "l")
     l.Draw()
     channeltag = ROOT.TPaveText(0.45,0.8,0.59,0.85,"NDC")
-    channeltag.AddText(pk)
+    firstlep, secondlep = pk[:len(pk)/2], pk[len(pk)/2:]
+    if firstlep == 'mu':
+      firstlep = '#' + firstlep
+    if secondlep == 'mu':
+      secondlep = '#' + secondlep
+    channeltag.AddText(firstlep+secondlep)
     channeltag.SetFillColor(ROOT.kWhite)
     channeltag.SetShadowColor(ROOT.kWhite)
     channeltag.Draw()
-    c1.Print(plotDir+"/test/"+plots[pk][plot]['name']+pk+".png")
+    c1.Print(plotDir+"/test/"+plots[pk][plot]['name']+"_"+pk+".png")
     
 
 for plot in plotsSF['SF'].keys():
@@ -219,25 +227,32 @@ for plot in plotsSF['SF'].keys():
   l.SetShadowColor(ROOT.kWhite)
   l.SetBorderSize(1)
   l.SetTextSize(legendtextsize)
-  #for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
-  for b in [TTVH]:
-    bkgforstack = plots['elel'][plot]['histo'][b["name"]]
+  for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
+  #for b in [TTVH]:
+    bkgforstack = plots['ee'][plot]['histo'][b["name"]]
     bkgforstack.Add(plots['mumu'][plot]['histo'][b["name"]])
     bkg_stack_SF.Add(bkgforstack,"h")
-    l.AddEntry(plots['elel'][plot]['histo'][b["name"]], b["name"])
+    l.AddEntry(plots['ee'][plot]['histo'][b["name"]], b["name"])
   
   c1 = ROOT.TCanvas()
   bkg_stack_SF.SetMaximum(2*bkg_stack.GetMaximum())
-  bkg_stack_SF.SetMinimum(ymininum)
+  bkg_stack_SF.SetMinimum(yminimum)
   bkg_stack_SF.Draw()
   bkg_stack_SF.GetXaxis().SetTitle(plotsSF['SF'][plot]['title'])
   bkg_stack_SF.GetYaxis().SetTitle("Events / %i GeV"%( (plotsSF['SF'][plot]['binning'][2]-plotsSF['SF'][plot]['binning'][1])/plotsSF['SF'][plot]['binning'][0]) )
   c1.SetLogy()
-  signalPlot = plots['elel'][plot]['histo'][signal['path']].Clone()
-  signalPlot.Add(plots['mumu'][plot]['histo'][signal['path']])
-  signalPlot.Scale(signalscaling)
-  signalPlot.Draw("same")
-  l.AddEntry(signalPlot, signal['name']+" x " + str(signalscaling), "l")
+  signalPlot_1 = plots['ee'][plot]['histo'][signal['path'][0]].Clone()
+  signalPlot_1.Add(plots['mumu'][plot]['histo'][signal['path'][0]])
+  signalPlot_2 = plots['ee'][plot]['histo'][signal['path'][1]].Clone()
+  signalPlot_2.Add(plots['mumu'][plot]['histo'][signal['path'][1]])
+  signalPlot_1.Scale(signalscaling)
+  signalPlot_2.Scale(signalscaling)
+  signalPlot_1.SetLineColor(ROOT.kBlack)
+  signalPlot_2.SetLineColor(ROOT.kCyan)
+  signalPlot_1.Draw("same")
+  signalPlot_2.Draw("same")
+  l.AddEntry(signalPlot_1, signal['name'][0]+" x " + str(signalscaling), "l")
+  l.AddEntry(signalPlot_2, signal['name'][1]+" x " + str(signalscaling), "l")
   l.Draw()
   channeltag = ROOT.TPaveText(0.45,0.8,0.59,0.85,"NDC")
   channeltag.AddText("SF")
