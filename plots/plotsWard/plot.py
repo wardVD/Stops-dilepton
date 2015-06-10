@@ -18,8 +18,8 @@ reduceStat = 1
 
 #load all the samples
 from StopsDilepton.plots.cmgTuplesPostProcessed_PHYS14 import *
-backgrounds = [TTJets, WJetsHTToLNu, TTVH, singleTop, DY]#, QCD]
-#backgrounds = [TTVH]
+#backgrounds = [TTJets, WJetsHTToLNu, TTVH, singleTop, DY]#, QCD]
+backgrounds = [TTVH]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
 
 #get the TChains for each sample
@@ -98,6 +98,7 @@ for s in backgrounds+signals:
   for ev in range(nEvents):
     if ev%10000==0:print "At %i/%i"%(ev,nEvents)
     chain.GetEntry(eList.GetEntry(ev))
+    mt2Calc.reset()
     #event weight (L= 4fb^-1)
     weight = reduceStat*getVarValue(chain, "weight")
     #MET
@@ -151,6 +152,10 @@ for s in backgrounds+signals:
           mt2Calc.setBJets(bjets[0]['pt'], bjets[0]['eta'], bjets[0]['phi'], bjets[1]['pt'], bjets[1]['eta'], bjets[1]['phi'])
           mt2bb   = mt2Calc.mt2bb()
           mt2blbl = mt2Calc.mt2blbl()
+          if mt2blbl < 20 and mt2blbl > 10:
+            print bjets[0]['pt'], bjets[0]['eta'], bjets[0]['phi'], bjets[1]['pt'], bjets[1]['eta'], bjets[1]['phi']
+            print met, metPhi
+            print l0pt, l0eta, l0phi, l1pt, l1eta, l1phi
           plots[leptons[lep]['name']]['mt2bb']['histo'][s["name"]].Fill(mt2bb, weight)
           plots[leptons[lep]['name']]['mt2blbl']['histo'][s["name"]].Fill(mt2blbl, weight)
           #else:
@@ -180,8 +185,8 @@ for pk in plots.keys():
     l.SetBorderSize(1)
     l.SetTextSize(legendtextsize)
     bkg_stack = ROOT.THStack("bkgs","bkgs")
-    for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
-    #for b in [TTVH]:
+    #for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
+    for b in [TTVH]:
       plots[pk][plot]['histo'][b["name"]].SetFillColor(b["color"])
       plots[pk][plot]['histo'][b["name"]].SetMarkerColor(b["color"])
       plots[pk][plot]['histo'][b["name"]].SetMarkerSize(0)
@@ -227,8 +232,8 @@ for plot in plotsSF['SF'].keys():
   l.SetShadowColor(ROOT.kWhite)
   l.SetBorderSize(1)
   l.SetTextSize(legendtextsize)
-  for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
-  #for b in [TTVH]:
+  #for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
+  for b in [TTVH]:
     bkgforstack = plots['ee'][plot]['histo'][b["name"]]
     bkgforstack.Add(plots['mumu'][plot]['histo'][b["name"]])
     bkg_stack_SF.Add(bkgforstack,"h")
