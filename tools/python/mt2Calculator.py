@@ -9,7 +9,9 @@ class mt2Calculator:
     self.reset()
     self.leptonMass = 0.
     self.bjetMass = 0.
-    self.mt2Mass    = 0. #probe mass entering MT2 calculation
+    self.mt2Mass_ll   = 0.   #probe mass for the daughter system 
+    self.mt2Mass_bb   = 80.4 #probe mass for the daughter system 
+    self.mt2Mass_blbl = 0.   #probe mass for the daughter system 
   def reset(self):
     self.met=None
     self.lepton1=None
@@ -45,7 +47,7 @@ class mt2Calculator:
     pmiss  = array.array('d',[  0., self.met.Px(), self.met.Py()] )
     l1     = array.array('d',[  0., self.lepton1.Px(), self.lepton1.Py()] )
     l2     = array.array('d',[  0., self.lepton2.Px(), self.lepton2.Py()] )
-    self.mt2.set_mn(self.mt2Mass)
+    self.mt2.set_mn(self.mt2Mass_ll)
     self.mt2.set_momenta(l1, l2, pmiss)
     return self.mt2.get_mt2()
 #MT2bb (treating leptons invisibly, endpoint at top mass) 
@@ -55,7 +57,7 @@ class mt2Calculator:
     pmiss  = array.array('d',[  0., pmiss_vec.Px(), pmiss_vec.Py()] )
     b1     = array.array('d',[  0., self.bjet1.Px(), self.bjet1.Py()] )
     b2     = array.array('d',[  0., self.bjet2.Px(), self.bjet2.Py()] )
-    self.mt2.set_mn(self.mt2Mass)
+    self.mt2.set_mn(self.mt2Mass_bb)
     self.mt2.set_momenta(b1, b2, pmiss)
     return self.mt2.get_mt2()
 #MT2blbl (Brians variant) 
@@ -76,6 +78,6 @@ class mt2Calculator:
     pmiss  = array.array('d',[  0., self.met.Px(), self.met.Py()] )
     bl1     = array.array('d',[  0., bl1.Px(), bl1.Py()] )
     bl2     = array.array('d',[  0., bl2.Px(), bl2.Py()] )
-    self.mt2.set_mn(self.mt2Mass)
+    self.mt2.set_mn(self.mt2Mass_blbl)
     self.mt2.set_momenta(bl1, bl2, pmiss)
     return self.mt2.get_mt2()
