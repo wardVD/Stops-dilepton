@@ -18,8 +18,8 @@ reduceStat = 1
 
 #load all the samples
 from StopsDilepton.plots.cmgTuplesPostProcessed_PHYS14 import *
-#backgrounds = [TTJets, WJetsHTToLNu, TTVH, singleTop, DY]#, QCD]
-backgrounds = [TTVH]
+backgrounds = [TTJets, WJetsHTToLNu, TTVH, singleTop, DY]#, QCD]
+#backgrounds = [TTVH]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
 
 #get the TChains for each sample
@@ -127,6 +127,7 @@ for s in backgrounds+signals:
           l1pt, l1eta, l1phi = leptons[lep]['file'][1]['pt'],  leptons[lep]['file'][1]['eta'],  leptons[lep]['file'][1]['phi']
           mll = sqrt(2.*l0pt*l1pt*(cosh(l0eta-l1eta)-cos(l0phi-l1phi)))
           plots[leptons[lep]['name']]['mll']['histo'][s["name"]].Fill(mll,weight) #mll as n-1 plot without Z-mass cut
+          zveto = True
       #Opposite Flavor
       if lep == 'emu':
         if len(leptons[lep]['file'][0])==1 and len(leptons[lep]['file'][1])==1 and leptons[lep]['file'][0][0]['pdgId']*leptons[lep]['file'][1][0]['pdgId']<0:
@@ -135,7 +136,8 @@ for s in backgrounds+signals:
           l1pt, l1eta, l1phi = leptons[lep]['file'][1][0]['pt'],  leptons[lep]['file'][1][0]['eta'],  leptons[lep]['file'][1][0]['phi']
           mll = sqrt(2.*l0pt*l1pt*(cosh(l0eta-l1eta)-cos(l0phi-l1phi)))
           plots[leptons[lep]['name']]['mll']['histo'][s["name"]].Fill(mll,weight) #mll as n-1 plot without Z-mass cut
-      if twoleptons and mll>20 and abs(mll-90.2)>15:
+          zveto = False
+      if (twoleptons and mll>20 and not zveto) or (twoleptons and mll > 20 and zveto and abs(mll-90.2)>15):
         plots[leptons[lep]['name']]['leadingjetpt']['histo'][s["name"]].Fill(leadingjetpt, weight)
         plots[leptons[lep]['name']]['subleadingjetpt']['histo'][s["name"]].Fill(subleadingjetpt, weight)
         mt2Calc.setMet(met,metPhi)
@@ -145,6 +147,7 @@ for s in backgrounds+signals:
         plots[leptons[lep]['name']]['mt2ll']['histo'][s["name"]].Fill(mt2ll, weight)
         jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(chain))
         ht = sum([j['pt'] for j in jets])
+        #if mt2ll > 120:
         plots[leptons[lep]['name']]['kinMetSig']['histo'][s["name"]].Fill(met/sqrt(ht), weight)
         plots[leptons[lep]['name']]['met']['histo'][s["name"]].Fill(met, weight)
         bjets = filter(lambda j:j['btagCSV']>0.814, jets)
@@ -152,10 +155,6 @@ for s in backgrounds+signals:
           mt2Calc.setBJets(bjets[0]['pt'], bjets[0]['eta'], bjets[0]['phi'], bjets[1]['pt'], bjets[1]['eta'], bjets[1]['phi'])
           mt2bb   = mt2Calc.mt2bb()
           mt2blbl = mt2Calc.mt2blbl()
-          if mt2blbl < 20 and mt2blbl > 10:
-            print bjets[0]['pt'], bjets[0]['eta'], bjets[0]['phi'], bjets[1]['pt'], bjets[1]['eta'], bjets[1]['phi']
-            print met, metPhi
-            print l0pt, l0eta, l0phi, l1pt, l1eta, l1phi
           plots[leptons[lep]['name']]['mt2bb']['histo'][s["name"]].Fill(mt2bb, weight)
           plots[leptons[lep]['name']]['mt2blbl']['histo'][s["name"]].Fill(mt2blbl, weight)
           #else:
@@ -171,9 +170,9 @@ singleTop["color"]=ROOT.kOrange
 DY["color"]=ROOT.kBlue
 
 #Plotvariables
-signal = {'path': ["SMS_T2tt_2J_mStop425_mLSP325","SMS_T2tt_2J_mStop650_mLSP325"], 'name': ["T2tt (St: 425, LSP: 325)","T2tt (St: 650, LSP: 325)"]} #May chose different signal here
+signal = {'path': ["SMS_T2tt_2J_mStop425_mLSP325","SMS_T2tt_2J_mStop650_mLSP325"], 'name': ["T2tt(425,325)","T2tt(650,325)"]} #May chose different signal here
 yminimum = 10**-1.5
-legendtextsize = 0.025
+legendtextsize = 0.032
 signalscaling = 100
 
 for pk in plots.keys():
@@ -185,8 +184,8 @@ for pk in plots.keys():
     l.SetBorderSize(1)
     l.SetTextSize(legendtextsize)
     bkg_stack = ROOT.THStack("bkgs","bkgs")
-    #for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
-    for b in [TTVH]:
+    for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
+    #for b in [TTVH]:
       plots[pk][plot]['histo'][b["name"]].SetFillColor(b["color"])
       plots[pk][plot]['histo'][b["name"]].SetMarkerColor(b["color"])
       plots[pk][plot]['histo'][b["name"]].SetMarkerSize(0)
@@ -207,6 +206,8 @@ for pk in plots.keys():
     signalPlot_2.Scale(signalscaling)
     signalPlot_1.SetLineColor(ROOT.kBlack)
     signalPlot_2.SetLineColor(ROOT.kCyan)
+    signalPlot_1.SetLineWidth(3)
+    signalPlot_2.SetLineWidth(3)
     signalPlot_1.Draw("same")
     signalPlot_2.Draw("same")
     l.AddEntry(signalPlot_1, signal['name'][0]+" x " + str(signalscaling), "l")
@@ -232,8 +233,8 @@ for plot in plotsSF['SF'].keys():
   l.SetShadowColor(ROOT.kWhite)
   l.SetBorderSize(1)
   l.SetTextSize(legendtextsize)
-  #for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
-  for b in [TTVH]:
+  for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
+  #for b in [TTVH]:
     bkgforstack = plots['ee'][plot]['histo'][b["name"]]
     bkgforstack.Add(plots['mumu'][plot]['histo'][b["name"]])
     bkg_stack_SF.Add(bkgforstack,"h")
@@ -254,6 +255,8 @@ for plot in plotsSF['SF'].keys():
   signalPlot_2.Scale(signalscaling)
   signalPlot_1.SetLineColor(ROOT.kBlack)
   signalPlot_2.SetLineColor(ROOT.kCyan)
+  signalPlot_1.SetLineWidth(3)
+  signalPlot_2.SetLineWidth(3)
   signalPlot_1.Draw("same")
   signalPlot_2.Draw("same")
   l.AddEntry(signalPlot_1, signal['name'][0]+" x " + str(signalscaling), "l")

@@ -3,22 +3,22 @@ from StopsDilepton.tools.localInfo import dataDir
 dir = dataDir 
 
 TTJets={\
-"name" : "ttJets",
+"name" : "tt+Jets",
 "bins" : ["TTJets"],
 'dir' : dir,
 }
 WJetsHTToLNu={\
-"name" : "WJetsHTToLNu",
+"name" : "W+Jets",
 "bins" : ["WJetsToLNu_HT100to200", "WJetsToLNu_HT200to400", "WJetsToLNu_HT400to600", "WJetsToLNu_HT600toInf"],
 'dir' : dir,
 }
 TTVH={\
-"name" : "TTVH",
+"name" : "TTV,H",
 "bins" : ["TTH", "TTWJets", "TTZJets"],
 'dir' : dir,
 }
 singleTop={\
-"name" : "singleTop",
+"name" : "single top",
 "bins" : ["TBarToLeptons_sch", "TBarToLeptons_tch", "TBar_tWch", "TToLeptons_sch", "TToLeptons_tch", "T_tWch"],
 'dir' : dir,
 }
