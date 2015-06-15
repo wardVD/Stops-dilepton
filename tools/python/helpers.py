@@ -68,9 +68,8 @@ def getVarValue(c, var, n=0):
 
 def getEList(chain, cut, newname='eListTMP'):
   chain.Draw('>>eListTMP_t', cut)
-  elistTMP_t = ROOT.gROOT.Get('eListTMP_t')
-  #elistTMP_t = ROOT.gDirectory.Get('eListTMP_t')
-  elistTMP_t.Print("all")
+  #elistTMP_t = ROOT.gROOT.Get('eListTMP_t')
+  elistTMP_t = ROOT.gDirectory.Get('eListTMP_t')
   elistTMP = elistTMP_t.Clone(newname)
   del elistTMP_t
   return elistTMP
