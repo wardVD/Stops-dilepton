@@ -1,7 +1,7 @@
 import ROOT
 ROOT.gROOT.LoadMacro("$CMSSW_BASE/src/StopsDilepton/tools/scripts/tdrstyle.C")
 ROOT.setTDRStyle()
-import numpy 
+import numpy
 
 from math import *
 from StopsDilepton.tools.mt2Calculator import mt2Calculator
@@ -19,14 +19,20 @@ reduceStat = 1
 
 #load all the samples
 from StopsDilepton.plots.cmgTuplesPostProcessed_PHYS14 import *
-#backgrounds = [TTJets, WJetsHTToLNu, TTVH, singleTop, DY]#, QCD]
-backgrounds = [TTVH]
+backgrounds = [TTJets, WJetsHTToLNu, TTVH, singleTop, DY]#, QCD]
+#backgrounds = [TTVH]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
 
 #get the TChains for each sample
 for s in backgrounds+signals:
   s['chain'] = getChain(s,histname="")
- 
+
+#ROOT output file
+MET_n = numpy.array([-999],dtype=float)
+MT2ee_n =numpy.array([-999],dtype=float)
+MT2emu_n =numpy.array([-999],dtype=float)
+MT2mumu_n =numpy.array([-999],dtype=float)
+
 #binning
 mllbinning = [25,25,275] 
 mt2llbinning = [25,0,275]
@@ -106,6 +112,14 @@ for s in backgrounds+signals:
   eList = getEList(chain, preselection) 
   nEvents = eList.GetN()/reduceStat
   print "Found %i events in %s after preselection %s, looping over %i" % (eList.GetN(),s["name"],preselection,nEvents)
+  
+  #ROOT output file
+  TreeFile = ROOT.TFile("./trees/tree"+s["name"]+".root","recreate")
+  Tree = ROOT.TTree("VarTree","Tree of Variables")
+  Tree.Branch("MET",MET_n,"MET/D")
+  Tree.Branch("MT2ee",MT2ee_n,"MT2ee/D")
+  Tree.Branch("MT2emu",MT2emu_n,"MT2emu/D")
+  Tree.Branch("MT2mumu",MT2mumu_n,"MT2mumu/D")
   for ev in range(nEvents):
     if ev%10000==0:print "At %i/%i"%(ev,nEvents)
     chain.GetEntry(eList.GetEntry(ev))
@@ -122,7 +136,9 @@ for s in backgrounds+signals:
     allLeptons = getLeptons(chain) 
     muons = filter(looseMuID, allLeptons)    
     electrons = filter(looseEleID, allLeptons)
-
+    
+    MET_n[0] = met
+    
     leptons = {\
       'mu':   {'name': 'mumu', 'file': muons},
       'e':   {'name': 'ee', 'file': electrons},
@@ -165,6 +181,9 @@ for s in backgrounds+signals:
         mt2Calc.setLeptons(l0pt, l0eta, l0phi, l1pt, l1eta, l1phi)
         
         mt2ll = mt2Calc.mt2ll()
+        if lep == 'e': MT2ee_n[0] = mt2ll
+        if lep == 'emu': MT2emu_n[0] = mt2ll
+        if lep == 'mu': MT2mumu_n[0] = mt2ll
         plots[leptons[lep]['name']]['mt2ll']['histo'][s["name"]].Fill(mt2ll, weight)
         jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(chain))
         ht = sum([j['pt'] for j in jets])
@@ -180,6 +199,9 @@ for s in backgrounds+signals:
           plots[leptons[lep]['name']]['mt2blbl']['histo'][s["name"]].Fill(mt2blbl, weight)
           #else:
           #  print "Preselection and b-jet selection inconsistent"
+    Tree.Fill()
+  TreeFile.Write()
+  TreeFile.Close()
   del eList
 
  
@@ -206,8 +228,8 @@ for pk in plots.keys():
     l.SetBorderSize(1)
     l.SetTextSize(legendtextsize)
     bkg_stack = ROOT.THStack("bkgs","bkgs")
-    #for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
-    for b in [TTVH]:
+    for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
+    #for b in [TTVH]:
       plots[pk][plot]['histo'][b["name"]].SetFillColor(b["color"])
       plots[pk][plot]['histo'][b["name"]].SetMarkerColor(b["color"])
       plots[pk][plot]['histo'][b["name"]].SetMarkerSize(0)
@@ -256,8 +278,8 @@ for plot in plotsSF['SF'].keys():
   l.SetShadowColor(ROOT.kWhite)
   l.SetBorderSize(1)
   l.SetTextSize(legendtextsize)
-  #for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
-  for b in [TTVH]:
+  for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
+  #for b in [TTVH]:
     bkgforstack = plots['ee'][plot]['histo'][b["name"]]
     bkgforstack.Add(plots['mumu'][plot]['histo'][b["name"]])
     bkg_stack_SF.Add(bkgforstack,"h")
