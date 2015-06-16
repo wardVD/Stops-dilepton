@@ -6,8 +6,8 @@ import numpy
 from math import *
 from StopsDilepton.tools.mt2Calculator import mt2Calculator
 mt2Calc = mt2Calculator()
-from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue
-from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets, ele_ID_eta
+from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue, genmatching
+from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets, ele_ID_eta, getGenParts
 from StopsDilepton.tools.localInfo import *
 
 #preselection: MET>50, HT>100, n_bjets>=2
@@ -136,9 +136,12 @@ for s in backgrounds+signals:
     allLeptons = getLeptons(chain) 
     muons = filter(looseMuID, allLeptons)    
     electrons = filter(looseEleID, allLeptons)
-    
+    #GENinfo
+    genparticles = getGenParts(chain)
+    #ROOT output file
     MET_n[0] = met
-    
+
+    #SF and OF channels
     leptons = {\
       'mu':   {'name': 'mumu', 'file': muons},
       'e':   {'name': 'ee', 'file': electrons},
@@ -149,6 +152,7 @@ for s in backgrounds+signals:
       #Same Flavor
       if lep != 'emu':
         if len(leptons[lep]['file'])==2 and leptons[lep]['file'][0]['pdgId']*leptons[lep]['file'][1]['pdgId']<0:
+          #genmatching(leptons[lep]['file'][0],genparticles)
           twoleptons = True
           l0pt, l0eta, l0phi = leptons[lep]['file'][0]['pt'],  leptons[lep]['file'][0]['eta'],  leptons[lep]['file'][0]['phi']
           l1pt, l1eta, l1phi = leptons[lep]['file'][1]['pt'],  leptons[lep]['file'][1]['eta'],  leptons[lep]['file'][1]['phi']
@@ -181,6 +185,7 @@ for s in backgrounds+signals:
         mt2Calc.setLeptons(l0pt, l0eta, l0phi, l1pt, l1eta, l1phi)
         
         mt2ll = mt2Calc.mt2ll()
+        #ROOT output file
         if lep == 'e': MT2ee_n[0] = mt2ll
         if lep == 'emu': MT2emu_n[0] = mt2ll
         if lep == 'mu': MT2mumu_n[0] = mt2ll
@@ -269,8 +274,6 @@ for pk in plots.keys():
     channeltag.Draw()
     c1.Print(plotDir+"/test/"+plots[pk][plot]['name']+"_"+pk+".png")
     
-output.Close()
-
 for plot in plotsSF['SF'].keys():
   bkg_stack_SF = ROOT.THStack("bkgs_SF","bkgs_SF")
   l=ROOT.TLegend(0.6,0.6,1.0,1.0)

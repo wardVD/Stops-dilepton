@@ -76,3 +76,13 @@ def getEList(chain, cut, newname='eListTMP'):
 
 def getObjDict(c, prefix, variables, i):
  return {var: c.GetLeaf(prefix+var).GetValue(i) for var in variables}
+
+def genmatching(lepton,genparticles):
+  for gen in genparticles:
+      deltaphi = abs(lepton['phi'] - gen['phi'])
+      if (deltaphi > pi): deltaphi = 2*pi - deltaphi
+      deltaeta = abs(lepton['eta'] - gen['eta'])
+      deltar = sqrt(deltaphi**2 + deltaeta**2)
+      if deltar<0.01:
+        print deltar
+        print gen['motherId']
