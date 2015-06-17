@@ -101,10 +101,30 @@ plotsSF = {\
   },
 }
 
+#2D plot
+dimensional = {\
+  'ee': {\
+  'metvsmt2ll': {'xtitle':'M_{T2ll} (GeV)','ytitle':'E^{miss}_{T} (GeV)', 'name': 'METvsMT2ll', 'ybinning': metbinning, 'xbinning': mt2llbinning, 'histo': {}},
+  },
+  'mumu': {\
+  'metvsmt2ll': {'xtitle':'M_{T2ll} (GeV)','ytitle':'E^{miss}_{T} (GeV)', 'name': 'METvsMT2ll', 'ybinning': metbinning, 'xbinning': mt2llbinning, 'histo': {}},
+  },
+  'emu': {\
+  'metvsmt2ll': {'xtitle':'M_{T2ll} (GeV)','ytitle':'E^{miss}_{T} (GeV)', 'name': 'METvsMT2ll', 'ybinning': metbinning, 'xbinning': mt2llbinning, 'histo': {}},
+  }
+}
+
 for s in backgrounds+signals:
+  #1D
   for pk in plots.keys():
     for plot in plots[pk].keys():
       plots[pk][plot]['histo'][s["name"]] = ROOT.TH1F(plots[pk][plot]['name']+"_"+s["name"]+"_"+pk, plots[pk][plot]['name']+"_"+s["name"]+"_"+pk, *plots[pk][plot]['binning'])
+  #2D
+  for pk in dimensional.keys():
+    for plot in dimensional[pk].keys():
+      dimensional[pk][plot]['histo'][s["name"]] = ROOT.TH2F(dimensional[pk][plot]['name']+"_"+s["name"]+"_"+pk, dimensional[pk][plot]['name']+"_"+s["name"]+"_"+pk, dimensional[pk][plot]['xbinning'][0], dimensional[pk][plot]['xbinning'][1],dimensional[pk][plot]['xbinning'][2], dimensional[pk][plot]['ybinning'][0], dimensional[pk][plot]['ybinning'][1],dimensional[pk][plot]['ybinning'][2])
+      #dimensional[pk][plot]['histo'][s["name"]] = ROOT.TH2F(dimensional[pk][plot]['name']+"_"+s["name"]+"_"+pk, dimensional[pk][plot]['name']+"_"+s["name"]+"_"+pk, 10,0,10,10,0,10)
+
   chain = s["chain"]
   #Using Event loop
   #get EList after preselection
@@ -190,6 +210,7 @@ for s in backgrounds+signals:
         if lep == 'emu': MT2emu_n[0] = mt2ll
         if lep == 'mu': MT2mumu_n[0] = mt2ll
         plots[leptons[lep]['name']]['mt2ll']['histo'][s["name"]].Fill(mt2ll, weight)
+        dimensional[leptons[lep]['name']]['metvsmt2ll']['histo'][s["name"]].Fill(mt2ll,met)
         jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(chain))
         ht = sum([j['pt'] for j in jets])
         #if mt2ll > 120:
@@ -233,8 +254,8 @@ for pk in plots.keys():
     l.SetBorderSize(1)
     l.SetTextSize(legendtextsize)
     bkg_stack = ROOT.THStack("bkgs","bkgs")
-    for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
-    #for b in [TTVH]:
+    #for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
+    for b in [TTVH]:
       plots[pk][plot]['histo'][b["name"]].SetFillColor(b["color"])
       plots[pk][plot]['histo'][b["name"]].SetMarkerColor(b["color"])
       plots[pk][plot]['histo'][b["name"]].SetMarkerSize(0)
@@ -281,8 +302,8 @@ for plot in plotsSF['SF'].keys():
   l.SetShadowColor(ROOT.kWhite)
   l.SetBorderSize(1)
   l.SetTextSize(legendtextsize)
-  for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
-  #for b in [TTVH]:
+  #for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
+  for b in [TTVH]:
     bkgforstack = plots['ee'][plot]['histo'][b["name"]]
     bkgforstack.Add(plots['mumu'][plot]['histo'][b["name"]])
     bkg_stack_SF.Add(bkgforstack,"h")
@@ -316,4 +337,36 @@ for plot in plotsSF['SF'].keys():
   channeltag.SetShadowColor(ROOT.kWhite)
   channeltag.Draw()
   c1.Print(plotDir+"/test/"+plotsSF['SF'][plot]['name']+"_SF.png")
-    
+     
+
+# for pk in dimensional.keys():
+#   for plot in dimensional[pk].keys():
+#     #Plot!
+#     for s in backgrounds+signals:
+#       c1 = ROOT.TCanvas()
+#       plot2D = dimensional[pk][plot]['histo'][s["name"]]
+#       plot2D.Draw("scat=0.5")
+#       plot2D.GetXaxis().SetTitle(dimensional[pk][plot]['xtitle'])
+#       plot2D.GetYaxis().SetTitle(dimensional[pk][plot]['ytitle'])
+#       l=ROOT.TLegend(0.25,0.95,0.9,1.0)
+#       l.SetFillColor(0)
+#       l.SetShadowColor(ROOT.kWhite)
+#       l.SetBorderSize(1)
+#       l.SetTextSize(legendtextsize)
+#       l.AddEntry(plot2D,s["name"])
+#       l.Draw()
+#       channeltag = ROOT.TPaveText(0.8,0.7,0.9,0.85,"NDC")
+#       firstlep, secondlep = pk[:len(pk)/2], pk[len(pk)/2:]
+#       if firstlep == 'mu':
+#         firstlep = '#' + firstlep
+#       if secondlep == 'mu':
+#         secondlep = '#' + secondlep
+#       channeltag.AddText(firstlep+secondlep)
+#       #channeltag.AddText("on Z")
+#       #channeltag.AddText("b #geq 1")
+#       channeltag.SetFillColor(ROOT.kWhite)
+#       channeltag.SetShadowColor(ROOT.kWhite)
+#       channeltag.Draw()
+
+#       c1.Print(plotDir+"/2D/"+dimensional[pk][plot]['name']+"_"+pk+"_"+s['name']+".png")
+#       c1.Clear()
