@@ -19,8 +19,8 @@ reduceStat = 1
 
 #load all the samples
 from StopsDilepton.plots.cmgTuplesPostProcessed_PHYS14 import *
-backgrounds = [TTJets, WJetsHTToLNu, TTVH, singleTop, DY]#, QCD]
-#backgrounds = [TTVH]
+#backgrounds = [TTJets, WJetsHTToLNu, TTVH, singleTop, DY]#, QCD]
+backgrounds = [TTVH]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
 
 #get the TChains for each sample
@@ -239,39 +239,88 @@ singleTop["color"]=ROOT.kOrange
 DY["color"]=ROOT.kBlue
 
 #Plotvariables
-signal = {'path': ["SMS_T2tt_2J_mStop425_mLSP325","SMS_T2tt_2J_mStop650_mLSP325"], 'name': ["T2tt(425,325)","T2tt(650,325)"]} #May chose different signal here
+signal = {'path': ["SMS_T2tt_2J_mStop425_mLSP325","SMS_T2tt_2J_mStop500_mLSP325","SMS_T2tt_2J_mStop650_mLSP325","SMS_T2tt_2J_mStop850_mLSP100"], 'name': ["T2tt(425,325)","T2tt(500,325)","T2tt(650,325)","T2tt(850,100)"]}
 yminimum = 10**-0.5
 legendtextsize = 0.032
 signalscaling = 100
 
+draw1D = True
 
-for pk in plots.keys():
-  for plot in plots[pk].keys():
-#Make a stack for backgrounds
+if draw1D:
+
+  for pk in plots.keys():
+    for plot in plots[pk].keys():
+    #Make a stack for backgrounds
+      l=ROOT.TLegend(0.6,0.6,1.0,1.0)
+      l.SetFillColor(0)
+      l.SetShadowColor(ROOT.kWhite)
+      l.SetBorderSize(1)
+      l.SetTextSize(legendtextsize)
+      bkg_stack = ROOT.THStack("bkgs","bkgs")
+      for b in backgrounds:
+        plots[pk][plot]['histo'][b["name"]].SetFillColor(b["color"])
+        plots[pk][plot]['histo'][b["name"]].SetMarkerColor(b["color"])
+        plots[pk][plot]['histo'][b["name"]].SetMarkerSize(0)
+        bkg_stack.Add(plots[pk][plot]['histo'][b["name"]],"h")
+        l.AddEntry(plots[pk][plot]['histo'][b["name"]], b["name"])
+    
+    #Plot!
+      c1 = ROOT.TCanvas()
+      bkg_stack.SetMaximum(2*bkg_stack.GetMaximum())
+      bkg_stack.SetMinimum(yminimum)
+      bkg_stack.Draw()
+      bkg_stack.GetXaxis().SetTitle(plots[pk][plot]['title'])
+      bkg_stack.GetYaxis().SetTitle("Events / %i GeV"%( (plots[pk][plot]['binning'][2]-plots[pk][plot]['binning'][1])/plots[pk][plot]['binning'][0]) )
+      c1.SetLogy()
+      signalPlot_1 = plots[pk][plot]['histo'][signal['path'][0]].Clone()
+      signalPlot_2 = plots[pk][plot]['histo'][signal['path'][2]].Clone()
+      signalPlot_1.Scale(signalscaling)
+      signalPlot_2.Scale(signalscaling)
+      signalPlot_1.SetLineColor(ROOT.kBlack)
+      signalPlot_2.SetLineColor(ROOT.kCyan)
+      signalPlot_1.SetLineWidth(3)
+      signalPlot_2.SetLineWidth(3)
+      signalPlot_1.Draw("same")
+      signalPlot_2.Draw("same")
+      l.AddEntry(signalPlot_1, signal['name'][0]+" x " + str(signalscaling), "l")
+      l.AddEntry(signalPlot_2, signal['name'][1]+" x " + str(signalscaling), "l")
+      l.Draw()
+      channeltag = ROOT.TPaveText(0.45,0.8,0.59,0.85,"NDC")
+      firstlep, secondlep = pk[:len(pk)/2], pk[len(pk)/2:]
+      if firstlep == 'mu':
+        firstlep = '#' + firstlep
+      if secondlep == 'mu':
+        secondlep = '#' + secondlep
+      channeltag.AddText(firstlep+secondlep)
+      channeltag.SetFillColor(ROOT.kWhite)
+      channeltag.SetShadowColor(ROOT.kWhite)
+      channeltag.Draw()
+      c1.Print(plotDir+"/test/"+plots[pk][plot]['name']+"_"+pk+".png")
+    
+  for plot in plotsSF['SF'].keys():
+    bkg_stack_SF = ROOT.THStack("bkgs_SF","bkgs_SF")
     l=ROOT.TLegend(0.6,0.6,1.0,1.0)
     l.SetFillColor(0)
     l.SetShadowColor(ROOT.kWhite)
     l.SetBorderSize(1)
     l.SetTextSize(legendtextsize)
-    bkg_stack = ROOT.THStack("bkgs","bkgs")
-    #for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
-    for b in [TTVH]:
-      plots[pk][plot]['histo'][b["name"]].SetFillColor(b["color"])
-      plots[pk][plot]['histo'][b["name"]].SetMarkerColor(b["color"])
-      plots[pk][plot]['histo'][b["name"]].SetMarkerSize(0)
-      bkg_stack.Add(plots[pk][plot]['histo'][b["name"]],"h")
-      l.AddEntry(plots[pk][plot]['histo'][b["name"]], b["name"])
-    
-    #Plot!
+    for b in backgrounds:
+      bkgforstack = plots['ee'][plot]['histo'][b["name"]]
+      bkgforstack.Add(plots['mumu'][plot]['histo'][b["name"]])
+      bkg_stack_SF.Add(bkgforstack,"h")
+      l.AddEntry(plots['ee'][plot]['histo'][b["name"]], b["name"])
+   
     c1 = ROOT.TCanvas()
-    bkg_stack.SetMaximum(2*bkg_stack.GetMaximum())
-    bkg_stack.SetMinimum(yminimum)
-    bkg_stack.Draw()
-    bkg_stack.GetXaxis().SetTitle(plots[pk][plot]['title'])
-    bkg_stack.GetYaxis().SetTitle("Events / %i GeV"%( (plots[pk][plot]['binning'][2]-plots[pk][plot]['binning'][1])/plots[pk][plot]['binning'][0]) )
+    bkg_stack_SF.SetMaximum(2*bkg_stack.GetMaximum())
+    bkg_stack_SF.SetMinimum(yminimum)
+    bkg_stack_SF.Draw()
+    bkg_stack_SF.GetXaxis().SetTitle(plotsSF['SF'][plot]['title'])
+    bkg_stack_SF.GetYaxis().SetTitle("Events / %i GeV"%( (plotsSF['SF'][plot]['binning'][2]-plotsSF['SF'][plot]['binning'][1])/plotsSF['SF'][plot]['binning'][0]) )
     c1.SetLogy()
-    signalPlot_1 = plots[pk][plot]['histo'][signal['path'][0]].Clone()
-    signalPlot_2 = plots[pk][plot]['histo'][signal['path'][1]].Clone()
+    signalPlot_1 = plots['ee'][plot]['histo'][signal['path'][0]].Clone()
+    signalPlot_1.Add(plots['mumu'][plot]['histo'][signal['path'][0]])
+    signalPlot_2 = plots['ee'][plot]['histo'][signal['path'][1]].Clone()
+    signalPlot_2.Add(plots['mumu'][plot]['histo'][signal['path'][1]])
     signalPlot_1.Scale(signalscaling)
     signalPlot_2.Scale(signalscaling)
     signalPlot_1.SetLineColor(ROOT.kBlack)
@@ -284,89 +333,47 @@ for pk in plots.keys():
     l.AddEntry(signalPlot_2, signal['name'][1]+" x " + str(signalscaling), "l")
     l.Draw()
     channeltag = ROOT.TPaveText(0.45,0.8,0.59,0.85,"NDC")
-    firstlep, secondlep = pk[:len(pk)/2], pk[len(pk)/2:]
-    if firstlep == 'mu':
-      firstlep = '#' + firstlep
-    if secondlep == 'mu':
-      secondlep = '#' + secondlep
-    channeltag.AddText(firstlep+secondlep)
+    channeltag.AddText("SF")
     channeltag.SetFillColor(ROOT.kWhite)
     channeltag.SetShadowColor(ROOT.kWhite)
     channeltag.Draw()
-    c1.Print(plotDir+"/test/"+plots[pk][plot]['name']+"_"+pk+".png")
-    
-for plot in plotsSF['SF'].keys():
-  bkg_stack_SF = ROOT.THStack("bkgs_SF","bkgs_SF")
-  l=ROOT.TLegend(0.6,0.6,1.0,1.0)
-  l.SetFillColor(0)
-  l.SetShadowColor(ROOT.kWhite)
-  l.SetBorderSize(1)
-  l.SetTextSize(legendtextsize)
-  #for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
-  for b in [TTVH]:
-    bkgforstack = plots['ee'][plot]['histo'][b["name"]]
-    bkgforstack.Add(plots['mumu'][plot]['histo'][b["name"]])
-    bkg_stack_SF.Add(bkgforstack,"h")
-    l.AddEntry(plots['ee'][plot]['histo'][b["name"]], b["name"])
-   
-  c1 = ROOT.TCanvas()
-  bkg_stack_SF.SetMaximum(2*bkg_stack.GetMaximum())
-  bkg_stack_SF.SetMinimum(yminimum)
-  bkg_stack_SF.Draw()
-  bkg_stack_SF.GetXaxis().SetTitle(plotsSF['SF'][plot]['title'])
-  bkg_stack_SF.GetYaxis().SetTitle("Events / %i GeV"%( (plotsSF['SF'][plot]['binning'][2]-plotsSF['SF'][plot]['binning'][1])/plotsSF['SF'][plot]['binning'][0]) )
-  c1.SetLogy()
-  signalPlot_1 = plots['ee'][plot]['histo'][signal['path'][0]].Clone()
-  signalPlot_1.Add(plots['mumu'][plot]['histo'][signal['path'][0]])
-  signalPlot_2 = plots['ee'][plot]['histo'][signal['path'][1]].Clone()
-  signalPlot_2.Add(plots['mumu'][plot]['histo'][signal['path'][1]])
-  signalPlot_1.Scale(signalscaling)
-  signalPlot_2.Scale(signalscaling)
-  signalPlot_1.SetLineColor(ROOT.kBlack)
-  signalPlot_2.SetLineColor(ROOT.kCyan)
-  signalPlot_1.SetLineWidth(3)
-  signalPlot_2.SetLineWidth(3)
-  signalPlot_1.Draw("same")
-  signalPlot_2.Draw("same")
-  l.AddEntry(signalPlot_1, signal['name'][0]+" x " + str(signalscaling), "l")
-  l.AddEntry(signalPlot_2, signal['name'][1]+" x " + str(signalscaling), "l")
-  l.Draw()
-  channeltag = ROOT.TPaveText(0.45,0.8,0.59,0.85,"NDC")
-  channeltag.AddText("SF")
-  channeltag.SetFillColor(ROOT.kWhite)
-  channeltag.SetShadowColor(ROOT.kWhite)
-  channeltag.Draw()
-  c1.Print(plotDir+"/test/"+plotsSF['SF'][plot]['name']+"_SF.png")
+    c1.Print(plotDir+"/test/"+plotsSF['SF'][plot]['name']+"_SF.png")
      
 
-# for pk in dimensional.keys():
-#   for plot in dimensional[pk].keys():
-#     #Plot!
-#     for s in backgrounds+signals:
-#       c1 = ROOT.TCanvas()
-#       plot2D = dimensional[pk][plot]['histo'][s["name"]]
-#       plot2D.Draw("scat=0.5")
-#       plot2D.GetXaxis().SetTitle(dimensional[pk][plot]['xtitle'])
-#       plot2D.GetYaxis().SetTitle(dimensional[pk][plot]['ytitle'])
-#       l=ROOT.TLegend(0.25,0.95,0.9,1.0)
-#       l.SetFillColor(0)
-#       l.SetShadowColor(ROOT.kWhite)
-#       l.SetBorderSize(1)
-#       l.SetTextSize(legendtextsize)
-#       l.AddEntry(plot2D,s["name"])
-#       l.Draw()
-#       channeltag = ROOT.TPaveText(0.8,0.7,0.9,0.85,"NDC")
-#       firstlep, secondlep = pk[:len(pk)/2], pk[len(pk)/2:]
-#       if firstlep == 'mu':
-#         firstlep = '#' + firstlep
-#       if secondlep == 'mu':
-#         secondlep = '#' + secondlep
-#       channeltag.AddText(firstlep+secondlep)
-#       #channeltag.AddText("on Z")
-#       #channeltag.AddText("b #geq 1")
-#       channeltag.SetFillColor(ROOT.kWhite)
-#       channeltag.SetShadowColor(ROOT.kWhite)
-#       channeltag.Draw()
+draw2D = False
 
-#       c1.Print(plotDir+"/2D/"+dimensional[pk][plot]['name']+"_"+pk+"_"+s['name']+".png")
-#       c1.Clear()
+if draw2D:
+
+  ROOT.gStyle.SetPalette(1)
+
+  for pk in dimensional.keys():
+    for plot in dimensional[pk].keys():
+      #Plot!
+      for s in backgrounds+signals:
+        c1 = ROOT.TCanvas()
+        plot2D = dimensional[pk][plot]['histo'][s["name"]]
+        #plot2D.Draw("scat=0.5")
+        plot2D.Draw("colz")
+        plot2D.GetXaxis().SetTitle(dimensional[pk][plot]['xtitle'])
+        plot2D.GetYaxis().SetTitle(dimensional[pk][plot]['ytitle'])
+        l=ROOT.TLegend(0.25,0.95,0.9,1.0)
+        l.SetFillColor(0)
+        l.SetShadowColor(ROOT.kWhite)
+        l.SetBorderSize(1)
+        l.SetTextSize(legendtextsize)
+        l.AddEntry(plot2D,s["name"])
+        l.Draw()
+        channeltag = ROOT.TPaveText(0.8,0.7,0.9,0.85,"NDC")
+        firstlep, secondlep = pk[:len(pk)/2], pk[len(pk)/2:]
+        if firstlep == 'mu':
+          firstlep = '#' + firstlep
+        if secondlep == 'mu':
+          secondlep = '#' + secondlep
+        channeltag.AddText(firstlep+secondlep)
+        channeltag.AddText(s["name"])
+        channeltag.SetFillColor(ROOT.kWhite)
+        channeltag.SetShadowColor(ROOT.kWhite)
+        channeltag.Draw()
+        
+        c1.Print(plotDir+"/2D/"+dimensional[pk][plot]['name']+"_"+pk+"_"+s['name']+".png")
+        c1.Clear()
