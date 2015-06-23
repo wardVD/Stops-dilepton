@@ -6,21 +6,21 @@ import numpy
 from math import *
 from StopsDilepton.tools.mt2Calculator import mt2Calculator
 mt2Calc = mt2Calculator()
-from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue, genmatching
+from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue, genmatching, latexmaker
 from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets, ele_ID_eta, getGenParts
 from StopsDilepton.tools.localInfo import *
 
 #preselection: MET>50, HT>100, n_bjets>=2
 #Once we decided in HT definition and b-tag WP we add those variables to the tuple.
 #For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
-preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)>0&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)>=2'
+preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)==1&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)>=2'
 
 reduceStat = 1
 
 #load all the samples
 from StopsDilepton.plots.cmgTuplesPostProcessed_PHYS14 import *
-#backgrounds = [TTJets, WJetsHTToLNu, TTVH, singleTop, DY]#, QCD]
-backgrounds = [TTVH]
+#backgrounds = [TTJets, WJetsHTToLNu, TTH, TTW, TTZ, singleTop, DY]#, QCD]
+backgrounds = [TTH, TTW, TTZ]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
 
 #get the TChains for each sample
@@ -28,10 +28,12 @@ for s in backgrounds+signals:
   s['chain'] = getChain(s,histname="")
 
 #ROOT output file
-MET_n = numpy.array([-999],dtype=float)
-MT2ee_n =numpy.array([-999],dtype=float)
-MT2emu_n =numpy.array([-999],dtype=float)
-MT2mumu_n =numpy.array([-999],dtype=float)
+#MET_n = numpy.array([-999],dtype=float)
+#MT2ee_n =numpy.array([-999],dtype=float)
+#MT2emu_n =numpy.array([-999],dtype=float)
+#MT2mumu_n =numpy.array([-999],dtype=float)
+
+latexmaker()
 
 #binning
 mllbinning = [25,25,275] 
@@ -134,12 +136,12 @@ for s in backgrounds+signals:
   print "Found %i events in %s after preselection %s, looping over %i" % (eList.GetN(),s["name"],preselection,nEvents)
   
   #ROOT output file
-  TreeFile = ROOT.TFile("./trees/tree"+s["name"]+".root","recreate")
-  Tree = ROOT.TTree("VarTree","Tree of Variables")
-  Tree.Branch("MET",MET_n,"MET/D")
-  Tree.Branch("MT2ee",MT2ee_n,"MT2ee/D")
-  Tree.Branch("MT2emu",MT2emu_n,"MT2emu/D")
-  Tree.Branch("MT2mumu",MT2mumu_n,"MT2mumu/D")
+  #TreeFile = ROOT.TFile("./trees/tree"+s["name"]+".root","recreate")
+  #Tree = ROOT.TTree("VarTree","Tree of Variables")
+  #Tree.Branch("MET",MET_n,"MET/D")
+  #Tree.Branch("MT2ee",MT2ee_n,"MT2ee/D")
+  #Tree.Branch("MT2emu",MT2emu_n,"MT2emu/D")
+  #Tree.Branch("MT2mumu",MT2mumu_n,"MT2mumu/D")
   for ev in range(nEvents):
     if ev%10000==0:print "At %i/%i"%(ev,nEvents)
     chain.GetEntry(eList.GetEntry(ev))
@@ -159,7 +161,7 @@ for s in backgrounds+signals:
     #GENinfo
     genparticles = getGenParts(chain)
     #ROOT output file
-    MET_n[0] = met
+    #MET_n[0] = met
 
     #SF and OF channels
     leptons = {\
@@ -206,9 +208,9 @@ for s in backgrounds+signals:
         
         mt2ll = mt2Calc.mt2ll()
         #ROOT output file
-        if lep == 'e': MT2ee_n[0] = mt2ll
-        if lep == 'emu': MT2emu_n[0] = mt2ll
-        if lep == 'mu': MT2mumu_n[0] = mt2ll
+        #if lep == 'e': MT2ee_n[0] = mt2ll
+        #if lep == 'emu': MT2emu_n[0] = mt2ll
+        #if lep == 'mu': MT2mumu_n[0] = mt2ll
         plots[leptons[lep]['name']]['mt2ll']['histo'][s["name"]].Fill(mt2ll, weight)
         dimensional[leptons[lep]['name']]['metvsmt2ll']['histo'][s["name"]].Fill(mt2ll,met)
         jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(chain))
@@ -225,16 +227,18 @@ for s in backgrounds+signals:
           plots[leptons[lep]['name']]['mt2blbl']['histo'][s["name"]].Fill(mt2blbl, weight)
           #else:
           #  print "Preselection and b-jet selection inconsistent"
-    Tree.Fill()
-  TreeFile.Write()
-  TreeFile.Close()
+    #Tree.Fill()
+  #TreeFile.Write()
+  #TreeFile.Close()
   del eList
 
  
 #Some coloring
 TTJets["color"]=ROOT.kRed
 WJetsHTToLNu["color"]=ROOT.kGreen
-TTVH["color"]=ROOT.kMagenta
+TTH["color"]=ROOT.kMagenta
+TTW["color"]=ROOT.kMagenta-3
+TTZ["color"]=ROOT.kMagenta-6
 singleTop["color"]=ROOT.kOrange
 DY["color"]=ROOT.kBlue
 
@@ -345,35 +349,43 @@ draw2D = False
 if draw2D:
 
   ROOT.gStyle.SetPalette(1)
+  c1 = ROOT.TCanvas()
+  ROOT.gStyle.SetPadRightMargin(0.2)
 
   for pk in dimensional.keys():
     for plot in dimensional[pk].keys():
       #Plot!
       for s in backgrounds+signals:
-        c1 = ROOT.TCanvas()
         plot2D = dimensional[pk][plot]['histo'][s["name"]]
         #plot2D.Draw("scat=0.5")
         plot2D.Draw("colz")
-        plot2D.GetXaxis().SetTitle(dimensional[pk][plot]['xtitle'])
-        plot2D.GetYaxis().SetTitle(dimensional[pk][plot]['ytitle'])
-        l=ROOT.TLegend(0.25,0.95,0.9,1.0)
-        l.SetFillColor(0)
-        l.SetShadowColor(ROOT.kWhite)
-        l.SetBorderSize(1)
-        l.SetTextSize(legendtextsize)
-        l.AddEntry(plot2D,s["name"])
-        l.Draw()
-        channeltag = ROOT.TPaveText(0.8,0.7,0.9,0.85,"NDC")
-        firstlep, secondlep = pk[:len(pk)/2], pk[len(pk)/2:]
-        if firstlep == 'mu':
-          firstlep = '#' + firstlep
-        if secondlep == 'mu':
-          secondlep = '#' + secondlep
-        channeltag.AddText(firstlep+secondlep)
-        channeltag.AddText(s["name"])
-        channeltag.SetFillColor(ROOT.kWhite)
-        channeltag.SetShadowColor(ROOT.kWhite)
-        channeltag.Draw()
+        print plot2D.GetZaxis().GetXmax()
+        print plot2D.GetZaxis().GetXmin()
+        print plot2D.GetZaxis().GetXbins()
+        # plot2D.GetXaxis().SetTitle(dimensional[pk][plot]['xtitle'])
+        # plot2D.GetYaxis().SetTitle(dimensional[pk][plot]['ytitle'])
         
-        c1.Print(plotDir+"/2D/"+dimensional[pk][plot]['name']+"_"+pk+"_"+s['name']+".png")
+        # l=ROOT.TLegend(0.25,0.95,0.9,1.0)
+        # l.SetFillColor(0)
+        # l.SetShadowColor(ROOT.kWhite)
+        # l.SetBorderSize(1)
+        # l.SetTextSize(legendtextsize)
+        # l.AddEntry(plot2D,s["name"])
+        # l.Draw()
+        # channeltag = ROOT.TPaveText(0.8,0.7,0.9,0.85,"NDC")
+        # firstlep, secondlep = pk[:len(pk)/2], pk[len(pk)/2:]
+        # if firstlep == 'mu':
+        #   firstlep = '#' + firstlep
+        # if secondlep == 'mu':
+        #   secondlep = '#' + secondlep
+        # channeltag.AddText(firstlep+secondlep)
+        # channeltag.AddText(s["name"])
+        # channeltag.SetFillColor(ROOT.kWhite)
+        # channeltag.SetShadowColor(ROOT.kWhite)
+        # channeltag.Draw()
+        
+        c1.Print(plotDir+"/test/"+dimensional[pk][plot]['name']+"_"+pk+"_"+s['name']+".png")
         c1.Clear()
+
+
+

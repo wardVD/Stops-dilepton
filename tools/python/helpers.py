@@ -86,3 +86,36 @@ def genmatching(lepton,genparticles):
       if deltar<0.01:
         print deltar
         print gen['motherId']
+
+def latexmaker():
+  output = open("./table.tex","w")
+
+  output.write("\\documentclass[8pt]{article}" + '\n')
+  output.write("\\usepackage[margin=0.5in]{geometry}" + '\n')
+  output.write("\\usepackage{verbatim}" + '\n')
+  output.write("\\usepackage{hyperref}" + '\n')
+  output.write("\\usepackage{epsfig}" + '\n')
+  output.write("\\usepackage{graphicx}" + '\n')
+  output.write("\\usepackage{epsfig}" + '\n')
+  output.write("\\usepackage{subfigure,              rotating,              rotate}" + '\n')
+  output.write("\\usepackage{relsize}" + '\n')
+  output.write("\\usepackage{fancyheadings}" + '\n')
+  output.write("\\usepackage[latin1]{inputenc}" + '\n')
+  output.write("\\usepackage{footnpag}" + '\n')
+  output.write("\\usepackage{enumerate}" + '\n')
+  output.write("\\usepackage{color}" + '\n')
+  output.write("\\newcommand{\\doglobally}[1]{{\\globaldefs=1#1}}" + '\n')
+  output.write("\\begin{document}" + '\n')
+  
+  
+  output.write("\\begin{tabular}{|c|c|c|c|c|c|}" + '\n')
+  output.write("\\hline" + '\n')
+  output.write("Variables & Signal (mm) & $t\\bar{t}$-jets & Total Bkg & $\\frac{signal}{\\sqrt{background}}$ & data \\\\" + '\n')
+  output.write("\\hline" + '\n')
+  output.write("\\hline" + '\n')
+  
+  output.write("\\end{tabular}" + '\n')
+  
+  output.write("\\end{document}")
+  
+  output.close()

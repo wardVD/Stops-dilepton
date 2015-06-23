@@ -12,9 +12,19 @@ WJetsHTToLNu={\
 "bins" : ["WJetsToLNu_HT100to200", "WJetsToLNu_HT200to400", "WJetsToLNu_HT400to600", "WJetsToLNu_HT600toInf"],
 'dir' : dir,
 }
-TTVH={\
-"name" : "TTV,H",
-"bins" : ["TTH", "TTWJets", "TTZJets"],
+TTH={\
+"name" : "TTH",
+"bins" : ["TTH"],
+'dir' : dir,
+}
+TTW={\
+"name" : "TTW",
+"bins" : ["TTWJets"],
+'dir' : dir,
+}
+TTZ={\
+"name" : "TTZ",
+"bins" : ["TTZJets"],
 'dir' : dir,
 }
 singleTop={\
