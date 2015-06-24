@@ -13,7 +13,7 @@ from StopsDilepton.tools.localInfo import *
 #preselection: MET>50, HT>100, n_bjets>=2
 #Once we decided in HT definition and b-tag WP we add those variables to the tuple.
 #For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
-preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)==1&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)>=2'
+preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)>0&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)>=2'
 
 reduceStat = 1
 
@@ -33,7 +33,6 @@ for s in backgrounds+signals:
 #MT2emu_n =numpy.array([-999],dtype=float)
 #MT2mumu_n =numpy.array([-999],dtype=float)
 
-latexmaker()
 
 #binning
 mllbinning = [25,25,275] 
@@ -211,11 +210,11 @@ for s in backgrounds+signals:
         #if lep == 'e': MT2ee_n[0] = mt2ll
         #if lep == 'emu': MT2emu_n[0] = mt2ll
         #if lep == 'mu': MT2mumu_n[0] = mt2ll
-        plots[leptons[lep]['name']]['mt2ll']['histo'][s["name"]].Fill(mt2ll, weight)
-        dimensional[leptons[lep]['name']]['metvsmt2ll']['histo'][s["name"]].Fill(mt2ll,met)
+        if mt2ll > 120:
+          plots[leptons[lep]['name']]['mt2ll']['histo'][s["name"]].Fill(mt2ll, weight)
+          dimensional[leptons[lep]['name']]['metvsmt2ll']['histo'][s["name"]].Fill(mt2ll,met)
         jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(chain))
         ht = sum([j['pt'] for j in jets])
-        #if mt2ll > 120:
         plots[leptons[lep]['name']]['kinMetSig']['histo'][s["name"]].Fill(met/sqrt(ht), weight)
         plots[leptons[lep]['name']]['met']['histo'][s["name"]].Fill(met, weight)
         bjets = filter(lambda j:j['btagCSV']>0.814, jets)
@@ -231,6 +230,10 @@ for s in backgrounds+signals:
   #TreeFile.Write()
   #TreeFile.Close()
   del eList
+
+latexmaker("120",'ee', plots)
+latexmaker("120",'mumu', plots)
+latexmaker("120",'emu',plots)
 
  
 #Some coloring

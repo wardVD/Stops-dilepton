@@ -87,8 +87,10 @@ def genmatching(lepton,genparticles):
         print deltar
         print gen['motherId']
 
-def latexmaker():
-  output = open("./table.tex","w")
+def latexmaker(mt2cut,channel,plots):
+
+  mt2ll = plots[channel]['mt2ll']
+  output = open("./table_"+channel+".tex","w")
 
   output.write("\\documentclass[8pt]{article}" + '\n')
   output.write("\\usepackage[margin=0.5in]{geometry}" + '\n')
@@ -100,6 +102,7 @@ def latexmaker():
   output.write("\\usepackage{subfigure,              rotating,              rotate}" + '\n')
   output.write("\\usepackage{relsize}" + '\n')
   output.write("\\usepackage{fancyheadings}" + '\n')
+  output.write("\usepackage{multirow}" + '\n')
   output.write("\\usepackage[latin1]{inputenc}" + '\n')
   output.write("\\usepackage{footnpag}" + '\n')
   output.write("\\usepackage{enumerate}" + '\n')
@@ -110,7 +113,16 @@ def latexmaker():
   
   output.write("\\begin{tabular}{|c|c|c|c|c|c|}" + '\n')
   output.write("\\hline" + '\n')
-  output.write("Variables & Signal (mm) & $t\\bar{t}$-jets & Total Bkg & $\\frac{signal}{\\sqrt{background}}$ & data \\\\" + '\n')
+  output.write("$M_{T2}$ cut (GeV) & Sample & Count \\\\"+ '\n')
+  output.write("\\hline" + '\n')
+  output.write("\\hline" + '\n')
+  a = 0
+  for key in mt2ll['histo']:
+    if a == 0:
+      output.write("\\multirow{"+ str(len(mt2ll['histo'])) +"}{*}{"+ mt2cut +"} & " + key + " & " + str(round(mt2ll['histo'][key].Integral(),2)) + "\\\\" + '\n')
+    else:
+      output.write(" & " + key + " & " + str(round(mt2ll['histo'][key].Integral(),2)) + "\\\\" + '\n')
+    a+=1
   output.write("\\hline" + '\n')
   output.write("\\hline" + '\n')
   
