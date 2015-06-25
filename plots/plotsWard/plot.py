@@ -13,14 +13,14 @@ from StopsDilepton.tools.localInfo import *
 #preselection: MET>50, HT>100, n_bjets>=2
 #Once we decided in HT definition and b-tag WP we add those variables to the tuple.
 #For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
-preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)>0&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)>=2'
+preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)>0&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
 
 reduceStat = 1
 
 #load all the samples
 from StopsDilepton.plots.cmgTuplesPostProcessed_PHYS14 import *
-#backgrounds = [TTJets, WJetsHTToLNu, TTH, TTW, TTZ, singleTop, DY]#, QCD]
-backgrounds = [TTH, TTW, TTZ]
+backgrounds = [WJetsHTToLNu, TTH, TTW, TTZ, DY, singleTop, TTJets]#, QCD]
+#backgrounds = [TTH, TTW, TTZ]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
 
 #get the TChains for each sample
@@ -210,9 +210,8 @@ for s in backgrounds+signals:
         #if lep == 'e': MT2ee_n[0] = mt2ll
         #if lep == 'emu': MT2emu_n[0] = mt2ll
         #if lep == 'mu': MT2mumu_n[0] = mt2ll
-        if mt2ll > 120:
-          plots[leptons[lep]['name']]['mt2ll']['histo'][s["name"]].Fill(mt2ll, weight)
-          dimensional[leptons[lep]['name']]['metvsmt2ll']['histo'][s["name"]].Fill(mt2ll,met)
+        plots[leptons[lep]['name']]['mt2ll']['histo'][s["name"]].Fill(mt2ll, weight)
+        dimensional[leptons[lep]['name']]['metvsmt2ll']['histo'][s["name"]].Fill(mt2ll,met)
         jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(chain))
         ht = sum([j['pt'] for j in jets])
         plots[leptons[lep]['name']]['kinMetSig']['histo'][s["name"]].Fill(met/sqrt(ht), weight)
@@ -315,7 +314,7 @@ if draw1D:
       bkgforstack = plots['ee'][plot]['histo'][b["name"]]
       bkgforstack.Add(plots['mumu'][plot]['histo'][b["name"]])
       bkg_stack_SF.Add(bkgforstack,"h")
-      l.AddEntry(plots['ee'][plot]['histo'][b["name"]], b["name"])
+      l.AddEntry(bkgforstack, b["name"])
    
     c1 = ROOT.TCanvas()
     bkg_stack_SF.SetMaximum(2*bkg_stack.GetMaximum())
