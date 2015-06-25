@@ -19,8 +19,8 @@ reduceStat = 1
 
 #load all the samples
 from StopsDilepton.plots.cmgTuplesPostProcessed_PHYS14 import *
-backgrounds = [WJetsHTToLNu, TTH, TTW, TTZ, DY, singleTop, TTJets]#, QCD]
-#backgrounds = [TTH, TTW, TTZ]
+#backgrounds = [WJetsHTToLNu, TTH, TTW, TTZ, DY, singleTop, TTJets]#, QCD]
+backgrounds = [TTH, TTW, TTZ]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
 
 #get the TChains for each sample
@@ -216,13 +216,18 @@ for s in backgrounds+signals:
         ht = sum([j['pt'] for j in jets])
         plots[leptons[lep]['name']]['kinMetSig']['histo'][s["name"]].Fill(met/sqrt(ht), weight)
         plots[leptons[lep]['name']]['met']['histo'][s["name"]].Fill(met, weight)
-        bjets = filter(lambda j:j['btagCSV']>0.814, jets)
-        if len(bjets)==2:
-          mt2Calc.setBJets(bjets[0]['pt'], bjets[0]['eta'], bjets[0]['phi'], bjets[1]['pt'], bjets[1]['eta'], bjets[1]['phi'])
-          mt2bb   = mt2Calc.mt2bb()
-          mt2blbl = mt2Calc.mt2blbl()
-          plots[leptons[lep]['name']]['mt2bb']['histo'][s["name"]].Fill(mt2bb, weight)
-          plots[leptons[lep]['name']]['mt2blbl']['histo'][s["name"]].Fill(mt2blbl, weight)
+        bjetspt = filter(lambda j:j['btagCSV']>0.814, jets)
+        nobjets = filter(lambda j:j['btagCSV']<0.814, jets)
+        if len(bjetspt)>=2:
+          mt2Calc.setBJets(bjetspt[0]['pt'], bjetspt[0]['eta'], bjetspt[0]['phi'], bjetspt[1]['pt'], bjetspt[1]['eta'], bjetspt[1]['phi'])
+        if len(bjetspt)==1:
+          mt2Calc.setBJets(bjetspt[0]['pt'], bjetspt[0]['eta'], bjetspt[0]['phi'], nobjets[0]['pt'], nobjets[0]['eta'], nobjets[0]['phi'])
+        if len(bjetspt)==0:
+          continue
+        mt2bb   = mt2Calc.mt2bb()
+        mt2blbl = mt2Calc.mt2blbl()
+        plots[leptons[lep]['name']]['mt2bb']['histo'][s["name"]].Fill(mt2bb, weight)
+        plots[leptons[lep]['name']]['mt2blbl']['histo'][s["name"]].Fill(mt2blbl, weight)
           #else:
           #  print "Preselection and b-jet selection inconsistent"
     #Tree.Fill()
