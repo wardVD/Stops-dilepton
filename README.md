@@ -8,3 +8,11 @@ cmsenv ;
 git cms-addpkg FWCore/Version
 
 git clone https://github.com/wardVD/Stops-dilepton StopsDilepton
+
+
+** To compile TMVA **
+cd TMVA/test; source setup.[c]sh; 
+cd ..
+make
+******************** 
+
