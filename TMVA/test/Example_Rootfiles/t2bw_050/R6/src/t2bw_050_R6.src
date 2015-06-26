@@ -1,0 +1,4 @@
+#!/bin/bash
+export SCRAM_ARCH=slc6_amd64_gcc472
+cd /afs/cern.ch/work/s/sigamani/public/CMSSW_5_3_14_STOPS/src/Stops-AN-14-067/runBDT; eval `scramv1 runtime -sh`; source setup.sh; 
+./MakeBDTtree root://eoscms//eos/cms/store/group/phys_susy/StopBabies/V00-04/T2bw-050.root /afs/cern.ch/work/s/sigamani/public/CMSSW_5_3_14_STOPS/src/Stops-AN-14-067/runBDT/BDT_skim_MT100/t2bw_050/R6/output/t2bw_050_R6.root 600 700 0 800;

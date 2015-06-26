@@ -1,0 +1,40 @@
+Sender: LSF System <lsfadmin@b67dac7ec7.cern.ch>
+Subject: Job 518665250: <source /afs/cern.ch/work/s/sigamani/public/CMSSW_5_3_14_STOPS/src/Stops-AN-14-067/runBDT/BDT_skim_MT100/t2bw_025/R4/src/t2bw_025_R4.src> in cluster batch Done
+
+Job <source /afs/cern.ch/work/s/sigamani/public/CMSSW_5_3_14_STOPS/src/Stops-AN-14-067/runBDT/BDT_skim_MT100/t2bw_025/R4/src/t2bw_025_R4.src> was submitted from host <lxplus0163.cern.ch> by user <sigamani> in cluster <batch>.
+Job was executed on host(s) <b67dac7ec7.cern.ch>, in queue <1nd>, as user <sigamani> in cluster <batch>.
+</afs/cern.ch/user/s/sigamani> was used as the home directory.
+</afs/cern.ch/work/s/sigamani/public/CMSSW_5_3_14_STOPS/src/Stops-AN-14-067/runBDT> was used as the working directory.
+Started at Wed Apr  9 17:03:34 2014
+Results reported at Wed Apr  9 17:19:10 2014
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+source /afs/cern.ch/work/s/sigamani/public/CMSSW_5_3_14_STOPS/src/Stops-AN-14-067/runBDT/BDT_skim_MT100/t2bw_025/R4/src/t2bw_025_R4.src
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time   :    344.74 sec.
+    Max Memory :       154 MB
+    Max Swap   :       501 MB
+
+    Max Processes  :         8
+    Max Threads    :        12
+
+The output (if any) follows:
+
+@(#)CERN job starter $Date: 2010/06/23 14:22:16 $
+Working directory is </pool/lsf/sigamani/518665250> on <>
+
+140409 17:03:49 001 Xrd: GoToAnotherServer: Going to: lxfsrc42a07.cern.ch:1095
+
+Job finished at Wed Apr  9 17:17:08 CEST 2014 on node 
+ under linux version Scientific Linux CERN SLC release 6.5 (Carbon)
+
+CERN statistics: This process used approximately : 0:10:07 KSI2K hours (607 KSI2K seconds)
+                 This process corresponds to     : 0:39:28 HS06  hours (2368 HS06  seconds)
