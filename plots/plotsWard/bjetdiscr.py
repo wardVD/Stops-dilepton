@@ -13,7 +13,7 @@ from StopsDilepton.tools.localInfo import *
 #preselection: MET>50, HT>100, n_bjets>=2
 #Once we decided in HT definition and b-tag WP we add those variables to the tuple.
 #For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
-preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)>=2'
+preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
 
 reduceStat = 1
 
@@ -32,6 +32,8 @@ mllbinning = [25,25,275]
 mt2llbinning = [25,0,275]
 mt2bbbinning = [25,0,550]
 mt2blblbinning = [25,0,550]
+njetsbinning = [15,0,15]
+nbjetsbinning = [10,0,10]
 
 #make plot in each sample:
 plots = {\
@@ -40,18 +42,24 @@ plots = {\
   'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': mt2llbinning, 'histo':{}},
   'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'MT2bb', 'binning': mt2bbbinning, 'histo':{}},
   'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'MT2blbl', 'binning': mt2blblbinning, 'histo':{}},
+  'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
+  'nbjets': {'title': 'nbjets', 'name':'nbjets', 'binning': nbjetsbinning, 'histo':{}},
   },
   'ee':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': mllbinning, 'histo':{}},
   'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': mt2llbinning, 'histo':{}},
   'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'MT2bb', 'binning': mt2bbbinning, 'histo':{}},
   'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'MT2blbl', 'binning': mt2blblbinning, 'histo':{}},
+  'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
+  'nbjets': {'title': 'nbjets', 'name':'nbjets', 'binning': nbjetsbinning, 'histo':{}},
   },
   'emu':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': mllbinning, 'histo':{}},
   'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': mt2llbinning, 'histo':{}},
   'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'MT2bb', 'binning': mt2bbbinning, 'histo':{}},
   'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'MT2blbl', 'binning': mt2blblbinning, 'histo':{}},
+  'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
+  'nbjets': {'title': 'nbjets', 'name':'nbjets', 'binning': nbjetsbinning, 'histo':{}},
   },
 }
 
@@ -62,6 +70,8 @@ plotsSF = {\
   'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': mt2llbinning, 'histo':{}},
   'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'MT2bb', 'binning': mt2bbbinning, 'histo':{}},
   'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'MT2blbl', 'binning': mt2blblbinning, 'histo':{}},
+  'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
+  'nbjets': {'title': 'nbjets', 'name':'nbjets', 'binning': nbjetsbinning, 'histo':{}},
   },
 }
 
@@ -138,13 +148,16 @@ for s in backgrounds+signals:
         #if mt2ll > 120:
         plots[leptons[lep]['name']]['mt2ll']['histo'][s["name"]].Fill(mt2ll, weight)
         jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(chain))
+        plots[leptons[lep]['name']]['njets']['histo'][s["name"]].Fill(len(jets),weight)
         #highest CSV
         if highestCSV:
           bjetsCSV = sorted(jets,key=lambda j:j['btagCSV'])
+          plots[leptons[lep]['name']]['nbjets']['histo'][s["name"]].Fill(len(bjetspt),weight)
           mt2Calc.setBJets(bjetsCSV[-1]['pt'], bjetsCSV[-1]['eta'], bjetsCSV[-1]['phi'], bjetsCSV[-2]['pt'], bjetsCSV[-2]['eta'], bjetsCSV[-2]['phi'])
         if highestPT:
           bjetspt = filter(lambda j:j['btagCSV']>0.814, jets)
           nobjets = filter(lambda j:j['btagCSV']<0.814, jets)
+          plots[leptons[lep]['name']]['nbjets']['histo'][s["name"]].Fill(len(bjetspt),weight)
           if len(bjetspt)>=2:
             mt2Calc.setBJets(bjetspt[0]['pt'], bjetspt[0]['eta'], bjetspt[0]['phi'], bjetspt[1]['pt'], bjetspt[1]['eta'], bjetspt[1]['phi'])
           if len(bjetspt)==1:

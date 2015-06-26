@@ -45,6 +45,8 @@ leadingjetptbinning = [25,25,575]
 subleadingjetptbinning = [25,25,575]
 leadingleptonptbinning = [25,25,575]
 subleadingleptonptbinning = [25,25,575]
+njetsbinning = [10,0,15]
+nbjetsbinning = [10,0,10]
 
 #make plot in each sample:
 plots = {\
@@ -59,6 +61,8 @@ plots = {\
   'subleadingjetpt': {'title':'subleading jet p_{T} (GeV)', 'name':'subleadingjetpt', 'binning': subleadingjetptbinning, 'histo':{}},
   'leadingleptonpt': {'title':'leading lep p_{T} (GeV)', 'name':'leadingleptonpt', 'binning': leadingleptonptbinning, 'histo':{}},
   'subleadingleptonpt': {'title':'subleading lep p_{T} (GeV)', 'name':'subleadingleptonpt', 'binning': subleadingleptonptbinning, 'histo':{}},
+  'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
+  'nbjets': {'title': 'nbjets', 'name':'nbjets', 'binning': nbjetsbinning, 'histo':{}},
   },
   'ee':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': mllbinning, 'histo':{}},
@@ -71,6 +75,8 @@ plots = {\
   'subleadingjetpt': {'title':'subleading jet p_{T} (GeV)', 'name':'subleadingjetpt', 'binning': subleadingjetptbinning, 'histo':{}},
   'leadingleptonpt': {'title':'leading lep p_{T} (GeV)', 'name':'leadingleptonpt', 'binning': leadingleptonptbinning, 'histo':{}},
   'subleadingleptonpt': {'title':'subleading lep p_{T} (GeV)', 'name':'subleadingleptonpt', 'binning': subleadingleptonptbinning, 'histo':{}},
+  'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
+  'nbjets': {'title': 'nbjets', 'name':'nbjets', 'binning': nbjetsbinning, 'histo':{}},
   },
   'emu':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': mllbinning, 'histo':{}},
@@ -83,6 +89,8 @@ plots = {\
   'subleadingjetpt': {'title':'subleading jet p_{T} (GeV)', 'name':'subleadingjetpt', 'binning': subleadingjetptbinning, 'histo':{}},
   'leadingleptonpt': {'title':'leading lep p_{T} (GeV)', 'name':'leadingleptonpt', 'binning': leadingleptonptbinning, 'histo':{}},
   'subleadingleptonpt': {'title':'subleading lep p_{T} (GeV)', 'name':'subleadingleptonpt', 'binning': subleadingleptonptbinning, 'histo':{}},
+  'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
+  'nbjets': {'title': 'nbjets', 'name':'nbjets', 'binning': nbjetsbinning, 'histo':{}},
   },
 }
 
@@ -99,6 +107,8 @@ plotsSF = {\
   'subleadingjetpt': {'title':'subleading jet p_{T} (GeV)', 'name':'subleadingjetpt', 'binning': subleadingjetptbinning, 'histo':{}},
   'leadingleptonpt': {'title':'leading lep p_{T} (GeV)', 'name':'leadingleptonpt', 'binning': leadingleptonptbinning, 'histo':{}},
   'subleadingleptonpt': {'title':'subleading lep p_{T} (GeV)', 'name':'subleadingleptonpt', 'binning': subleadingleptonptbinning, 'histo':{}},
+  'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
+  'nbjets': {'title': 'nbjets', 'name':'nbjets', 'binning': nbjetsbinning, 'histo':{}},
   },
 }
 
@@ -218,6 +228,8 @@ for s in backgrounds+signals:
         plots[leptons[lep]['name']]['met']['histo'][s["name"]].Fill(met, weight)
         bjetspt = filter(lambda j:j['btagCSV']>0.814, jets)
         nobjets = filter(lambda j:j['btagCSV']<0.814, jets)
+        plots[leptons[lep]['name']]['njets']['histo'][s["name"]].Fill(len(jets),weight)
+        plots[leptons[lep]['name']]['nbjets']['histo'][s["name"]].Fill(len(bjetspt),weight)
         if len(bjetspt)>=2:
           mt2Calc.setBJets(bjetspt[0]['pt'], bjetspt[0]['eta'], bjetspt[0]['phi'], bjetspt[1]['pt'], bjetspt[1]['eta'], bjetspt[1]['phi'])
         if len(bjetspt)==1:
