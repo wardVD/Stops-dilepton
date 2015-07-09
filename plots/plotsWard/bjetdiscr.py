@@ -12,8 +12,15 @@ from StopsDilepton.tools.localInfo import *
 
 #preselection: MET>50, HT>100, n_bjets>=2
 #Once we decided in HT definition and b-tag WP we add those variables to the tuple.
-#For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
-preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
+#For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw
+
+highestCSV = False
+highestPT  = True
+
+if highestCSV and not highestPT:
+  preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
+if highestPT and not highestCSV:
+  preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)>=1&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
 
 reduceStat = 1
 
@@ -74,10 +81,6 @@ plotsSF = {\
   'nbjets': {'title': 'nbjets', 'name':'nbjets', 'binning': nbjetsbinning, 'histo':{}},
   },
 }
-
-highestCSV = False
-highestPT  = True
-
 
 for s in backgrounds+signals:
   #1D
@@ -152,7 +155,7 @@ for s in backgrounds+signals:
         #highest CSV
         if highestCSV:
           bjetsCSV = sorted(jets,key=lambda j:j['btagCSV'])
-          plots[leptons[lep]['name']]['nbjets']['histo'][s["name"]].Fill(len(bjetspt),weight)
+          plots[leptons[lep]['name']]['nbjets']['histo'][s["name"]].Fill(len(bjetsCSV),weight)
           mt2Calc.setBJets(bjetsCSV[-1]['pt'], bjetsCSV[-1]['eta'], bjetsCSV[-1]['phi'], bjetsCSV[-2]['pt'], bjetsCSV[-2]['eta'], bjetsCSV[-2]['phi'])
         if highestPT:
           bjetspt = filter(lambda j:j['btagCSV']>0.814, jets)
@@ -162,8 +165,7 @@ for s in backgrounds+signals:
             mt2Calc.setBJets(bjetspt[0]['pt'], bjetspt[0]['eta'], bjetspt[0]['phi'], bjetspt[1]['pt'], bjetspt[1]['eta'], bjetspt[1]['phi'])
           if len(bjetspt)==1:
             mt2Calc.setBJets(bjetspt[0]['pt'], bjetspt[0]['eta'], bjetspt[0]['phi'], nobjets[0]['pt'], nobjets[0]['eta'], nobjets[0]['phi'])
-          if len(bjetspt)==0:
-            continue
+          
         #higest pt
         mt2bb   = mt2Calc.mt2bb()
         mt2blbl = mt2Calc.mt2blbl()

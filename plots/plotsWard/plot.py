@@ -45,7 +45,7 @@ leadingjetptbinning = [25,25,575]
 subleadingjetptbinning = [25,25,575]
 leadingleptonptbinning = [25,25,575]
 subleadingleptonptbinning = [25,25,575]
-njetsbinning = [10,0,15]
+njetsbinning = [15,0,15]
 nbjetsbinning = [10,0,10]
 
 #make plot in each sample:
@@ -267,7 +267,7 @@ yminimum = 10**-0.5
 legendtextsize = 0.032
 signalscaling = 100
 
-draw1D = True
+draw1D = False
 
 if draw1D:
 
@@ -363,45 +363,51 @@ if draw1D:
     c1.Print(plotDir+"/test/"+plotsSF['SF'][plot]['name']+"_SF.png")
      
 
-draw2D = False
+draw2D = True
 
 if draw2D:
 
-  ROOT.gStyle.SetPalette(1)
   c1 = ROOT.TCanvas()
-  ROOT.gStyle.SetPadRightMargin(0.2)
+  ROOT.gStyle.SetOptStat(0)
+  ROOT.gStyle.SetPalette(1)
+  c1.SetRightMargin(0.16)
 
   for pk in dimensional.keys():
     for plot in dimensional[pk].keys():
       #Plot!
       for s in backgrounds+signals:
         plot2D = dimensional[pk][plot]['histo'][s["name"]]
-        #plot2D.Draw("scat=0.5")
         plot2D.Draw("colz")
-        print plot2D.GetZaxis().GetXmax()
-        print plot2D.GetZaxis().GetXmin()
-        print plot2D.GetZaxis().GetXbins()
-        # plot2D.GetXaxis().SetTitle(dimensional[pk][plot]['xtitle'])
-        # plot2D.GetYaxis().SetTitle(dimensional[pk][plot]['ytitle'])
+        ROOT.gPad.Update()
+        palette = plot2D.GetListOfFunctions().FindObject("palette")
+        palette.SetX1NDC(0.85)
+        palette.SetX2NDC(0.9)
+        palette.Draw()
+        plot2D.GetXaxis().SetTitle(dimensional[pk][plot]['xtitle'])
+        plot2D.GetYaxis().SetTitle(dimensional[pk][plot]['ytitle'])
         
-        # l=ROOT.TLegend(0.25,0.95,0.9,1.0)
-        # l.SetFillColor(0)
-        # l.SetShadowColor(ROOT.kWhite)
-        # l.SetBorderSize(1)
-        # l.SetTextSize(legendtextsize)
-        # l.AddEntry(plot2D,s["name"])
-        # l.Draw()
-        # channeltag = ROOT.TPaveText(0.8,0.7,0.9,0.85,"NDC")
-        # firstlep, secondlep = pk[:len(pk)/2], pk[len(pk)/2:]
-        # if firstlep == 'mu':
-        #   firstlep = '#' + firstlep
-        # if secondlep == 'mu':
-        #   secondlep = '#' + secondlep
-        # channeltag.AddText(firstlep+secondlep)
-        # channeltag.AddText(s["name"])
-        # channeltag.SetFillColor(ROOT.kWhite)
-        # channeltag.SetShadowColor(ROOT.kWhite)
-        # channeltag.Draw()
+        l=ROOT.TLegend(0.25,0.95,0.9,1.0)
+        l.SetFillColor(0)
+        l.SetShadowColor(ROOT.kWhite)
+        l.SetBorderSize(1)
+        l.SetTextSize(legendtextsize)
+        l.AddEntry(plot2D,s["name"])
+        l.Draw()
+        channeltag = ROOT.TPaveText(0.65,0.7,0.8,0.85,"NDC")
+        firstlep, secondlep = pk[:len(pk)/2], pk[len(pk)/2:]
+        if firstlep == 'mu':
+          firstlep = '#' + firstlep
+        if secondlep == 'mu':
+          secondlep = '#' + secondlep
+        channeltag.AddText(firstlep+secondlep)
+        if s in signals:
+          index = signal['path'].index(s["name"])
+          channeltag.AddText(signal["name"][index])
+        if s in backgrounds:
+          channeltag.AddText(s["name"])
+        channeltag.SetFillColor(ROOT.kWhite)
+        channeltag.SetShadowColor(ROOT.kWhite)
+        channeltag.Draw()
         
         c1.Print(plotDir+"/test/"+dimensional[pk][plot]['name']+"_"+pk+"_"+s['name']+".png")
         c1.Clear()
