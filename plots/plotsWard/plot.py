@@ -6,7 +6,7 @@ import numpy
 from math import *
 from StopsDilepton.tools.mt2Calculator import mt2Calculator
 mt2Calc = mt2Calculator()
-from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue, genmatching, latexmaker
+from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue, genmatching, latexmaker, piemaker
 from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets, ele_ID_eta, getGenParts
 from StopsDilepton.tools.localInfo import *
 
@@ -19,9 +19,10 @@ reduceStat = 1
 
 #load all the samples
 from StopsDilepton.plots.cmgTuplesPostProcessed_PHYS14 import *
-backgrounds = [WJetsHTToLNu, TTH, TTW, TTZ, DY, singleTop, TTJets]#, QCD]
-#backgrounds = [TTH, TTW, TTZ]
-signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
+#backgrounds = [WJetsHTToLNu, TTH, TTW, TTZ, DY, singleTop, TTJets]#, QCD]
+backgrounds = [TTH, TTW, TTZ]
+#signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
+signals = []
 
 #get the TChains for each sample
 for s in backgrounds+signals:
@@ -35,8 +36,8 @@ for s in backgrounds+signals:
 
 
 #binning
-mllbinning = [25,25,275] 
-mt2llbinning = [25,0,275]
+mllbinning = [25,25,325] 
+mt2llbinning = [25,0,300]
 metbinning = [25,25,575]
 mt2bbbinning = [25,0,550]
 mt2blblbinning = [25,0,550]
@@ -247,9 +248,11 @@ for s in backgrounds+signals:
   #TreeFile.Close()
   del eList
 
-latexmaker("120",'ee', plots)
-latexmaker("120",'mumu', plots)
-latexmaker("120",'emu',plots)
+latexmaker(120.,'ee', plots)
+latexmaker(120.,'mumu', plots)
+latexmaker(120.,'emu',plots)
+
+piemaker(120.,'ee', plots)
 
  
 #Some coloring
@@ -363,7 +366,7 @@ if draw1D:
     c1.Print(plotDir+"/test/"+plotsSF['SF'][plot]['name']+"_SF.png")
      
 
-draw2D = True
+draw2D = False
 
 if draw2D:
 
