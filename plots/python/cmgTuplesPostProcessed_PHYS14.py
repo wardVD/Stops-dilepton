@@ -2,6 +2,12 @@ import copy, os, sys
 from StopsDilepton.tools.localInfo import dataDir
 dir = dataDir 
 
+DYWARD={\
+"name": "DYward",
+"bins": ["treeProducerSusySingleLepton"],
+'dir': "/afs/cern.ch/work/w/wvandrie/public/STOPS/CMSSW_7_4_7/src/CMGTools/TTHAnalysis/cfg/Test/DYJetsToLL_M50/",
+}
+
 TTJets={\
 "name" : "tt+Jets",
 "bins" : ["TTJets"],
