@@ -6,27 +6,41 @@ import numpy
 from math import *
 from StopsDilepton.tools.mt2Calculator import mt2Calculator
 mt2Calc = mt2Calculator()
-from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue, genmatching, latexmaker, piemaker
+from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue, genmatching, latexmaker, piemaker, getWeight
 from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets, ele_ID_eta, getGenParts
 from StopsDilepton.tools.localInfo import *
 
-#preselection: MET>50, HT>100, n_bjets>=2
-#Once we decided in HT definition and b-tag WP we add those variables to the tuple.
+#preselection: MET>40, njets>=2, n_bjets>=1, n_lep>=2
 #For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
 preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)>=1&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
 
-reduceStat = 1
 
-#load all the samples
+#######################################################
+#        SELECT WHAT YOU WANT TO DO HERE              #
+#######################################################
+reduceStat = 1 #recude the statistics, i.e. 10 is ten times less samples to look at
+makedraw1D = False 
+makedraw2D = False 
+makelatextables = True
+makepiechart = False
+
+#######################################################
+#                 load all the samples                #
+#######################################################
 from StopsDilepton.plots.cmgTuplesPostProcessed_PHYS14 import *
-#backgrounds = [WJetsHTToLNu, TTH, TTW, TTZ, DY, singleTop, TTJets]#, QCD]
-backgrounds = [DYWARD}
-#signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
-signals = []
+#backgrounds = [WJetsHTToLNu, TTH, TTW, TTZ, DYWARD, singleTop, TTJets]#, QCD]
+backgrounds = [TTH]
+signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
+#signals = []
 
-#get the TChains for each sample
+
+#######################################################
+#            get the TChains for each sample          #
+#######################################################
 for s in backgrounds+signals:
-  s['chain'] = getChain(s,histname="")
+  if s==DYWARD: s['chain'] = getChain(s,histname="",treeName="tree")
+  else:         s['chain'] = getChain(s,histname="")
+
 
 #ROOT output file
 #MET_n = numpy.array([-999],dtype=float)
@@ -35,7 +49,10 @@ for s in backgrounds+signals:
 #MT2mumu_n =numpy.array([-999],dtype=float)
 
 
-#binning
+
+#######################################################
+#           define binning of 1D histograms           #
+#######################################################
 mllbinning = [25,25,325] 
 mt2llbinning = [25,0,300]
 metbinning = [25,25,575]
@@ -49,7 +66,10 @@ subleadingleptonptbinning = [25,25,575]
 njetsbinning = [15,0,15]
 nbjetsbinning = [10,0,10]
 
-#make plot in each sample:
+
+#######################################################
+#             make plot in each sample:               #
+#######################################################
 plots = {\
   'mumu':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': mllbinning, 'histo':{}},
@@ -95,7 +115,9 @@ plots = {\
   },
 }
 
-#adding SF
+#######################################################
+#          make plots specifically for SF             #
+#######################################################
 plotsSF = {\
   'SF':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': mllbinning, 'histo':{}},
@@ -113,7 +135,10 @@ plotsSF = {\
   },
 }
 
-#2D plot
+
+#######################################################
+#                   2D plots                          #
+#######################################################
 dimensional = {\
   'ee': {\
   'metvsmt2ll': {'xtitle':'M_{T2ll} (GeV)','ytitle':'E^{miss}_{T} (GeV)', 'name': 'METvsMT2ll', 'ybinning': metbinning, 'xbinning': mt2llbinning, 'histo': {}},
@@ -126,6 +151,10 @@ dimensional = {\
   }
 }
 
+
+#######################################################
+#            Start filling in the histograms          #
+#######################################################
 for s in backgrounds+signals:
   #1D
   for pk in plots.keys():
@@ -157,7 +186,8 @@ for s in backgrounds+signals:
     chain.GetEntry(eList.GetEntry(ev))
     mt2Calc.reset()
     #event weight (L= 4fb^-1)
-    weight = reduceStat*getVarValue(chain, "weight")
+    if s==DYWARD:   weight = getWeight(chain,s, 4000) #this method for SPRING15 samples
+    else:           weight = reduceStat*getVarValue(chain, "weight") #this method for PHYS14 samples
     #MET
     met = getVarValue(chain, "met_pt")
     metPhi = getVarValue(chain, "met_phi")
@@ -169,7 +199,7 @@ for s in backgrounds+signals:
     muons = filter(looseMuID, allLeptons)    
     electrons = filter(looseEleID, allLeptons)
     #GENinfo
-    genparticles = getGenParts(chain)
+    #genparticles = getGenParts(chain)
     #ROOT output file
     #MET_n[0] = met
 
@@ -231,9 +261,12 @@ for s in backgrounds+signals:
         nobjets = filter(lambda j:j['btagCSV']<0.814, jets)
         plots[leptons[lep]['name']]['njets']['histo'][s["name"]].Fill(len(jets),weight)
         plots[leptons[lep]['name']]['nbjets']['histo'][s["name"]].Fill(len(bjetspt),weight)
+        #2 or more bjets: two highest pt
         if len(bjetspt)>=2:
           mt2Calc.setBJets(bjetspt[0]['pt'], bjetspt[0]['eta'], bjetspt[0]['phi'], bjetspt[1]['pt'], bjetspt[1]['eta'], bjetspt[1]['phi'])
+        #1 bjets: bjet+jet with highest pt
         if len(bjetspt)==1:
+          print bjetspt[0]['pt'],nobjets[0]['pt'], '\n'
           mt2Calc.setBJets(bjetspt[0]['pt'], bjetspt[0]['eta'], bjetspt[0]['phi'], nobjets[0]['pt'], nobjets[0]['eta'], nobjets[0]['phi'])
         if len(bjetspt)==0:
           continue
@@ -248,13 +281,27 @@ for s in backgrounds+signals:
   #TreeFile.Close()
   del eList
 
-latexmaker(120.,'ee', plots)
-latexmaker(120.,'mumu', plots)
-latexmaker(120.,'emu',plots)
 
-piemaker(120.,'ee', plots)
+#######################################################
+#           provide tables from histograms            #
+#######################################################
+if makelatextables:
+  #latexmaker(120.,'ee', plots)
+  #latexmaker(120.,'mumu', plots)
+  #latexmaker(120.,'emu',plots)
 
- 
+
+#######################################################
+#            make piecharts from histograms           #
+#######################################################
+if makepiechart:
+  piemaker(120.,'ee', plots)
+
+
+
+#######################################################
+#             Drawing done here                       #
+#######################################################
 #Some coloring
 TTJets["color"]=ROOT.kRed
 WJetsHTToLNu["color"]=ROOT.kGreen
@@ -263,16 +310,15 @@ TTW["color"]=ROOT.kMagenta-3
 TTZ["color"]=ROOT.kMagenta-6
 singleTop["color"]=ROOT.kOrange
 DY["color"]=ROOT.kBlue
-
+DYWARD["color"]=ROOT.kBlue
 #Plotvariables
 signal = {'path': ["SMS_T2tt_2J_mStop425_mLSP325","SMS_T2tt_2J_mStop500_mLSP325","SMS_T2tt_2J_mStop650_mLSP325","SMS_T2tt_2J_mStop850_mLSP100"], 'name': ["T2tt(425,325)","T2tt(500,325)","T2tt(650,325)","T2tt(850,100)"]}
 yminimum = 10**-0.5
 legendtextsize = 0.032
 signalscaling = 100
 
-draw1D = False
 
-if draw1D:
+if makedraw1D:
 
   for pk in plots.keys():
     for plot in plots[pk].keys():
@@ -366,9 +412,7 @@ if draw1D:
     c1.Print(plotDir+"/test/"+plotsSF['SF'][plot]['name']+"_SF.png")
      
 
-draw2D = False
-
-if draw2D:
+if makedraw2D:
 
   c1 = ROOT.TCanvas()
   ROOT.gStyle.SetOptStat(0)
