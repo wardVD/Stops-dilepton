@@ -77,7 +77,14 @@ def getEList(chain, cut, newname='eListTMP'):
   return elistTMP
 
 def getObjDict(c, prefix, variables, i):
- return {var: c.GetLeaf(prefix+var).GetValue(i) for var in variables}
+  return {var: c.GetLeaf(prefix+var).GetValue(i) for var in variables}
+
+def getWeight(c,sample,lumi,n=0):
+  genweight_value    = c.GetLeaf("genWeight").GetValue(n)
+  lumi_value         = lumi
+  xsec_value         = c.GetLeaf("xsec").GetValue(n)
+  sumofweights_value = sample['totalweight']
+  return (genweight_value*lumi_value*xsec_value)/sumofweights_value
 
 def genmatching(lepton,genparticles):
   for gen in genparticles:

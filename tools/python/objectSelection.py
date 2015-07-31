@@ -13,8 +13,11 @@ def getGenParts(c):
 def getGenPartsAll(c):
   return [getObjDict(c, 'genPartAll_', ['eta','pt','phi','charge', 'pdgId', 'motherId', 'grandmotherId'], i) for i in range(int(getVarValue(c, 'ngenPartAll')))]
 
+#def getLeptons(c):
+#  return [getObjDict(c, 'LepGood_', ['eta','pt','phi','charge', 'dxy', 'dz', 'relIso03','tightId', 'pdgId', 'mediumMuonId', 'eleMVAId', 'miniRelIso', 'sip3d', 'mvaIdPhys14', 'convVeto', 'lostHits'], i) for i in range(int(getVarValue(c, 'nLepGood')))]
+
 def getLeptons(c):
-  return [getObjDict(c, 'LepGood_', ['eta','pt','phi','charge', 'dxy', 'dz', 'relIso03','tightId', 'pdgId', 'mediumMuonId', 'eleMVAId', 'miniRelIso', 'sip3d', 'mvaIdPhys14', 'convVeto', 'lostHits'], i) for i in range(int(getVarValue(c, 'nLepGood')))]
+  return [getObjDict(c, 'LepGood_', ['eta','pt','phi','charge', 'dxy', 'dz', 'relIso03','tightId', 'pdgId', 'mediumMuonId', 'miniRelIso', 'sip3d', 'mvaIdPhys14', 'convVeto', 'lostHits'], i) for i in range(int(getVarValue(c, 'nLepGood')))]
 #  return filter(lambda m:abs(m['pdgId'])==13, res)
 
 def looseMuID(l, ptCut=20, absEtaCut=2.4):
