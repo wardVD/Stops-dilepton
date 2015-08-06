@@ -83,7 +83,7 @@ def getWeight(c,sample,lumi,n=0):
   genweight_value    = c.GetLeaf("genWeight").GetValue(n)
   lumi_value         = lumi
   xsec_value         = c.GetLeaf("xsec").GetValue(n)
-  sumofweights_value = sample['totalweight']
+  sumofweights_value = sum(sample['totalweight'])
   return (genweight_value*lumi_value*xsec_value)/sumofweights_value
 
 def genmatching(lepton,genparticles):
@@ -102,10 +102,14 @@ def latexmaker(mt2cut,channel,plots):
 
   binwidth = (mt2ll['binning'][2]-mt2ll['binning'][1])/(mt2ll['binning'][0])
 
-  if mt2cut%binwidth == 0:
+  #integral from mt2cut and onwards. mt2cut has to be well defined so that mt2cut/binwidth is an integer
+  if mt2cut%binwidth != 0:
+    print '\n' + '\n' + "Binwidth for MT2ll and cut for MT2ll in table are not compatible, please change! No table for " +channel+  " is produced." + '\n' + '\n'
+
+  else:
 
     bin1 = int(mt2cut/binwidth) + 1
-    bin2 = mt2ll['binning'][0] + 1
+    bin2 = mt2ll['binning'][0] + 1 #include overflow bin
 
     output = open("./table_"+channel+".tex","w")
 
@@ -134,7 +138,7 @@ def latexmaker(mt2cut,channel,plots):
     output.write("\\hline" + '\n')
     output.write("\\hline" + '\n')
     a = 0
-    sortedhist = sorted(mt2ll['histo'].items(),key=lambda l:l[1].Integral(bin1,bin2))
+    sortedhist = sorted(mt2ll['histo'].items(),key=lambda l:l[1].Integral(bin1,bin2)) #set histogram with highest value first
     for item in sortedhist:
       samplename = item[0].replace("_","\_")
       if a == 0:
@@ -151,40 +155,39 @@ def latexmaker(mt2cut,channel,plots):
   
     output.close()
 
-  else:
-
-    print '\n' + '\n' + "binwidth for MT2ll and cut for MT2ll in table are not compatible, please change! No table for " +channel+  " is produced." + '\n' + '\n'
-
+    
   
-def piemaker(mt2cut,channel,plots):
-
-  mt2ll = plots[channel]['mt2ll']
-
-  binwidth = (mt2ll['binning'][2]-mt2ll['binning'][1])/(mt2ll['binning'][0])
-
-  bin1 = int(mt2cut/binwidth) + 1
-  bin2 = mt2ll['binning'][0] + 1
-  sortedhist = sorted(mt2ll['histo'].items(),key=lambda l:l[1].Integral(bin1,bin2))
-
+def piemaker(mt2cut,piechart):
+  
   ROOT.gStyle.SetOptStat(0)
-  canvas = ROOT.TCanvas()
+  canvas = ROOT.TCanvas('canvas','canvas',700,572)
+  canvas.SetLeftMargin(0.2)
+  ROOT.gStyle.SetPadLeftMargin(0.2)
   canvas.SetRightMargin(0.3)
   canvas.SetBottomMargin(0.3)
-  vals = array('f', [item[1].Integral(bin1,bin2) for item in sortedhist])
-  pie = ROOT.TPie('Pie_''channel''_forMT2llcutat''mt2cut','',len(vals),vals)
-  pie.SetLabelsOffset(-0.2)
-  pie.SetLabelFormat("#splitline{%val}{(%perc)}")
-  pie.SetCircle(0.35,0.35,0.3)
-  legend = ROOT.TLegend(0.7,0.7,0.9,0.9)
-  legend.SetFillColor(0)
-  legend.SetShadowColor(ROOT.kWhite)
-  legend.SetBorderSize(1)
-  legend.SetTextSize(0.032)
-  for i in range(len(vals)):
-    pie.SetEntryFillColor(i,i+2)
-    sortedhist[i][1].SetFillColor(i+2)
-    legend.AddEntry(sortedhist[i][1],sortedhist[i][0],"f")
-    legend.AddEntry(pie.GetSlice(i),sortedhist[i][0],"f")
-  pie.Draw('nol < t')
-  legend.Draw("same")
-  canvas.Print("Pie_"+channel+"_forMT2llcutat"+str(int(mt2cut))+".png")
+  height=1-ROOT.gStyle.GetPadBottomMargin()-ROOT.gStyle.GetPadTopMargin()
+  width =1-ROOT.gStyle.GetPadLeftMargin()-ROOT.gStyle.GetPadRightMargin()
+  canvas.cd()
+  pies = []
+  pads = []
+  canvas.Divide(5,1)
+  for ipiece, piece in enumerate(piechart["SF"].keys()):
+    x0 = ROOT.gStyle.GetPadLeftMargin() + (0.01+ipiece)*width/float(len(piechart["SF"]))
+    x1 = ROOT.gStyle.GetPadLeftMargin() + (0.99+ipiece)*width/float(len(piechart["SF"]))
+    y0 = ROOT.gStyle.GetPadBottomMargin() + (0.01+1.)*height/float(2)
+    y1 = ROOT.gStyle.GetPadBottomMargin() + (0.99+1.)*height/float(2)
+
+    cols = array('i', [1])
+
+    pielist = [piechart["SF"][piece][i] for i in piechart["SF"][piece]]
+    pielist = array('f',pielist)
+    temp = ROOT.TPie('pie_'+piece,'',len(pielist),pielist,cols)
+    pies.append(temp)
+  
+  for ipiece, piece in enumerate(piechart["SF"].keys()):
+    canvas.cd(ipiece+1)
+    pies[ipiece].Draw("nol")
+ 
+
+  canvas.SaveAs("Pie_SF_forMT2llcutat.png")
+  #canvas.Close()

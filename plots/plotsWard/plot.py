@@ -12,34 +12,35 @@ from StopsDilepton.tools.localInfo import *
 
 #preselection: MET>40, njets>=2, n_bjets>=1, n_lep>=2
 #For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
-preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)>=1&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
-
+#preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)>=1&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
+preselection = 'Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
 
 #######################################################
 #        SELECT WHAT YOU WANT TO DO HERE              #
 #######################################################
 reduceStat = 1 #recude the statistics, i.e. 10 is ten times less samples to look at
-makedraw1D = False 
+makedraw1D = True
 makedraw2D = False 
-makelatextables = True
+makelatextables = False
 makepiechart = False
 
 #######################################################
 #                 load all the samples                #
 #######################################################
 from StopsDilepton.plots.cmgTuplesPostProcessed_PHYS14 import *
+from StopsDilepton.plots.cmgTuples_SPRING15 import *
 #backgrounds = [WJetsHTToLNu, TTH, TTW, TTZ, DYWARD, singleTop, TTJets]#, QCD]
-backgrounds = [TTH]
-signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
-#signals = []
+backgrounds = [DY_15,DY]
+#signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
+signals = []
 
 
 #######################################################
 #            get the TChains for each sample          #
 #######################################################
 for s in backgrounds+signals:
-  if s==DYWARD: s['chain'] = getChain(s,histname="",treeName="tree")
-  else:         s['chain'] = getChain(s,histname="")
+  if s.has_key('totalweight'): s['chain'] = getChain(s,histname="",treeName="tree")
+  else:                        s['chain'] = getChain(s,histname="")
 
 
 #ROOT output file
@@ -186,8 +187,8 @@ for s in backgrounds+signals:
     chain.GetEntry(eList.GetEntry(ev))
     mt2Calc.reset()
     #event weight (L= 4fb^-1)
-    if s==DYWARD:   weight = getWeight(chain,s, 4000) #this method for SPRING15 samples
-    else:           weight = reduceStat*getVarValue(chain, "weight") #this method for PHYS14 samples
+    if s.has_key('totalweight'): weight = getWeight(chain,s, 4000) #this method for SPRING15 samples
+    else:                        weight = reduceStat*getVarValue(chain, "weight") #this method for PHYS14 samples
     #MET
     met = getVarValue(chain, "met_pt")
     metPhi = getVarValue(chain, "met_phi")
@@ -266,7 +267,6 @@ for s in backgrounds+signals:
           mt2Calc.setBJets(bjetspt[0]['pt'], bjetspt[0]['eta'], bjetspt[0]['phi'], bjetspt[1]['pt'], bjetspt[1]['eta'], bjetspt[1]['phi'])
         #1 bjets: bjet+jet with highest pt
         if len(bjetspt)==1:
-          print bjetspt[0]['pt'],nobjets[0]['pt'], '\n'
           mt2Calc.setBJets(bjetspt[0]['pt'], bjetspt[0]['eta'], bjetspt[0]['phi'], nobjets[0]['pt'], nobjets[0]['eta'], nobjets[0]['phi'])
         if len(bjetspt)==0:
           continue
@@ -286,9 +286,9 @@ for s in backgrounds+signals:
 #           provide tables from histograms            #
 #######################################################
 if makelatextables:
-  #latexmaker(120.,'ee', plots)
-  #latexmaker(120.,'mumu', plots)
-  #latexmaker(120.,'emu',plots)
+  latexmaker(120.,'ee', plots)
+  latexmaker(120.,'mumu', plots)
+  latexmaker(120.,'emu',plots)
 
 
 #######################################################
@@ -303,14 +303,14 @@ if makepiechart:
 #             Drawing done here                       #
 #######################################################
 #Some coloring
-TTJets["color"]=ROOT.kRed
+#TTJets["color"]=ROOT.kRed
 WJetsHTToLNu["color"]=ROOT.kGreen
-TTH["color"]=ROOT.kMagenta
-TTW["color"]=ROOT.kMagenta-3
-TTZ["color"]=ROOT.kMagenta-6
-singleTop["color"]=ROOT.kOrange
+#TTH["color"]=ROOT.kMagenta
+#TTW["color"]=ROOT.kMagenta-3
+#TTZ["color"]=ROOT.kMagenta-6
+#singleTop["color"]=ROOT.kOrange
 DY["color"]=ROOT.kBlue
-DYWARD["color"]=ROOT.kBlue
+DY_15["color"]=ROOT.kRed
 #Plotvariables
 signal = {'path': ["SMS_T2tt_2J_mStop425_mLSP325","SMS_T2tt_2J_mStop500_mLSP325","SMS_T2tt_2J_mStop650_mLSP325","SMS_T2tt_2J_mStop850_mLSP100"], 'name': ["T2tt(425,325)","T2tt(500,325)","T2tt(650,325)","T2tt(850,100)"]}
 yminimum = 10**-0.5
@@ -344,18 +344,18 @@ if makedraw1D:
       bkg_stack.GetXaxis().SetTitle(plots[pk][plot]['title'])
       bkg_stack.GetYaxis().SetTitle("Events / %i GeV"%( (plots[pk][plot]['binning'][2]-plots[pk][plot]['binning'][1])/plots[pk][plot]['binning'][0]) )
       c1.SetLogy()
-      signalPlot_1 = plots[pk][plot]['histo'][signal['path'][0]].Clone()
-      signalPlot_2 = plots[pk][plot]['histo'][signal['path'][2]].Clone()
-      signalPlot_1.Scale(signalscaling)
-      signalPlot_2.Scale(signalscaling)
-      signalPlot_1.SetLineColor(ROOT.kBlack)
-      signalPlot_2.SetLineColor(ROOT.kCyan)
-      signalPlot_1.SetLineWidth(3)
-      signalPlot_2.SetLineWidth(3)
-      signalPlot_1.Draw("same")
-      signalPlot_2.Draw("same")
-      l.AddEntry(signalPlot_1, signal['name'][0]+" x " + str(signalscaling), "l")
-      l.AddEntry(signalPlot_2, signal['name'][1]+" x " + str(signalscaling), "l")
+      # signalPlot_1 = plots[pk][plot]['histo'][signal['path'][0]].Clone()
+      # signalPlot_2 = plots[pk][plot]['histo'][signal['path'][2]].Clone()
+      # signalPlot_1.Scale(signalscaling)
+      # signalPlot_2.Scale(signalscaling)
+      # signalPlot_1.SetLineColor(ROOT.kBlack)
+      # signalPlot_2.SetLineColor(ROOT.kCyan)
+      # signalPlot_1.SetLineWidth(3)
+      # signalPlot_2.SetLineWidth(3)
+      # signalPlot_1.Draw("same")
+      # signalPlot_2.Draw("same")
+      # l.AddEntry(signalPlot_1, signal['name'][0]+" x " + str(signalscaling), "l")
+      # l.AddEntry(signalPlot_2, signal['name'][1]+" x " + str(signalscaling), "l")
       l.Draw()
       channeltag = ROOT.TPaveText(0.45,0.8,0.59,0.85,"NDC")
       firstlep, secondlep = pk[:len(pk)/2], pk[len(pk)/2:]
@@ -389,20 +389,20 @@ if makedraw1D:
     bkg_stack_SF.GetXaxis().SetTitle(plotsSF['SF'][plot]['title'])
     bkg_stack_SF.GetYaxis().SetTitle("Events / %i GeV"%( (plotsSF['SF'][plot]['binning'][2]-plotsSF['SF'][plot]['binning'][1])/plotsSF['SF'][plot]['binning'][0]) )
     c1.SetLogy()
-    signalPlot_1 = plots['ee'][plot]['histo'][signal['path'][0]].Clone()
-    signalPlot_1.Add(plots['mumu'][plot]['histo'][signal['path'][0]])
-    signalPlot_2 = plots['ee'][plot]['histo'][signal['path'][2]].Clone()
-    signalPlot_2.Add(plots['mumu'][plot]['histo'][signal['path'][2]])
-    signalPlot_1.Scale(signalscaling)
-    signalPlot_2.Scale(signalscaling)
-    signalPlot_1.SetLineColor(ROOT.kBlack)
-    signalPlot_2.SetLineColor(ROOT.kCyan)
-    signalPlot_1.SetLineWidth(3)
-    signalPlot_2.SetLineWidth(3)
-    signalPlot_1.Draw("same")
-    signalPlot_2.Draw("same")
-    l.AddEntry(signalPlot_1, signal['name'][0]+" x " + str(signalscaling), "l")
-    l.AddEntry(signalPlot_2, signal['name'][1]+" x " + str(signalscaling), "l")
+    # signalPlot_1 = plots['ee'][plot]['histo'][signal['path'][0]].Clone()
+    # signalPlot_1.Add(plots['mumu'][plot]['histo'][signal['path'][0]])
+    # signalPlot_2 = plots['ee'][plot]['histo'][signal['path'][2]].Clone()
+    # signalPlot_2.Add(plots['mumu'][plot]['histo'][signal['path'][2]])
+    # signalPlot_1.Scale(signalscaling)
+    # signalPlot_2.Scale(signalscaling)
+    # signalPlot_1.SetLineColor(ROOT.kBlack)
+    # signalPlot_2.SetLineColor(ROOT.kCyan)
+    # signalPlot_1.SetLineWidth(3)
+    # signalPlot_2.SetLineWidth(3)
+    # signalPlot_1.Draw("same")
+    # signalPlot_2.Draw("same")
+    #l.AddEntry(signalPlot_1, signal['name'][0]+" x " + str(signalscaling), "l")
+    #l.AddEntry(signalPlot_2, signal['name'][1]+" x " + str(signalscaling), "l")
     l.Draw()
     channeltag = ROOT.TPaveText(0.45,0.8,0.59,0.85,"NDC")
     channeltag.AddText("SF")
@@ -410,7 +410,6 @@ if makedraw1D:
     channeltag.SetShadowColor(ROOT.kWhite)
     channeltag.Draw()
     c1.Print(plotDir+"/test/"+plotsSF['SF'][plot]['name']+"_SF.png")
-     
 
 if makedraw2D:
 
