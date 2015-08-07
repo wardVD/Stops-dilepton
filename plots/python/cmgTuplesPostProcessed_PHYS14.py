@@ -2,13 +2,6 @@ import copy, os, sys
 from StopsDilepton.tools.localInfo import dataDir
 dir = dataDir 
 
-DYWARD={\
-"name": "DYward",
-"bins": ["DYJetsToLL_M50"],
-'dir': "/afs/cern.ch/work/w/wvandrie/public/STOPS/CMSSW_7_4_7/src/CMGTools/TTHAnalysis/cfg/",
-'totalweight': 6323816737.16,
-}
-
 TTJets={\
 "name" : "tt+Jets",
 "bins" : ["TTJets"],
@@ -39,10 +32,15 @@ singleTop={\
 "bins" : ["TBarToLeptons_sch", "TBarToLeptons_tch", "TBar_tWch", "TToLeptons_sch", "TToLeptons_tch", "T_tWch"],
 'dir' : dir,
 }
+# DY={\
+# "name" : "DY",
+# "bins" : ["DYJetsToLL_M50_HT100to200", "DYJetsToLL_M50_HT200to400", "DYJetsToLL_M50_HT400to600", "DYJetsToLL_M50_HT600toInf"],
+# 'dir' : dir,
+# }
 DY={\
 "name" : "DY",
 "bins" : ["DYJetsToLL_M50_HT100to200", "DYJetsToLL_M50_HT200to400", "DYJetsToLL_M50_HT400to600", "DYJetsToLL_M50_HT600toInf"],
-'dir' : dir,
+'dir' : "/afs/cern.ch/work/w/wvandrie/public/STOPS/CMSSW_7_4_7/src/CMGTools/TTHAnalysis/cfg/phys14/",
 }
 QCD={\
 "name" : "QCD",
