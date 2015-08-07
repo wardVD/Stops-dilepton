@@ -4,21 +4,25 @@ ROOT.setTDRStyle()
 import numpy
 
 from math import *
-from StopsDilepton.tools.mt2Calculator import mt2Calculator
-mt2Calc = mt2Calculator()
-from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue, genmatching, latexmaker, piemaker, getWeight
-from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets, ele_ID_eta, getGenParts
+from StopsDilepton.tools.helpers import getChain,  getWeight
 from StopsDilepton.tools.localInfo import *
+from datetime import datetime
+
+start = datetime.now()
+print '\n','\n', "Starting code",'\n','\n'
+
 
 #preselection: MET>40, njets>=2, n_bjets>=1, n_lep>=2
 #For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
 #preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)>=1&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
-preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
+preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)==2'
 
 #######################################################
 #        SELECT WHAT YOU WANT TO DO HERE              #
 #######################################################
 reduceStat = 1 #recude the statistics, i.e. 10 is ten times less samples to look at
+makedraw1D = True
+makedraw2D = True
 
 #######################################################
 #                 load all the samples                #
@@ -38,83 +42,63 @@ for s in backgrounds+signals:
   if s.has_key('totalweight'): s['chain'] = getChain(s,histname="",treeName="tree")
   else:                        s['chain'] = getChain(s,histname="")
 
-metbinning = [25,20,520]
-dphibinning = [50,-1.1,1.1]
-
 plots = {\
-  'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': metbinning, 'histo':{}},
-  'dPhi_1':{'title':'cos(dPhi(MET,jet_1))', 'name':'leadingdPhi', 'binning':dphibinning, 'histo':{}},
-  'dPhi_2':{'title':'cos(dPhi(MET,jet_2))', 'name':'subleadingdPhi', 'binning':dphibinning, 'histo':{}},
-}
+  'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'histo':{}},
+  'dPhi_1':{'title':'cos(dPhi(MET,jet_1))', 'name':'leadingdPhi', 'histo':{}},
+  'dPhi_2':{'title':'cos(dPhi(MET,jet_2))', 'name':'subleadingdPhi', 'histo':{}},
+  'njets': {'title':'nJets', 'name':'nJets', 'histo':{}},
+  }
+plots2D = {\
+  'metvsdPhi_1':{'Xtitle':'Cos(dPhi(MET,jet_1))','Ytitle':'MET', 'name':'METvsLeadingdPhi', 'histo':{}},
+  'metvsMaxdPhi_Max':{'Xtitle':'Max(Cos(dPhi(MET,jet))','Ytitle':'MET', 'name':'max(METvsdPhi),jet_pt>100_Max', 'histo':{}},
+  'metvsMaxdPhi_MaxIf':{'Xtitle':'Max(Cos(dPhi(MET,jet))','Ytitle':'MET', 'name':'max(METvsdPhi),jet_pt>100_MaxIf', 'histo':{}}
+  }
 
 
 #######################################################
 #            Start filling in the histograms          #
 #######################################################
-for s in backgrounds+signals:
-  #1D
-  for plot in plots.keys():
-    plots[plot]['histo'][s["name"]] = ROOT.TH1F(plots[plot]['name']+"_"+s["name"], plots[plot]['name']+"_"+s["name"], *plots[plot]['binning'])
+for i,s in enumerate(backgrounds+signals):
   chain = s["chain"]
-  #Using Event loop
-  #get EList after preselection
-  print "Looping over %s" % s["name"]
-  eList = getEList(chain, preselection) 
-  nEvents = eList.GetN()/reduceStat
-  print "Found %i events in %s after preselection %s, looping over %i" % (eList.GetN(),s["name"],preselection,nEvents)
-  for ev in range(nEvents):
-    if ev%10000==0:print "At %i/%i"%(ev,nEvents)
-    chain.GetEntry(eList.GetEntry(ev))
-    #event weight (L= 4fb^-1)
-    if s.has_key('totalweight'): weight = getWeight(chain,s, 4000) #this method for SPRING15 samples
-    else:                        weight = reduceStat*getVarValue(chain, "weight") #this method for PHYS14 samples
-    #MET
-    met = getVarValue(chain, "met_pt")
-    metPhi = getVarValue(chain, "met_phi")
-    #jets
-    leadingjetPhi = getVarValue(chain, "Jet_phi",0)
-    subleadingjetPhi = getVarValue(chain, "Jet_phi",1)
 
-    dphi_1 = abs(metPhi-leadingjetPhi)
-    dphi_2 = abs(metPhi-subleadingjetPhi)
+  chain.Draw("met_pt>>met"+str(i)+"(25,20,1020)",preselection)
+  plots['met']['histo'][s["name"]] = ROOT.gDirectory.Get("met"+str(i))
 
-    if dphi_1>pi : dphi_1 -= pi
-    if dphi_2>pi : dphi_2 -= pi
+  chain.Draw("cos(met_phi-Jet_phi[0])>>cos_1"+str(i)+"(50,-1.1,1.1)",preselection)
+  plots['dPhi_1']['histo'][s["name"]] = ROOT.gDirectory.Get("cos_1"+str(i))
 
-    plots['met']['histo'][s["name"]].Fill(met, weight)
-    plots['dPhi_1']['histo'][s['name']].Fill(cos(dphi_1), weight)
-    plots['dPhi_2']['histo'][s['name']].Fill(cos(dphi_2), weight)
+  chain.Draw("cos(met_phi-Jet_phi[1])>>cos_2"+str(i)+"(50,-1.1,1.1)",preselection)
+  plots['dPhi_2']['histo'][s["name"]] = ROOT.gDirectory.Get("cos_2"+str(i))
 
-  del eList
+  chain.Draw("Length$(Jet_pt)>>njets"+str(i)+"(10,0,10)",preselection)
+  plots['njets']['histo'][s['name']] = ROOT.gDirectory.Get("njets"+str(i))
 
+  chain.Draw("met_pt:cos(met_phi-Jet_phi[0])>>metvsdphi"+str(i)+"(50,-1,1,50,0,1000)",preselection)
+  plots2D['metvsdPhi_1']['histo'][s['name']] = ROOT.gDirectory.Get("metvsdphi"+str(i))
 
+  chain.Draw("met_pt:Max$((Jet_pt>100)*cos(met_phi-Jet_phi))>>max_metvsdphi"+str(i)+"(50,-1,1,50,0,1000)",preselection+'&&Jet_pt>100')
+  plots2D['metvsMaxdPhi_Max']['histo'][s['name']] = ROOT.gDirectory.Get("max_metvsdphi"+str(i))
+  
+  chain.Draw("met_pt:MaxIf$(cos(met_phi-Jet_phi),Jet_pt>100)>>max_metvsdphi_2"+str(i)+"(50,-1,1,50,0,1000)",preselection+'&&Jet_pt>100')
+  plots2D['metvsMaxdPhi_MaxIf']['histo'][s['name']] = ROOT.gDirectory.Get("max_metvsdphi_2"+str(i))
+
+processtime = datetime.now()
+print "Time to process chains: ", processtime - start
 
 #######################################################
 #             Drawing done here                       #
 #######################################################
 #Some coloring
-#TTJets["color"]=ROOT.kRed
-WJetsHTToLNu["color"]=ROOT.kGreen
-#TTH["color"]=ROOT.kMagenta
-#TTW["color"]=ROOT.kMagenta-3
-#TTZ["color"]=ROOT.kMagenta-6
-#singleTop["color"]=ROOT.kOrange
 DY["color"]=ROOT.kBlue
 DY_15["color"]=ROOT.kRed
-#Plotvariables
-signal = {'path': ["SMS_T2tt_2J_mStop425_mLSP325","SMS_T2tt_2J_mStop500_mLSP325","SMS_T2tt_2J_mStop650_mLSP325","SMS_T2tt_2J_mStop850_mLSP100"], 'name': ["T2tt(425,325)","T2tt(500,325)","T2tt(650,325)","T2tt(850,100)"]}
-yminimum = 10**-0.5
 legendtextsize = 0.032
-signalscaling = 100
-
-makedraw1D = True
 
 if makedraw1D:
   for plot in plots.keys():
     for s in backgrounds+signals:
       integral = plots[plot]['histo'][s['name']].Integral()
       plots[plot]['histo'][s['name']].Scale(1./integral)
-
+     
     #Make a stack for backgrounds
     l=ROOT.TLegend(0.6,0.8,1.0,1.0)
     l.SetFillColor(0)
@@ -132,9 +116,41 @@ if makedraw1D:
       l.AddEntry(plots[plot]['histo'][b["name"]],b['name'])
       if i == 0: 
         plots[plot]['histo'][b["name"]].GetXaxis().SetTitle(plots[plot]['title'])
-        plots[plot]['histo'][b["name"]].GetYaxis().SetTitle("Events / %i GeV"%( (plots[plot]['binning'][2]-plots[plot]['binning'][1])/plots[plot]['binning'][0]) )
-        plots[plot]['histo'][b["name"]].GetYaxis().SetRangeUser(0.00001,2)
+        plots[plot]['histo'][b["name"]].GetYaxis().SetTitle("Events (A.U.)")
+        if plot!="met": plots[plot]['histo'][b["name"]].GetYaxis().SetRangeUser(0.001,2)
     c1.SetLogy()
     l.Draw()
-    c1.Print(plotDir+"/test/"+plots[plot]['name']+".png")
-  
+    c1.Print(plotDir+"/testDY/"+plots[plot]['name']+".png")
+
+if makedraw2D:
+  for b in backgrounds+signals:
+    for plot in plots2D.keys():
+      c1 = ROOT.TCanvas()
+      ROOT.gStyle.SetOptStat(0)
+      ROOT.gStyle.SetPalette(1)
+      c1.SetRightMargin(0.16)
+
+      l=ROOT.TLegend(0.6,0.9,1.0,1.0)
+      l.SetFillColor(0)
+      l.SetShadowColor(ROOT.kWhite)
+      l.SetBorderSize(1)
+      l.SetTextSize(legendtextsize)
+
+      plots2D[plot]['histo'][b["name"]].Draw("colz")
+      ROOT.gPad.Update()
+      palette = plots2D[plot]['histo'][b["name"]].GetListOfFunctions().FindObject("palette")
+      palette.SetX1NDC(0.85)
+      palette.SetX2NDC(0.9)
+      palette.Draw()
+
+      l.AddEntry(plots2D[plot]['histo'][b["name"]],b['name'])
+      plots2D[plot]['histo'][b["name"]].GetXaxis().SetTitle(plots2D[plot]['Xtitle'])
+      plots2D[plot]['histo'][b["name"]].GetYaxis().SetTitle(plots2D[plot]['Ytitle'])
+      l.Draw()
+      c1.SetLogz()
+      c1.Print(plotDir+"/testDY/"+plots2D[plot]['name']+'_'+b['name']+".png")
+      c1.Close()
+
+makeplotstime = datetime.now()
+
+print '\n','\n', "Total time processing: ", makeplotstime-start
