@@ -59,7 +59,8 @@ def getSignalSample(signal):
   if signal in allSignalStrings:
     return {
       "name" : signal,
-      'dir' : dir,
+      #'dir' : dir,
+      'dir' : "/afs/cern.ch/work/w/wvandrie/public/STOPS/CMSSW_7_4_7/src/CMGTools/TTHAnalysis/cfg/phys14/",
       'bins':[signal]}
   else:
     print "Signal",signal,"unknown. Available: ",", ".join(allSignalStrings)
