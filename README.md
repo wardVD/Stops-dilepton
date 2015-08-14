@@ -11,7 +11,13 @@ git clone https://github.com/wardVD/Stops-dilepton StopsDilepton
 
 cd $CMSSW_BASE/src
 
-To run: python plot.py
+scram b -j9
+
+To run: 
+
+cd StopsDilepton/plots/plotsWard/
+
+python plot.py
 
 ** To compile TMVA **
 cd TMVA/test; source setup.[c]sh; 
