@@ -9,7 +9,7 @@ git cms-addpkg FWCore/Version
 
 git clone https://github.com/wardVD/Stops-dilepton StopsDilepton
 
-cd $CMSSW_RELEASE_BASE/src
+cd $CMSSW_BASE/src
 
 To run: python plot.py
 
