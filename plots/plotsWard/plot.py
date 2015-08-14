@@ -6,12 +6,12 @@ import numpy
 from math import *
 from StopsDilepton.tools.mt2Calculator import mt2Calculator
 mt2Calc = mt2Calculator()
-from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue, genmatching, latexmaker, piemaker, getWeight
+from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue, genmatching, latexmaker, piemaker, getWeight, deltaPhi
 from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets, ele_ID_eta, getGenParts
 from StopsDilepton.tools.localInfo import *
 
 #preselection: MET>40, njets>=2, n_bjets>=1, n_lep>=2
-#For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
+#See here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
 preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)>=1&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
 
 #######################################################
@@ -19,9 +19,9 @@ preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV
 #######################################################
 reduceStat = 1 #recude the statistics, i.e. 10 is ten times less samples to look at
 makedraw1D = True
-makedraw2D = False
-makelatextables = False
-makepiechart = False
+makedraw2D = True
+makelatextables = False #Ignore this if you're not Ward
+makepiechart = False    #Ignore this if you're not Ward
 
 #######################################################
 #                 load all the samples                #
@@ -37,6 +37,8 @@ signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_
 #######################################################
 #            get the TChains for each sample          #
 #######################################################
+#PHYS14 and my(!) SPRING15 ntuples are structured a bit differently (i.e. treeName is different). PHYS14 have correct weight stored in ntuple
+#SPRING15 has to make the weight with xsec,luminosity and totalweight (total genWeight) that I saved by hand
 for s in backgrounds+signals:
   if s.has_key('totalweight'): s['chain'] = getChain(s,histname="",treeName="tree")
   else:                        s['chain'] = getChain(s,histname="")
@@ -55,7 +57,7 @@ for s in backgrounds+signals:
 #######################################################
 mllbinning = [25,25,325] 
 mt2llbinning = [25,0,300]
-metbinning = [25,25,725]
+metbinning = [20,0,800]
 mt2bbbinning = [25,0,550]
 mt2blblbinning = [25,0,550]
 kinMetSigbinning = [25,0,25]
@@ -67,6 +69,7 @@ njetsbinning = [15,0,15]
 nbjetsbinning = [10,0,10]
 cosbinning = [25,-1.1,1.1]
 partonbinning = [32,-10,22]
+phibinning = [20,0,pi]
 
 #######################################################
 #             make plot in each sample:               #
@@ -76,8 +79,8 @@ plots = {\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': mllbinning, 'histo':{}},
   'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': mt2llbinning, 'histo':{}},
   'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': metbinning, 'histo':{}},
-  #'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'MT2bb', 'binning': mt2bbbinning, 'histo':{}},
-  #'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'MT2blbl', 'binning': mt2blblbinning, 'histo':{}},
+  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'MT2bb', 'binning': mt2bbbinning, 'histo':{}},
+  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'MT2blbl', 'binning': mt2blblbinning, 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': kinMetSigbinning, 'histo':{}},
   'leadingjetpt': {'title':'leading jet p_{T} (GeV)', 'name':'leadingjetpt', 'binning': leadingjetptbinning, 'histo':{}},
   'subleadingjetpt': {'title':'subleading jet p_{T} (GeV)', 'name':'subleadingjetpt', 'binning': subleadingjetptbinning, 'histo':{}},
@@ -86,15 +89,17 @@ plots = {\
   'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
   'nbjets': {'title': 'nbjets', 'name':'nbjets', 'binning': nbjetsbinning, 'histo':{}},
   'leadingjetpartonId':{'title': 'Leading Jet Parton Id','name':'LeadingJetPartonId','binning':partonbinning,'histo':{}},
-  'MinDphi':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))','name':'MinDphiJets', 'binning':cosbinning, 'histo':{}},
-  'MinDphiMt2llcut':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))', 'name':'MinDphiJetsMt2llcut', 'binning':cosbinning, 'histo':{},'tag':'MT2cut'},
+  'CosMinDphi':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))','name':'CosMinDphiJets', 'binning':cosbinning, 'histo':{}},
+  'CosMinDphiMt2llcut':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))', 'name':'CosMinDphiJetsMt2llcut', 'binning':cosbinning, 'histo':{},'tag':'MT2cut'},
+  'MinDphi':{'title':'Min(dPhi(MET,jet_1|jet_2))','name':'MinDphiJets', 'binning':phibinning, 'histo':{}},
+  'MinDphiMt2llcut':{'title':'Min(dPhi(MET,jet_1|jet_2))', 'name':'MinDphiJetsMt2llcut', 'binning':phibinning, 'histo':{},'tag':'MT2cut'},
   },
   'ee':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': mllbinning, 'histo':{}},
   'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': mt2llbinning, 'histo':{}},
   'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': metbinning, 'histo':{}},
-  #'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'MT2bb', 'binning': mt2bbbinning, 'histo':{}},
-  #'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'MT2blbl', 'binning': mt2blblbinning, 'histo':{}},
+  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'MT2bb', 'binning': mt2bbbinning, 'histo':{}},
+  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'MT2blbl', 'binning': mt2blblbinning, 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': kinMetSigbinning, 'histo':{}},
   'leadingjetpt': {'title':'leading jet p_{T} (GeV)', 'name':'leadingjetpt', 'binning': leadingjetptbinning, 'histo':{}},
   'subleadingjetpt': {'title':'subleading jet p_{T} (GeV)', 'name':'subleadingjetpt', 'binning': subleadingjetptbinning, 'histo':{}},
@@ -103,15 +108,17 @@ plots = {\
   'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
   'nbjets': {'title': 'nbjets', 'name':'nbjets', 'binning': nbjetsbinning, 'histo':{}},
   'leadingjetpartonId':{'title': 'Leading Jet Parton Id','name':'LeadingJetPartonId','binning':partonbinning,'histo':{}},
-  'MinDphi':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))','name':'MinDphiJets', 'binning':cosbinning, 'histo':{}},
-  'MinDphiMt2llcut':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))', 'name':'MinDphiJetsMt2llcut', 'binning':cosbinning, 'histo':{},'tag':'MT2cut'},
+  'CosMinDphi':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))','name':'CosMinDphiJets', 'binning':cosbinning, 'histo':{}},
+  'CosMinDphiMt2llcut':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))', 'name':'CosMinDphiJetsMt2llcut', 'binning':cosbinning, 'histo':{},'tag':'MT2cut'},
+  'MinDphi':{'title':'Min(dPhi(MET,jet_1|jet_2))','name':'MinDphiJets', 'binning':phibinning, 'histo':{}},
+  'MinDphiMt2llcut':{'title':'Min(dPhi(MET,jet_1|jet_2))', 'name':'MinDphiJetsMt2llcut', 'binning':phibinning, 'histo':{},'tag':'MT2cut'},
   },
   'emu':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': mllbinning, 'histo':{}},
   'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': mt2llbinning, 'histo':{}},
   'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': metbinning, 'histo':{}},
-  #'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'MT2bb', 'binning': mt2bbbinning, 'histo':{}},
-  #'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'MT2blbl', 'binning': mt2blblbinning, 'histo':{}},
+  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'MT2bb', 'binning': mt2bbbinning, 'histo':{}},
+  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'MT2blbl', 'binning': mt2blblbinning, 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': kinMetSigbinning, 'histo':{}},
   'leadingjetpt': {'title':'leading jet p_{T} (GeV)', 'name':'leadingjetpt', 'binning': leadingjetptbinning, 'histo':{}},
   'subleadingjetpt': {'title':'subleading jet p_{T} (GeV)', 'name':'subleadingjetpt', 'binning': subleadingjetptbinning, 'histo':{}},
@@ -120,8 +127,10 @@ plots = {\
   'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
   'nbjets': {'title': 'nbjets', 'name':'nbjets', 'binning': nbjetsbinning, 'histo':{}},
   'leadingjetpartonId':{'title': 'Leading Jet Parton Id','name':'LeadingJetPartonId','binning':partonbinning,'histo':{}},
-  'MinDphi':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))','name':'MinDphiJets', 'binning':cosbinning, 'histo':{}},
-  'MinDphiMt2llcut':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))', 'name':'MinDphiJetsMt2llcut', 'binning':cosbinning, 'histo':{},'tag':'MT2cut'},
+  'CosMinDphi':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))','name':'CosMinDphiJets', 'binning':cosbinning, 'histo':{}},
+  'CosMinDphiMt2llcut':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))', 'name':'CosMinDphiJetsMt2llcut', 'binning':cosbinning, 'histo':{},'tag':'MT2cut'},
+  'MinDphi':{'title':'Min(dPhi(MET,jet_1|jet_2))','name':'MinDphiJets', 'binning':phibinning, 'histo':{}},
+  'MinDphiMt2llcut':{'title':'Min(dPhi(MET,jet_1|jet_2))', 'name':'MinDphiJetsMt2llcut', 'binning':phibinning, 'histo':{},'tag':'MT2cut'},
 },
 }
 
@@ -133,8 +142,8 @@ plotsSF = {\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': mllbinning, 'histo':{}},
   'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': mt2llbinning, 'histo':{}},
   'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': metbinning, 'histo':{}},
-  #'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'MT2bb', 'binning': mt2bbbinning, 'histo':{}},
-  #'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'MT2blbl', 'binning': mt2blblbinning, 'histo':{}},
+  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'MT2bb', 'binning': mt2bbbinning, 'histo':{}},
+  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'MT2blbl', 'binning': mt2blblbinning, 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': kinMetSigbinning, 'histo':{}},
   'leadingjetpt': {'title':'leading jet p_{T} (GeV)', 'name':'leadingjetpt', 'binning': leadingjetptbinning, 'histo':{}},
   'subleadingjetpt': {'title':'subleading jet p_{T} (GeV)', 'name':'subleadingjetpt', 'binning': subleadingjetptbinning, 'histo':{}},
@@ -143,8 +152,10 @@ plotsSF = {\
   'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
   'nbjets': {'title': 'nbjets', 'name':'nbjets', 'binning': nbjetsbinning, 'histo':{}},
   'leadingjetpartonId':{'title': 'Leading Jet Parton Id','name':'LeadingJetPartonId','binning':partonbinning,'histo':{}},
-  'MinDphi':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))','name':'MinDphiJets', 'binning':cosbinning, 'histo':{}},
-  'MinDphiMt2llcut':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))', 'name':'MinDphiJetsMt2llcut', 'binning':cosbinning, 'histo':{},'tag':'MT2cut'},
+  'CosMinDphi':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))','name':'CosMinDphiJets', 'binning':cosbinning, 'histo':{}},
+  'CosMinDphiMt2llcut':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))', 'name':'CosMinDphiJetsMt2llcut', 'binning':cosbinning, 'histo':{},'tag':'MT2cut'},
+  'MinDphi':{'title':'Min(dPhi(MET,jet_1|jet_2))','name':'MinDphiJets', 'binning':phibinning, 'histo':{}},
+  'MinDphiMt2llcut':{'title':'Min(dPhi(MET,jet_1|jet_2))', 'name':'MinDphiJetsMt2llcut', 'binning':phibinning, 'histo':{},'tag':'MT2cut'},
   },
 }
 
@@ -155,46 +166,86 @@ plotsSF = {\
 dimensional = {\
   'ee': {\
   'metvsmt2ll': {'xtitle':'M_{T2ll} (GeV)','ytitle':'E^{miss}_{T} (GeV)', 'name': 'METvsMT2ll', 'ybinning': metbinning, 'xbinning': mt2llbinning, 'histo': {}},
-  'MT2llvsdPhi_1':{'xtitle':'Cos(dPhi(MET,jet_1))','ytitle':'MT2ll', 'name':'MT2llvsCosDphiLeadingJet', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
-  'MT2llvsdPhi_2':{'xtitle':'Cos(dPhi(MET,jet_2))','ytitle':'MT2ll', 'name':'MT2llvsCosDphiSubleadingJet', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
-  'MT2llvsMinDphi':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'MT2ll', 'name':'MT2llvsMinDphiJets', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
-  'metvsdPhi_1':{'xtitle':'Cos(dPhi(MET,jet_1))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosDphiLeadingJet', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
-  'metvsdPhi_2':{'xtitle':'Cos(dPhi(MET,jet_2))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosDphiSubleadingJet', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
-  'metvsMinDphi':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsMinDphiJets', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
-  'metvsMinDphiMt2llcut':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsMinDphiJetsMt2llcut', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{},'tag':'MT2cut'},
-  },
+  'MT2llvsCosdPhi_1':{'xtitle':'Cos(dPhi(MET,jet_1))','ytitle':'MT2ll', 'name':'MT2llvsCosDphiLeadingJet', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
+  'MT2llvsCosdPhi_2':{'xtitle':'Cos(dPhi(MET,jet_2))','ytitle':'MT2ll', 'name':'MT2llvsCosDphiSubleadingJet', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
+  'MT2llvsCosMinDphi':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'MT2ll', 'name':'MT2llvsCosMinDphiJets', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
+  'MT2llvsdPhi_1':{'xtitle':'dPhi(MET,jet_1)','ytitle':'MT2ll', 'name':'MT2llvsDphiLeadingJet', 'ybinning': mt2llbinning, 'xbinning':phibinning, 'histo':{}},
+  'MT2llvsdPhi_2':{'xtitle':'dPhi(MET,jet_2)','ytitle':'MT2ll', 'name':'MT2llvsDphiSubleadingJet', 'ybinning': mt2llbinning, 'xbinning':phibinning, 'histo':{}},
+  'MT2llvsMinDphi':{'xtitle':'Min(dPhi(MET,jet_1|jet_2))','ytitle':'MT2ll', 'name':'MT2llvsMinDphiJets', 'ybinning': mt2llbinning, 'xbinning':phibinning, 'histo':{}},
+  'metvsCosdPhi_1':{'xtitle':'Cos(dPhi(MET,jet_1))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosDphiLeadingJet', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
+  'metvsCosdPhi_2':{'xtitle':'Cos(dPhi(MET,jet_2))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosDphiSubleadingJet', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
+  'metvsCosMinDphi':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosMinDphiJets', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
+  'metvsCosMinDphiMt2llcut':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosMinDphiJetsMt2llcut', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{},'tag':'MT2cut'},
+  'metvsdPhi_1':{'xtitle':'dPhi(MET,jet_1)','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsDphiLeadingJet', 'ybinning': metbinning, 'xbinning':phibinning, 'histo':{}},
+  'metvsdPhi_2':{'xtitle':'dPhi(MET,jet_2)','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsDphiSubleadingJet', 'ybinning': metbinning, 'xbinning':phibinning, 'histo':{}},
+  'metvsMinDphi':{'xtitle':'Min(dPhi(MET,jet_1|jet_2))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsMinDphiJets', 'ybinning': metbinning, 'xbinning':phibinning, 'histo':{}},
+  'metvsMinDphiMt2llcut':{'xtitle':'Min(dPhi(MET,jet_1|jet_2))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsMinDphiJetsMt2llcut', 'ybinning': metbinning, 'xbinning':phibinning, 'histo':{},'tag':'MT2cut'},
+ },
   'mumu': {\
   'metvsmt2ll': {'xtitle':'M_{T2ll} (GeV)','ytitle':'E^{miss}_{T} (GeV)', 'name': 'METvsMT2ll', 'ybinning': metbinning, 'xbinning': mt2llbinning, 'histo': {}},
-  'MT2llvsdPhi_1':{'xtitle':'Cos(dPhi(MET,jet_1))','ytitle':'MT2ll', 'name':'MT2llvsCosDphiLeadingJet', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
-  'MT2llvsdPhi_2':{'xtitle':'Cos(dPhi(MET,jet_2))','ytitle':'MT2ll', 'name':'MT2llvsCosDphiSubleadingJet', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
-  'MT2llvsMinDphi':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'MT2ll', 'name':'MT2llvsMinDphiJets', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
-  'metvsdPhi_1':{'xtitle':'Cos(dPhi(MET,jet_1))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosDphiLeadingJet', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
-  'metvsdPhi_2':{'xtitle':'Cos(dPhi(MET,jet_2))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosDphiSubleadingJet', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
-  'metvsMinDphi':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsMinDphiJets', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
-  'metvsMinDphiMt2llcut':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsMinDphiJetsMt2llcut', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{},'tag':'MT2cut'},
-  },
+  'MT2llvsCosdPhi_1':{'xtitle':'Cos(dPhi(MET,jet_1))','ytitle':'MT2ll', 'name':'MT2llvsCosDphiLeadingJet', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
+  'MT2llvsCosdPhi_2':{'xtitle':'Cos(dPhi(MET,jet_2))','ytitle':'MT2ll', 'name':'MT2llvsCosDphiSubleadingJet', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
+  'MT2llvsCosMinDphi':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'MT2ll', 'name':'MT2llvsCosMinDphiJets', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
+  'MT2llvsdPhi_1':{'xtitle':'dPhi(MET,jet_1)','ytitle':'MT2ll', 'name':'MT2llvsDphiLeadingJet', 'ybinning': mt2llbinning, 'xbinning':phibinning, 'histo':{}},
+  'MT2llvsdPhi_2':{'xtitle':'dPhi(MET,jet_2)','ytitle':'MT2ll', 'name':'MT2llvsDphiSubleadingJet', 'ybinning': mt2llbinning, 'xbinning':phibinning, 'histo':{}},
+  'MT2llvsMinDphi':{'xtitle':'Min(dPhi(MET,jet_1|jet_2))','ytitle':'MT2ll', 'name':'MT2llvsMinDphiJets', 'ybinning': mt2llbinning, 'xbinning':phibinning, 'histo':{}},
+  'metvsCosdPhi_1':{'xtitle':'Cos(dPhi(MET,jet_1))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosDphiLeadingJet', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
+  'metvsCosdPhi_2':{'xtitle':'Cos(dPhi(MET,jet_2))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosDphiSubleadingJet', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
+  'metvsCosMinDphi':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosMinDphiJets', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
+  'metvsCosMinDphiMt2llcut':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosMinDphiJetsMt2llcut', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{},'tag':'MT2cut'},
+  'metvsdPhi_1':{'xtitle':'dPhi(MET,jet_1)','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsDphiLeadingJet', 'ybinning': metbinning, 'xbinning':phibinning, 'histo':{}},
+  'metvsdPhi_2':{'xtitle':'dPhi(MET,jet_2)','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsDphiSubleadingJet', 'ybinning': metbinning, 'xbinning':phibinning, 'histo':{}},
+  'metvsMinDphi':{'xtitle':'Min(dPhi(MET,jet_1|jet_2))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsMinDphiJets', 'ybinning': metbinning, 'xbinning':phibinning, 'histo':{}},
+  'metvsMinDphiMt2llcut':{'xtitle':'Min(dPhi(MET,jet_1|jet_2))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsMinDphiJetsMt2llcut', 'ybinning': metbinning, 'xbinning':phibinning, 'histo':{},'tag':'MT2cut'},
+ },
   'emu': {\
   'metvsmt2ll': {'xtitle':'M_{T2ll} (GeV)','ytitle':'E^{miss}_{T} (GeV)', 'name': 'METvsMT2ll', 'ybinning': metbinning, 'xbinning': mt2llbinning, 'histo': {}},
-  'MT2llvsdPhi_1':{'xtitle':'Cos(dPhi(MET,jet_1))','ytitle':'MT2ll', 'name':'MT2llvsCosDphiLeadingJet', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
-  'MT2llvsdPhi_2':{'xtitle':'Cos(dPhi(MET,jet_2))','ytitle':'MT2ll', 'name':'MT2llvsCosDphiSubleadingJet', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
-  'MT2llvsMinDphi':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'MT2ll', 'name':'MT2llvsMinDphiJets', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
-  'metvsdPhi_1':{'xtitle':'Cos(dPhi(MET,jet_1))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosDphiLeadingJet', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
-  'metvsdPhi_2':{'xtitle':'Cos(dPhi(MET,jet_2))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosDphiSubleadingJet', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
-  'metvsMinDphi':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsMinDphiJets', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
-  'metvsMinDphiMt2llcut':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsMinDphiJetsMt2llcut', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{},'tag':'MT2cut'},
+  'MT2llvsCosdPhi_1':{'xtitle':'Cos(dPhi(MET,jet_1))','ytitle':'MT2ll', 'name':'MT2llvsCosDphiLeadingJet', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
+  'MT2llvsCosdPhi_2':{'xtitle':'Cos(dPhi(MET,jet_2))','ytitle':'MT2ll', 'name':'MT2llvsCosDphiSubleadingJet', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
+  'MT2llvsCosMinDphi':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'MT2ll', 'name':'MT2llvsCosMinDphiJets', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
+  'MT2llvsdPhi_1':{'xtitle':'dPhi(MET,jet_1)','ytitle':'MT2ll', 'name':'MT2llvsDphiLeadingJet', 'ybinning': mt2llbinning, 'xbinning':phibinning, 'histo':{}},
+  'MT2llvsdPhi_2':{'xtitle':'dPhi(MET,jet_2)','ytitle':'MT2ll', 'name':'MT2llvsDphiSubleadingJet', 'ybinning': mt2llbinning, 'xbinning':phibinning, 'histo':{}},
+  'MT2llvsMinDphi':{'xtitle':'Min(dPhi(MET,jet_1|jet_2))','ytitle':'MT2ll', 'name':'MT2llvsMinDphiJets', 'ybinning': mt2llbinning, 'xbinning':phibinning, 'histo':{}},
+  'metvsCosdPhi_1':{'xtitle':'Cos(dPhi(MET,jet_1))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosDphiLeadingJet', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
+  'metvsCosdPhi_2':{'xtitle':'Cos(dPhi(MET,jet_2))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosDphiSubleadingJet', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
+  'metvsCosMinDphi':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosMinDphiJets', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
+  'metvsCosMinDphiMt2llcut':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosMinDphiJetsMt2llcut', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{},'tag':'MT2cut'},
+  'metvsdPhi_1':{'xtitle':'dPhi(MET,jet_1)','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsDphiLeadingJet', 'ybinning': metbinning, 'xbinning':phibinning, 'histo':{}},
+  'metvsdPhi_2':{'xtitle':'dPhi(MET,jet_2)','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsDphiSubleadingJet', 'ybinning': metbinning, 'xbinning':phibinning, 'histo':{}},
+  'metvsMinDphi':{'xtitle':'Min(dPhi(MET,jet_1|jet_2))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsMinDphiJets', 'ybinning': metbinning, 'xbinning':phibinning, 'histo':{}},
+  'metvsMinDphiMt2llcut':{'xtitle':'Min(dPhi(MET,jet_1|jet_2))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsMinDphiJetsMt2llcut', 'ybinning': metbinning, 'xbinning':phibinning, 'histo':{},'tag':'MT2cut'},
   }
 }
 
+dimensionalSF={\
+  'SF': {\
+  'metvsmt2ll': {'xtitle':'M_{T2ll} (GeV)','ytitle':'E^{miss}_{T} (GeV)', 'name': 'METvsMT2ll', 'ybinning': metbinning, 'xbinning': mt2llbinning, 'histo': {}},
+  'MT2llvsCosdPhi_1':{'xtitle':'Cos(dPhi(MET,jet_1))','ytitle':'MT2ll', 'name':'MT2llvsCosDphiLeadingJet', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
+  'MT2llvsCosdPhi_2':{'xtitle':'Cos(dPhi(MET,jet_2))','ytitle':'MT2ll', 'name':'MT2llvsCosDphiSubleadingJet', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
+  'MT2llvsCosMinDphi':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'MT2ll', 'name':'MT2llvsCosMinDphiJets', 'ybinning': mt2llbinning, 'xbinning':cosbinning, 'histo':{}},
+  'MT2llvsdPhi_1':{'xtitle':'dPhi(MET,jet_1)','ytitle':'MT2ll', 'name':'MT2llvsDphiLeadingJet', 'ybinning': mt2llbinning, 'xbinning':phibinning, 'histo':{}},
+  'MT2llvsdPhi_2':{'xtitle':'dPhi(MET,jet_2)','ytitle':'MT2ll', 'name':'MT2llvsDphiSubleadingJet', 'ybinning': mt2llbinning, 'xbinning':phibinning, 'histo':{}},
+  'MT2llvsMinDphi':{'xtitle':'Min(dPhi(MET,jet_1|jet_2))','ytitle':'MT2ll', 'name':'MT2llvsMinDphiJets', 'ybinning': mt2llbinning, 'xbinning':phibinning, 'histo':{}},
+  'metvsCosdPhi_1':{'xtitle':'Cos(dPhi(MET,jet_1))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosDphiLeadingJet', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
+  'metvsCosdPhi_2':{'xtitle':'Cos(dPhi(MET,jet_2))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosDphiSubleadingJet', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
+  'metvsCosMinDphi':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosMinDphiJets', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{}},
+  'metvsCosMinDphiMt2llcut':{'xtitle':'Cos(Min(dPhi(MET,jet_1|jet_2)))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsCosMinDphiJetsMt2llcut', 'ybinning': metbinning, 'xbinning':cosbinning, 'histo':{},'tag':'MT2cut'},
+  'metvsdPhi_1':{'xtitle':'dPhi(MET,jet_1)','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsDphiLeadingJet', 'ybinning': metbinning, 'xbinning':phibinning, 'histo':{}},
+  'metvsdPhi_2':{'xtitle':'dPhi(MET,jet_2)','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsDphiSubleadingJet', 'ybinning': metbinning, 'xbinning':phibinning, 'histo':{}},
+  'metvsMinDphi':{'xtitle':'Min(dPhi(MET,jet_1|jet_2))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsMinDphiJets', 'ybinning': metbinning, 'xbinning':phibinning, 'histo':{}},
+  'metvsMinDphiMt2llcut':{'xtitle':'Min(dPhi(MET,jet_1|jet_2))','ytitle':'E^{miss}_{T} (GeV)', 'name':'metvsMinDphiJetsMt2llcut', 'ybinning': metbinning, 'xbinning':phibinning, 'histo':{},'tag':'MT2cut'},
+  }
+}
 
 #######################################################
 #            Start filling in the histograms          #
 #######################################################
 for s in backgrounds+signals:
-  #1D
+  #construct 1D histograms
   for pk in plots.keys():
     for plot in plots[pk].keys():
       plots[pk][plot]['histo'][s["name"]] = ROOT.TH1F(plots[pk][plot]['name']+"_"+s["name"]+"_"+pk, plots[pk][plot]['name']+"_"+s["name"]+"_"+pk, *plots[pk][plot]['binning'])
-  #2D
+  #construct 2D histograms
   for pk in dimensional.keys():
     for plot in dimensional[pk].keys():
       dimensional[pk][plot]['histo'][s["name"]] = ROOT.TH2F(dimensional[pk][plot]['name']+"_"+s["name"]+"_"+pk, dimensional[pk][plot]['name']+"_"+s["name"]+"_"+pk, dimensional[pk][plot]['xbinning'][0], dimensional[pk][plot]['xbinning'][1],dimensional[pk][plot]['xbinning'][2], dimensional[pk][plot]['ybinning'][0], dimensional[pk][plot]['ybinning'][1],dimensional[pk][plot]['ybinning'][2])
@@ -254,8 +305,8 @@ for s in backgrounds+signals:
     chain.GetEntry(eList.GetEntry(ev))
     mt2Calc.reset()
     #event weight (L= 4fb^-1)
-    if s.has_key('totalweight'): weight = getWeight(chain,s, 4000) #this method for SPRING15 samples
-    else:                        weight = reduceStat*getVarValue(chain, "weight") #this method for PHYS14 samples
+    if s.has_key('totalweight'): weight = getWeight(chain,s, 4000) #this method for Ward's SPRING15 samples
+    else:                        weight = reduceStat*getVarValue(chain, "weight") #this method for Robert's PHYS14 samples
     #MET
     met = getVarValue(chain, "met_pt")
     metPhi = getVarValue(chain, "met_phi")
@@ -323,28 +374,41 @@ for s in backgrounds+signals:
         dimensional[leptons[lep]['name']]['metvsmt2ll']['histo'][s["name"]].Fill(mt2ll,met)
         jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(chain))
         ht = sum([j['pt'] for j in jets])
-        PhiMetJet1 = abs(metPhi - leadingjetpt)
-        PhiMetJet2 = abs(metPhi - subleadingjetpt)
-        dimensional[leptons[lep]['name']]['MT2llvsdPhi_1']['histo'][s['name']].Fill(cos(PhiMetJet1),mt2ll)
-        dimensional[leptons[lep]['name']]['MT2llvsdPhi_2']['histo'][s['name']].Fill(cos(PhiMetJet2),mt2ll)
-        if (PhiMetJet1 <= PhiMetJet2): 
-          dimensional[leptons[lep]['name']]['MT2llvsMinDphi']['histo'][s['name']].Fill(cos(PhiMetJet1),mt2ll)
-        else:
-          dimensional[leptons[lep]['name']]['MT2llvsMinDphi']['histo'][s['name']].Fill(cos(PhiMetJet2),mt2ll)
-        dimensional[leptons[lep]['name']]['metvsdPhi_1']['histo'][s['name']].Fill(cos(PhiMetJet1),met)
-        dimensional[leptons[lep]['name']]['metvsdPhi_2']['histo'][s['name']].Fill(cos(PhiMetJet2),met)
-        if (PhiMetJet1 <= PhiMetJet2): 
-          plots[leptons[lep]['name']]['MinDphi']['histo'][s['name']].Fill(cos(PhiMetJet1),weight)
-          dimensional[leptons[lep]['name']]['metvsMinDphi']['histo'][s['name']].Fill(cos(PhiMetJet1),met)
+        PhiMetJet1 = deltaPhi(metPhi,getVarValue(chain, "Jet_phi",0))
+        PhiMetJet2 = deltaPhi(metPhi,getVarValue(chain, "Jet_phi",1))
+        dimensional[leptons[lep]['name']]['MT2llvsCosdPhi_1']['histo'][s['name']].Fill(cos(PhiMetJet1),mt2ll)
+        dimensional[leptons[lep]['name']]['MT2llvsCosdPhi_2']['histo'][s['name']].Fill(cos(PhiMetJet2),mt2ll)
+        dimensional[leptons[lep]['name']]['MT2llvsdPhi_1']['histo'][s['name']].Fill(PhiMetJet1,mt2ll)
+        dimensional[leptons[lep]['name']]['MT2llvsdPhi_2']['histo'][s['name']].Fill(PhiMetJet2,mt2ll)
+        dimensional[leptons[lep]['name']]['metvsCosdPhi_1']['histo'][s['name']].Fill(cos(PhiMetJet1),met)
+        dimensional[leptons[lep]['name']]['metvsCosdPhi_2']['histo'][s['name']].Fill(cos(PhiMetJet2),met)
+        dimensional[leptons[lep]['name']]['metvsdPhi_1']['histo'][s['name']].Fill(PhiMetJet1,met)
+        dimensional[leptons[lep]['name']]['metvsdPhi_2']['histo'][s['name']].Fill(PhiMetJet2,met)
+        if (PhiMetJet1 <= PhiMetJet2): #selecting min(dPhi)
+          dimensional[leptons[lep]['name']]['MT2llvsCosMinDphi']['histo'][s['name']].Fill(cos(PhiMetJet1),mt2ll)
+          dimensional[leptons[lep]['name']]['MT2llvsMinDphi']['histo'][s['name']].Fill(PhiMetJet1,mt2ll)
+          plots[leptons[lep]['name']]['CosMinDphi']['histo'][s['name']].Fill(cos(PhiMetJet1),weight)
+          plots[leptons[lep]['name']]['MinDphi']['histo'][s['name']].Fill(PhiMetJet1,weight)
+          dimensional[leptons[lep]['name']]['metvsCosMinDphi']['histo'][s['name']].Fill(cos(PhiMetJet1),met)
+          dimensional[leptons[lep]['name']]['metvsMinDphi']['histo'][s['name']].Fill(PhiMetJet1,met)
           if (mt2ll>=80):
-            plots[leptons[lep]['name']]['MinDphiMt2llcut']['histo'][s['name']].Fill(cos(PhiMetJet1),weight)
-            dimensional[leptons[lep]['name']]['metvsMinDphiMt2llcut']['histo'][s['name']].Fill(cos(PhiMetJet1),met)
+            plots[leptons[lep]['name']]['CosMinDphiMt2llcut']['histo'][s['name']].Fill(cos(PhiMetJet1),weight)
+            plots[leptons[lep]['name']]['MinDphiMt2llcut']['histo'][s['name']].Fill(PhiMetJet1,weight)
+            dimensional[leptons[lep]['name']]['metvsCosMinDphiMt2llcut']['histo'][s['name']].Fill(cos(PhiMetJet1),met)
+            dimensional[leptons[lep]['name']]['metvsMinDphiMt2llcut']['histo'][s['name']].Fill(PhiMetJet1,met)
         else:
-          plots[leptons[lep]['name']]['MinDphi']['histo'][s['name']].Fill(cos(PhiMetJet2),weight)
-          dimensional[leptons[lep]['name']]['metvsMinDphi']['histo'][s['name']].Fill(cos(PhiMetJet2),met)
+          dimensional[leptons[lep]['name']]['MT2llvsCosMinDphi']['histo'][s['name']].Fill(cos(PhiMetJet2),mt2ll)
+          dimensional[leptons[lep]['name']]['MT2llvsMinDphi']['histo'][s['name']].Fill(PhiMetJet2,mt2ll)
+          plots[leptons[lep]['name']]['CosMinDphi']['histo'][s['name']].Fill(cos(PhiMetJet2),weight)
+          plots[leptons[lep]['name']]['MinDphi']['histo'][s['name']].Fill(PhiMetJet2,weight)
+          dimensional[leptons[lep]['name']]['metvsCosMinDphi']['histo'][s['name']].Fill(cos(PhiMetJet2),met)
+          dimensional[leptons[lep]['name']]['metvsMinDphi']['histo'][s['name']].Fill(PhiMetJet2,met)
           if mt2ll>=80:
-            plots[leptons[lep]['name']]['MinDphiMt2llcut']['histo'][s['name']].Fill(cos(PhiMetJet1),weight)
-            dimensional[leptons[lep]['name']]['metvsMinDphiMt2llcut']['histo'][s['name']].Fill(cos(PhiMetJet2),met)
+            plots[leptons[lep]['name']]['CosMinDphiMt2llcut']['histo'][s['name']].Fill(cos(PhiMetJet2),weight)
+            plots[leptons[lep]['name']]['MinDphiMt2llcut']['histo'][s['name']].Fill(PhiMetJet2,weight)
+            dimensional[leptons[lep]['name']]['metvsCosMinDphiMt2llcut']['histo'][s['name']].Fill(cos(PhiMetJet2),met)
+            dimensional[leptons[lep]['name']]['metvsMinDphiMt2llcut']['histo'][s['name']].Fill(PhiMetJet2,met)
+        
         plots[leptons[lep]['name']]['kinMetSig']['histo'][s["name"]].Fill(met/sqrt(ht), weight)
         plots[leptons[lep]['name']]['met']['histo'][s["name"]].Fill(met, weight)
         bjetspt = filter(lambda j:j['btagCSV']>0.814, jets)
@@ -352,25 +416,22 @@ for s in backgrounds+signals:
         plots[leptons[lep]['name']]['njets']['histo'][s["name"]].Fill(len(jets),weight)
         plots[leptons[lep]['name']]['nbjets']['histo'][s["name"]].Fill(len(bjetspt),weight)
         plots[leptons[lep]['name']]['leadingjetpartonId']['histo'][s["name"]].Fill(getVarValue(chain,"Jet_partonId",0),weight)
-        """
         #2 or more bjets: two highest pt
         if len(bjetspt)>=2:
           mt2Calc.setBJets(bjetspt[0]['pt'], bjetspt[0]['eta'], bjetspt[0]['phi'], bjetspt[1]['pt'], bjetspt[1]['eta'], bjetspt[1]['phi'])
         #1 bjets: bjet+jet with highest pt
         if len(bjetspt)==1 and len(nobjets)>0:
           mt2Calc.setBJets(bjetspt[0]['pt'], bjetspt[0]['eta'], bjetspt[0]['phi'], nobjets[0]['pt'], nobjets[0]['eta'], nobjets[0]['phi'])
-        if len(bjetspt)==0:
+        if (len(bjetspt)==0) or (len(bjetspt)==1 and len(nobjets)==0): #last one seems necessary if btagCSV is 'nan'
           continue
         mt2bb   = mt2Calc.mt2bb()
         mt2blbl = mt2Calc.mt2blbl()
         plots[leptons[lep]['name']]['mt2bb']['histo'][s["name"]].Fill(mt2bb, weight)
         plots[leptons[lep]['name']]['mt2blbl']['histo'][s["name"]].Fill(mt2blbl, weight)
-        """
-    #Tree.Fill()
+        #Tree.Fill()
   #TreeFile.Write()
   #TreeFile.Close()
   del eList
-
 
 #######################################################
 #           provide tables from histograms            #
@@ -393,8 +454,9 @@ if makepiechart:
 #             Drawing done here                       #
 #######################################################
 #Some coloring
+
 TTJets_15["color"]=ROOT.kRed
-WJetsHTToLNu["color"]=ROOT.kGreen
+#WJetsHTToLNu["color"]=ROOT.kGreen
 #TTH["color"]=ROOT.kMagenta
 #TTW["color"]=ROOT.kMagenta-3
 #TTZ["color"]=ROOT.kMagenta-6
@@ -404,7 +466,7 @@ DY_15["color"]=ROOT.kBlue
 #Plotvariables
 signal = {'path': ["SMS_T2tt_2J_mStop425_mLSP325","SMS_T2tt_2J_mStop500_mLSP325","SMS_T2tt_2J_mStop650_mLSP325","SMS_T2tt_2J_mStop850_mLSP100"], 'name': ["T2tt(425,325)","T2tt(500,325)","T2tt(650,325)","T2tt(850,100)"]}
 yminimum = 10**-0.5
-legendtextsize = 0.032
+legendtextsize = 0.028
 signalscaling = 100
 
 
@@ -412,9 +474,8 @@ if makedraw1D:
 
   for pk in plots.keys():
     for plot in plots[pk].keys():
-      print plots[pk][plot]['name']
-    #Make a stack for backgrounds
-      l=ROOT.TLegend(0.6,0.6,1.0,1.0)
+      #Make a stack for backgrounds
+      l=ROOT.TLegend(0.6,0.8,1.0,1.0)
       l.SetFillColor(0)
       l.SetShadowColor(ROOT.kWhite)
       l.SetBorderSize(1)
@@ -429,7 +490,7 @@ if makedraw1D:
     
     #Plot!
       c1 = ROOT.TCanvas()
-      bkg_stack.SetMaximum(2*bkg_stack.GetMaximum())
+      bkg_stack.SetMaximum(30*bkg_stack.GetMaximum())
       bkg_stack.SetMinimum(yminimum)
       bkg_stack.Draw()
       bkg_stack.GetXaxis().SetTitle(plots[pk][plot]['title'])
@@ -465,7 +526,7 @@ if makedraw1D:
     
   for plot in plotsSF['SF'].keys():
     bkg_stack_SF = ROOT.THStack("bkgs_SF","bkgs_SF")
-    l=ROOT.TLegend(0.6,0.6,1.0,1.0)
+    l=ROOT.TLegend(0.6,0.8,1.0,1.0)
     l.SetFillColor(0)
     l.SetShadowColor(ROOT.kWhite)
     l.SetBorderSize(1)
@@ -477,7 +538,7 @@ if makedraw1D:
       l.AddEntry(bkgforstack, b["name"])
    
     c1 = ROOT.TCanvas()
-    bkg_stack_SF.SetMaximum(2*bkg_stack_SF.GetMaximum())
+    bkg_stack_SF.SetMaximum(30*bkg_stack_SF.GetMaximum())
     bkg_stack_SF.SetMinimum(yminimum)
     bkg_stack_SF.Draw()
     bkg_stack_SF.GetXaxis().SetTitle(plotsSF['SF'][plot]['title'])
@@ -518,7 +579,7 @@ if makedraw2D:
 
   for pk in dimensional.keys():
     for plot in dimensional[pk].keys():
-      #Plot!
+    #Plot!
       for s in backgrounds+signals:
         plot2D = dimensional[pk][plot]['histo'][s["name"]]
         
@@ -558,5 +619,45 @@ if makedraw2D:
         channeltag.SetShadowColor(ROOT.kWhite)
         channeltag.Draw()
         
-        c1.Print(plotDir+"/test/2D/"+dimensional[pk][plot]['name']+"_"+pk+"_"+s['name']+".png")
+        c1.Print(plotDir+"/test/2D/"+dimensionalSF[pk][plot]['name']+"/"+dimensionalSF[pk][plot]['name']+"_"+pk+"_"+s['name']+".png")
+        c1.Clear()
+  
+  for pk in dimensionalSF.keys():
+    for plot in dimensionalSF[pk].keys():
+      for s in backgrounds+signals:
+        plot2DSF = dimensional['ee'][plot]['histo'][s["name"]]
+        plot2DSF.Add(dimensional['mumu'][plot]['histo'][s["name"]])
+        
+        plot2DSF.Draw("colz")
+        if plot2DSF.Integral()==0:continue
+        ROOT.gPad.Update()
+        palette = plot2DSF.GetListOfFunctions().FindObject("palette")
+        palette.SetX1NDC(0.85)
+        palette.SetX2NDC(0.9)
+        palette.Draw()
+        plot2DSF.GetXaxis().SetTitle(dimensionalSF[pk][plot]['xtitle'])
+        plot2DSF.GetYaxis().SetTitle(dimensionalSF[pk][plot]['ytitle'])
+        
+        l=ROOT.TLegend(0.25,0.95,0.9,1.0)
+        l.SetFillColor(0)
+        l.SetShadowColor(ROOT.kWhite)
+        l.SetBorderSize(1)
+        l.SetTextSize(legendtextsize)
+        l.AddEntry(plot2DSF,s["name"])
+        l.Draw()
+        channeltag = ROOT.TPaveText(0.65,0.7,0.8,0.85,"NDC")
+        channeltag.AddText("SF")
+        if s in signals:
+          index = signal['path'].index(s["name"])
+          channeltag.AddText(signal["name"][index])
+        if s in backgrounds:
+          channeltag.AddText(s["name"])
+        if dimensionalSF['SF'][plot].has_key('tag'):
+          print 'Tag found, adding to histogram'
+          channeltag.AddText(dimensionalSF[pk][plot]['tag'])
+        channeltag.SetFillColor(ROOT.kWhite)
+        channeltag.SetShadowColor(ROOT.kWhite)
+        channeltag.Draw()
+        
+        c1.Print(plotDir+"/test/2D/"+dimensionalSF[pk][plot]['name']+"/"+dimensionalSF[pk][plot]['name']+"_"+pk+"_"+s['name']+".png")
         c1.Clear()
