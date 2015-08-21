@@ -2,17 +2,18 @@
 
 // tdrGrid: Turns the grid lines on (true) or off (false)
 
-void tdrGrid(bool gridOn) {
-  tdrStyle->SetPadGridX(gridOn);
-  tdrStyle->SetPadGridY(gridOn);
-}
+// void tdrGrid(bool gridOn) {
+//   tdrStyle->SetPadGridX(gridOn);
+//   tdrStyle->SetPadGridY(gridOn);
+// }
 
 // fixOverlay: Redraws the axis
 
 void fixOverlay() {
   gPad->RedrawAxis();
 }
-TStyle * setTDRStyle() {
+
+void setTDRStyle() {
   TStyle *tdrStyle = new TStyle("tdrStyle","Style for P-TDR");
 
 // For the canvas:
@@ -88,7 +89,7 @@ TStyle * setTDRStyle() {
   tdrStyle->SetPadTopMargin(0.05);
   tdrStyle->SetPadBottomMargin(0.13);
   tdrStyle->SetPadLeftMargin(0.16);
-  tdrStyle->SetPadRightMargin(0.05);
+  tdrStyle->SetPadRightMargin(0.02);
 
 // For the Global title:
 
@@ -152,5 +153,5 @@ TStyle * setTDRStyle() {
   // tdrStyle->SetHistMinimumZero(kTRUE);
 
   tdrStyle->cd();
-  return tdrStyle;
+
 }
