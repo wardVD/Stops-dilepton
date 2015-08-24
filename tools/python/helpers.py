@@ -37,6 +37,43 @@ def getChain(sampleList, histname='histo', maxN=-1, treeName="Events"):
   print "Added ",i,'files from sample',s['name']
   return c
 
+def getChunks(sample,  maxN=-1):
+#  print "sample" , sample , maxN
+  import os, subprocess, datetime
+  #print "sample dir:" , sample['dir']
+  chunks = [{'name':x} for x in os.listdir(sample['dir']) if x.startswith(sample['chunkString']+'_Chunk') or x==sample['name']]
+  #print chunks
+  chunks=chunks[:maxN] if maxN>0 else chunks
+  sumWeights=0
+  allFiles=[]
+  failedChunks=[]
+  const = 'All Events' if sample['isData'] else 'Sum Weights'
+  for i, s in enumerate(chunks):
+      if not sample.has_key("skimAnalyzerDir"):
+        logfile = sample['dir']+'/'+s['name']+'/SkimReport.txt'
+      else:
+        logfile = sample['dir']+'/'+s['name']+"/"+sample["skimAnalyzerDir"]+'/SkimReport.txt'
+      if os.path.isfile(logfile):
+        line = [x for x in subprocess.check_output(["cat", logfile]).split('\n') if x.count(const)]
+        assert len(line)==1,"Didn't find normalization constant '%s' in  number in file %s"%(const, logfile)
+        #n = int(float(line[0].split()[2]))
+        sumW = float(line[0].split()[2])
+        inputFilename = sample['dir']+'/'+s['name']+'/'+sample['rootFileLocation']
+        #print sumW, inputFilename
+        if os.path.isfile(inputFilename):
+          sumWeights+=sumW
+          allFiles.append(inputFilename)
+          s['file']=inputFilename
+        else:
+          failedChunks.append(chunks[i])
+      else:
+        print "log file not found:  ", logfile
+        failedChunks.append(chunks[i])
+#    except: print "Chunk",s,"could not be added"
+  print "Found",len(chunks),"chunks for sample",sample["name"],'with a normalization constant of',sumWeights,
+  if len(chunks) > 0: print ". Failed for:",",".join([c['name'] for c in failedChunks]),"(",round(100*len(failedChunks)/float(len(chunks)),1),")%"
+  return chunks, sumWeights
+
 def getObjFromFile(fname, hname):
   f = ROOT.TFile(fname)
   assert not f.IsZombie()
@@ -48,22 +85,20 @@ def getObjFromFile(fname, hname):
   f.Close()
   return res
 
-def getVar(c, var, n=0):
-    l = c.GetLeaf(var)
-    try:
-       return l.GetValue(n)
-    except:
-      raise Exception("Unsuccessful getVarValue for leaf %s and index %i"%(var, n))
-
-def getVarValue(c, var, n=0):
-  varNameHisto = var
-  leaf = c.GetAlias(varNameHisto)
-  if leaf!='':
-    try:
-      return c.GetLeaf(leaf).GetValue(n)
-    except:
-      raise Exception("Unsuccessful getVarValue for leaf %s and index %i"%(leaf, n))
-  else:
+def getVarValue(c, var, n=-1):
+#  varNameHisto = var
+#  leaf = c.GetAlias(varNameHisto)
+#  if leaf!='':
+#    try:
+#      return c.GetLeaf(leaf).GetValue(n)
+#    except:
+#      raise Exception("Unsuccessful getVarValue for leaf %s and index %i"%(leaf, n))
+#  else:
+  try:
+    att = getattr(c, var)
+    if n>=0:return att[n]
+    return att
+  except:  
     l = c.GetLeaf(var)
     if l:return l.GetValue(n)
     return float('nan')
@@ -77,7 +112,7 @@ def getEList(chain, cut, newname='eListTMP'):
   return elistTMP
 
 def getObjDict(c, prefix, variables, i):
-  return {var: c.GetLeaf(prefix+var).GetValue(i) for var in variables}
+  return {var: getVarValue(c, prefix+var, i) for var in variables}
 
 def getWeight(c,sample,lumi,n=0):
   genweight_value    = c.GetLeaf("genWeight").GetValue(n)
