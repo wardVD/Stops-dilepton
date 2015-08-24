@@ -2,12 +2,12 @@ import copy, os, sys
 from StopsDilepton.tools.localInfo import dataDir
 dir = dataDir 
 
-TTJets={\
+TTJets_50ns={\
 "name" : "tt+Jets",
 "bins" : ["TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1"],
 'dir' : dir,
 }
-WJetsToLNu={\
+WJetsToLNu_50ns={\
 "name" : "W+Jets",
 "bins" : [
 "WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
@@ -15,7 +15,7 @@ WJetsToLNu={\
 'dir' : dir,
 }
 
-diBosons={\
+diBosons_50ns={\
 "name" : "WW/WZ/ZZ",
 "bins" : [
 "WWTo2L2Nu_13TeV-powheg_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2",
@@ -24,7 +24,7 @@ diBosons={\
 ],
 'dir' : dir,
 }
-singleTop={\
+singleTop_50ns={\
 "name" : "single top",
 "bins" : [
 "ST_t-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
@@ -33,7 +33,7 @@ singleTop={\
 ],
 'dir' : dir,
 }
-DY={\
+DY_50ns={\
 "name" : "DY",
 "bins" : [
 "DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
@@ -41,14 +41,15 @@ DY={\
 "DYJetsToLL_M-50_HT-400to600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
 "DYJetsToLL_M-50_HT-600toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
 ],
-DYM10to50={\
+}
+DYM10to50_50ns={\
 "name" : "DY M10-50",
 "bins" : [
 "DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
 ],
 'dir' : dataDir,
 }
-QCDMu={\
+QCDMu_50ns={\
 "name" : "QCDMu",
 "bins" : [
 "QCD_Pt-1000toInf_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2",

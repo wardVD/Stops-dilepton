@@ -5,12 +5,12 @@ dir = dataDir
 #"ZJetsToNuNu_HT-400To600_13TeV-madgraph_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 #"ZJetsToNuNu_HT-600ToInf_13TeV-madgraph_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 
-TTJets={\
+TTJets_25ns={\
 "name" : "tt+Jets",
 "bins" : ["TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1"],
 'dir' : dir,
 }
-WJetsHTToLNu={\
+WJetsHTToLNu_25ns={\
 "name" : "W+Jets",
 "bins" : [
 "WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
@@ -25,7 +25,7 @@ WJetsHTToLNu={\
 'dir' : dir,
 }
 
-diBosons={\
+diBosons_25ns={\
 "name" : "WW/WZ/ZZ",
 "bins" : [
 "WWTo2L2Nu_13TeV-powheg_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
@@ -34,7 +34,7 @@ diBosons={\
 ],
 'dir' : dir,
 }
-singleTop={\
+singleTop_25ns={\
 "name" : "single top",
 "bins" : [
 "ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
@@ -44,7 +44,7 @@ singleTop={\
 ],
 'dir' : dir,
 }
-DY={\
+DY_25ns={\
 "name" : "DY",
 "bins" : [
 "DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2",
@@ -52,14 +52,15 @@ DY={\
 "DYJetsToLL_M-50_HT-400to600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2",
 "DYJetsToLL_M-50_HT-600toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2",
 ],
-DYM10to50={\
+}
+DYM10to50_25ns={\
 "name" : "DY M10-50",
 "bins" : [
 "DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 ],
 'dir' : dataDir,
 }
-QCDMu={\
+QCDMu_25ns={\
 "name" : "QCD (MuPt5 enriched)",
 "bins" : [
 "QCD_Pt-15to20_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
@@ -79,7 +80,7 @@ QCDMu={\
 }
 
 
-QCDEle={\
+QCDEle_25ns={\
 "name" : "QCD (Ele)",
 "bins" : [
 "QCD_Pt_15to20_bcToE_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
