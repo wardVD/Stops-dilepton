@@ -22,7 +22,7 @@ preselection = 'met_pt>40&&Sum$((Jet_pt)*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>
 reduceStat = 1
 
 #load all the samples
-from StopsDilepton.plots.cmgTuplesPostProcessed_PHYS14 import *
+from StopsDilepton.samples.cmgTuplesPostProcessed_PHYS14 import *
 backgrounds = [TTJets, WJetsHTToLNu, TTVH, singleTop, DY]#, QCD]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
 
