@@ -113,6 +113,7 @@ def getEList(chain, cut, newname='eListTMP'):
 
 def getObjDict(c, prefix, variables, i):
   return {var: getVarValue(c, prefix+var, i) for var in variables}
+#  return {var: c.GetLeaf(prefix+var).GetValue(i) for var in variables}
 
 def getWeight(c,sample,lumi,n=0):
   genweight_value    = c.GetLeaf("genWeight").GetValue(n)
@@ -222,7 +223,6 @@ def piemaker(mt2cut,piechart):
   for ipiece, piece in enumerate(piechart["SF"].keys()):
     canvas.cd(ipiece+1)
     pies[ipiece].Draw("nol")
- 
 
   canvas.SaveAs("Pie_SF_forMT2llcutat.png")
   #canvas.Close()
