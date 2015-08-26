@@ -7,4 +7,4 @@ if os.environ['USER'] in ['didar']:
   dataDir = "~/eos/cms/store/cmst3/group/susy/schoef/postProcessed_Phys14V3_diLep" #needs EOS mount on lxplus at ~/eos 
 if os.environ['USER'] in ['schoef', 'rschoefbeck', 'schoefbeck']:
   plotDir = "/afs/hephy.at/user/r/rschoefbeck/www/png2L/"
-  dataDir = "/data/rschoefbeck/cmgTuples/postProcessed_Phys14V3_diLep/diLep/" 
+  dataDir = "/data/rschoefbeck/cmgTuples/postProcessed_Spring15/dilep/" 

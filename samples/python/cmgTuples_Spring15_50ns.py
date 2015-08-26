@@ -215,12 +215,157 @@ QCD_MuEnriched_Pt800to1000_50ns={\
 QCD_MuEnriched_Pt1000toInf_50ns={\
 "name" : "QCD_Pt-1000toInf_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2",
 "chunkString":"QCD_Pt-1000toInf_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2",
-"dir" : data_path,
 "dbsName" : "/QCD_Pt-1000toInf_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/MINIAODSIM",
+"dir" : data_path,
 "rootFileLocation":"tree.root",
 "treeName":"tree",
 'isData':False
 }
+QCD_Pt_10to15={
+"dbsName":     "/QCD_Pt_10to15_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/MINIAODSIM",
+"name":        "QCD_Pt_10to15_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"chunkString": "QCD_Pt_10to15_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"dir" : data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+QCD_Pt_15to30_50ns={
+"dbsName":     "/QCD_Pt_15to30_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/MINIAODSIM",
+"name":        "QCD_Pt_15to30_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"chunkString": "QCD_Pt_15to30_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"dir" : data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+QCD_Pt_30to50_50ns={
+"dbsName":     "/QCD_Pt_30to50_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/MINIAODSIM",
+"name":        "QCD_Pt_30to50_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2",
+"chunkString": "QCD_Pt_30to50_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2",
+"dir" : data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+QCD_Pt_50to80_50ns={
+"dbsName":     "/QCD_Pt_50to80_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/MINIAODSIM",
+"name":        "QCD_Pt_50to80_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"chunkString": "QCD_Pt_50to80_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"dir" : data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+QCD_Pt_80to120_50ns={
+"dbsName":     "/QCD_Pt_80to120_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/MINIAODSIM",
+"name":        "QCD_Pt_80to120_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"chunkString": "QCD_Pt_80to120_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"dir" : data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+QCD_Pt_120to170_50ns={
+"dbsName":     "/QCD_Pt_120to170_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/MINIAODSIM",
+"name":        "QCD_Pt_120to170_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"chunkString": "QCD_Pt_120to170_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"dir" : data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+QCD_Pt_170to300_50ns={
+"name":        "QCD_Pt_170to300_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2",
+"chunkString": "QCD_Pt_170to300_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2",
+"dbsName":     "/QCD_Pt_170to300_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/MINIAODSIM",
+"dir" : data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+QCD_Pt_300to470_50ns={
+"dbsName":     "/QCD_Pt_300to470_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/MINIAODSIM",
+"name":        "QCD_Pt_300to470_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"chunkString": "QCD_Pt_300to470_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"dir" : data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+QCD_Pt_470to600_50ns={
+"dbsName":     "/QCD_Pt_470to600_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/MINIAODSIM",
+"name":        "QCD_Pt_470to600_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2",
+"chunkString": "QCD_Pt_470to600_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2",
+"dir" : data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+QCD_Pt_600to800_50ns={
+"dbsName":     "/QCD_Pt_600to800_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/MINIAODSIM",
+"name":        "QCD_Pt_600to800_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2",
+"chunkString": "QCD_Pt_600to800_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2",
+"dir" : data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+QCD_Pt_800to1000_50ns={
+"dbsName":     "/QCD_Pt_800to1000_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/MINIAODSIM",
+"name":        "QCD_Pt_800to1000_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2",
+"chunkString": "QCD_Pt_800to1000_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2",
+"dir" : data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+QCD_Pt_1000to1400_50ns={
+"dbsName":     "/QCD_Pt_1000to1400_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/MINIAODSIM",
+"name":        "QCD_Pt_1000to1400_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2",
+"chunkString": "QCD_Pt_1000to1400_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2",
+"dir" : data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+QCD_Pt_1400to1800_50ns={
+"dbsName":     "/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/MINIAODSIM",
+"name":        "QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"chunkString": "QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"dir" : data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+QCD_Pt_1800to2400_50ns={
+"dbsName":     "/QCD_Pt_1800to2400_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/MINIAODSIM",
+"name":        "QCD_Pt_1800to2400_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"chunkString": "QCD_Pt_1800to2400_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"dir" : data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+QCD_Pt_2400to3200_50ns={
+"dbsName":     "/QCD_Pt_2400to3200_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/MINIAODSIM",
+"name":        "QCD_Pt_2400to3200_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"chunkString": "QCD_Pt_2400to3200_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"dir" : data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+QCD_Pt_3200toInf_50ns={
+"dbsName":     "/QCD_Pt_3200toInf_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/MINIAODSIM",
+"name":        "QCD_Pt_3200toInf_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"chunkString": "QCD_Pt_3200toInf_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+"dir" : data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+
 
 WZ_50ns={\
 "name" : "WZ_TuneCUETP8M1_13TeV-pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2",

@@ -34,7 +34,7 @@
 #include <math.h>
 #include "mt2_bisect.h"
 
-ClassImp(mt2);
+//ClassImp(mt2);
 
 using namespace std;
 
