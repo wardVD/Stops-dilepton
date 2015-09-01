@@ -23,7 +23,7 @@ reduceStat = 100 #recude the statistics, i.e. 10 is ten times less samples to lo
 #######################################################
 #                 load all the samples                #
 #######################################################
-from StopsDilepton.plots.cmgTuplesPostProcessed_PHYS14 import *
+from StopsDilepton.samples.cmgTuplesPostProcessed_PHYS14 import *
 #backgrounds = [WJetsHTToLNu, TTH, TTW, TTZ, DYWARD, singleTop, TTJets]#, QCD]
 backgrounds = [TTH]
 #signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]

@@ -3,11 +3,13 @@ ROOT.gROOT.LoadMacro("$CMSSW_BASE/src/StopsDilepton/tools/scripts/tdrstyle.C")
 ROOT.setTDRStyle()
 
 from math import *
-from StopsDilepton.tools.mt2Calculator import mt2Calculator
-mt2Calc = mt2Calculator()
+import array
+
 from StopsDilepton.tools.mtautau import mtautau as mtautau_
 from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue
 from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets 
+from StopsDilepton.tools.mt2Calculator import mt2Calculator
+mt2Calc = mt2Calculator()
 from StopsDilepton.tools.localInfo import *
 
 #preselection: MET>50, HT>100, n_bjets>=2
@@ -15,15 +17,24 @@ from StopsDilepton.tools.localInfo import *
 #For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
 
 #preselection = 'met_pt>40&&Sum$((Jet_pt)*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>100&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)==2&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
-preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)==2&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)>=2'
+preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)==2&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)>=2'
 prefix="def"
 #prefix="mt2ll-120"
 reduceStat = 1
 
 #load all the samples
-from StopsDilepton.plots.cmgTuplesPostProcessed_PHYS14 import *
-backgrounds = [TTJets, WJetsHTToLNu, TTVH, singleTop, DY]#, QCD]
-signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
+from StopsDilepton.samples.cmgTuples_Spring15_50ns_postProcessed import *
+from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
+from StopsDilepton.samples.cmgTuples_Data50ns_1l_postProcessed import *
+
+#backgrounds = [TTJets_50ns, WJetsToLNu_50ns, diBosons_50ns, singleTop_50ns, DY_50ns]#, QCD]
+#backgrounds = [TTJets_50ns, diBosons_50ns, singleTop_50ns, DY_50ns]#, QCD]
+backgrounds = [TTJets_25ns, DY_25ns, singleTop_25ns, diBosons_25ns, WJetsHTToLNu_25ns]#, QCD]
+
+data = 
+
+signals = [] #SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
+
 
 #get the TChains for each sample
 for s in backgrounds+signals:
@@ -42,16 +53,13 @@ plots = {\
   'alpha1': {'title':'#alpha_{1}', 'name':'alpha1', 'binning': [50,-10,10], 'histo':{}},
 }
 
+
 #make plot in each sample: 
 for s in backgrounds+signals:
   for pk in plots.keys():
     plots[pk]['histo'][s['name']] = ROOT.TH1F("met_"+s["name"], "met_"+s["name"], *(plots[pk]['binning']))
+
   chain = s["chain"]
-#  #Using Draw command
-#  print "Obtain MET plot from %s" % s["name"]
-#  chain.Draw("met_pt>>met_"+s["name"], "weight*("+preselection+")","goff")
-  #Using Event loop
-  #get EList after preselection
   print "Looping over %s" % s["name"]
   eList = getEList(chain, preselection) 
   nEvents = eList.GetN()/reduceStat
@@ -60,20 +68,17 @@ for s in backgrounds+signals:
     if ev%10000==0:print "At %i/%i"%(ev,nEvents)
     chain.GetEntry(eList.GetEntry(ev))
     mt2Calc.reset()
-    #event weight (L= 4fb^-1)
     weight = reduceStat*getVarValue(chain, "weight")
-    #MET
     met = getVarValue(chain, "met_pt")
     metPhi = getVarValue(chain, "met_phi")
-    #Leptons 
     leptons = filter(lambda l: looseMuID(l) or looseEleID(l), getLeptons(chain))
     if len(leptons)==2 and leptons[0]['pdgId']*leptons[1]['pdgId']<0 and abs(leptons[0]['pdgId'])==abs(leptons[1]['pdgId']): #OSSF choice
       l0pt, l0eta, l0phi = leptons[0]['pt'],  leptons[0]['eta'],  leptons[0]['phi']
       l1pt, l1eta, l1phi = leptons[1]['pt'],  leptons[1]['eta'],  leptons[1]['phi']
       mll = sqrt(2.*l0pt*l1pt*(cosh(l0eta-l1eta)-cos(l0phi-l1phi)))
-      if mll>20 and abs(mll-90.2)>15:
+      if mll>20 and abs(mll-90.2)<15:
         jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(chain))
-        bjets = filter(lambda j:j['btagCSV']>0.814, jets)
+        bjets = filter(lambda j:j['btagCSV']>0.890, jets)
         if len(bjets)==2:
           mt2Calc.setMet(met,metPhi)
           mt2Calc.setLeptons(l0pt, l0eta, l0phi, l1pt, l1eta, l1phi)
@@ -101,11 +106,16 @@ for s in backgrounds+signals:
   del eList
 
 #Some coloring
-TTJets["color"]=ROOT.kRed
-WJetsHTToLNu["color"]=ROOT.kGreen
-TTVH["color"]=ROOT.kMagenta
-singleTop["color"]=ROOT.kOrange
-DY["color"]=ROOT.kBlue
+TTJets_50ns["color"]=ROOT.kRed
+TTJets_25ns["color"]=ROOT.kRed
+WJetsHTToLNu_25ns["color"]=ROOT.kGreen
+#TTVH["color"]=ROOT.kMagenta
+diBosons_50ns["color"]=ROOT.kMagenta
+diBosons_25ns["color"]=ROOT.kMagenta
+singleTop_50ns["color"]=ROOT.kOrange
+singleTop_25ns["color"]=ROOT.kOrange
+DY_50ns["color"]=ROOT.kBlue
+DY_25ns["color"]=ROOT.kBlue
 
 for pk in plots.keys():
   #Make a stack for backgrounds
@@ -114,7 +124,7 @@ for pk in plots.keys():
   l.SetShadowColor(ROOT.kWhite)
   l.SetBorderSize(1)
   bkg_stack = ROOT.THStack("bkgs","bkgs")
-  for b in [WJetsHTToLNu, TTVH, DY, singleTop, TTJets]:
+  for b in reversed(backgrounds):
     plots[pk]['histo'][b['name']].SetFillColor(b["color"])
     plots[pk]['histo'][b['name']].SetMarkerColor(b["color"])
     plots[pk]['histo'][b['name']].SetMarkerSize(0)
@@ -122,7 +132,6 @@ for pk in plots.keys():
     bkg_stack.Add(plots[pk]['histo'][b['name']],"h")
     l.AddEntry(plots[pk]['histo'][b['name']], b["name"])
   #Plot!
-  signal = "SMS_T2tt_2J_mStop650_mLSP325"#May chose different signal here
   c1 = ROOT.TCanvas()
   bkg_stack.SetMaximum(2*bkg_stack.GetMaximum())
   bkg_stack.SetMinimum(10**-1.5)
@@ -131,9 +140,10 @@ for pk in plots.keys():
   binning = plots[pk]['binning']
   bkg_stack.GetYaxis().SetTitle("Events / %i GeV"%( (binning[2]-binning[1])/binning[0]) )
   c1.SetLogy()
-  signalPlot = plots[pk]['histo'][signal].Clone()
-  signalPlot.Scale(100)
-  signalPlot.Draw("same")
-  l.AddEntry(signalPlot, signal+" x 100")
+#  signal = "SMS_T2tt_2J_mStop650_mLSP325"#May chose different signal here
+#  signalPlot = plots[pk]['histo'][signal].Clone()
+#  signalPlot.Scale(100)
+#  signalPlot.Draw("same")
+#  l.AddEntry(signalPlot, signal+" x 100")
   l.Draw()
   c1.Print(plotDir+"/"+prefix+'_'+plots[pk]["name"]+".png")

@@ -18,7 +18,7 @@ preselection = 'Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)
 reduceStat = 1
 
 #load all the samples
-from StopsDilepton.plots.cmgTuplesPostProcessed_PHYS14 import *
+from StopsDilepton.samples.cmgTuplesPostProcessed_PHYS14 import *
 backgrounds = [DY]
 
 #get the TChains for each sample

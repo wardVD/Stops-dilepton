@@ -1,7 +1,6 @@
 #ifndef MT2_BISECT_H
 #define MT2_BISECT_H
 
-
 /*The user can change the desired precision below, the larger one of the following two definitions is used. Relative precision less than 0.00001 is not guaranteed to be achievable--use with caution*/ 
 
 #define RELATIVE_PRECISION 0.00001 //defined as precision = RELATIVE_PRECISION * scale, where scale = max{Ea, Eb}
