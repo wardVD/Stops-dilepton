@@ -4,11 +4,11 @@ ROOT.setTDRStyle()
 import numpy
 
 from math import *
+from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue, genmatching, latexmaker, piemaker, getWeight, deltaPhi
+from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets, getGenParts
+from StopsDilepton.tools.localInfo import *
 from StopsDilepton.tools.mt2Calculator import mt2Calculator
 mt2Calc = mt2Calculator()
-from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue, genmatching, latexmaker, piemaker, getWeight, deltaPhi
-from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets, ele_ID_eta, getGenParts
-from StopsDilepton.tools.localInfo import *
 
 #preselection: MET>40, njets>=2, n_bjets>=1, n_lep>=2
 #See here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
@@ -19,17 +19,16 @@ preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV
 #######################################################
 reduceStat = 1 #recude the statistics, i.e. 10 is ten times less samples to look at
 makedraw1D = True
-makedraw2D = True
+makedraw2D = False
 makelatextables = False #Ignore this if you're not Ward
 makepiechart = False    #Ignore this if you're not Ward
 
 #######################################################
 #                 load all the samples                #
 #######################################################
-from StopsDilepton.samples.cmgTuplesPostProcessed_PHYS14 import *
-from StopsDilepton.samples.cmgTuples_SPRING15_WardPrivateProduction import *
-#backgrounds = [WJetsHTToLNu, TTH, TTW, TTZ, DYWARD, singleTop, TTJets]#, QCD]
-backgrounds = [DY_15,TTJets_15]
+#from StopsDilepton.samples.cmgTuplesPostProcessed_PHYS14 import *
+from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
+backgrounds = [DY_25ns]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
 #signals = []
 
@@ -40,8 +39,7 @@ signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_
 #PHYS14 and my(!) SPRING15 ntuples are structured a bit differently (i.e. treeName is different). PHYS14 have correct weight stored in ntuple
 #SPRING15 has to make the weight with xsec,luminosity and totalweight (total genWeight) that I saved by hand
 for s in backgrounds+signals:
-  if s.has_key('totalweight'): s['chain'] = getChain(s,histname="",treeName="tree")
-  else:                        s['chain'] = getChain(s,histname="")
+  s['chain'] = getChain(s,histname="")
 
 
 #ROOT output file
@@ -305,8 +303,7 @@ for s in backgrounds+signals:
     chain.GetEntry(eList.GetEntry(ev))
     mt2Calc.reset()
     #event weight (L= 4fb^-1)
-    if s.has_key('totalweight'): weight = getWeight(chain,s, 4000) #this method for Ward's SPRING15 samples
-    else:                        weight = reduceStat*getVarValue(chain, "weight") #this method for Robert's PHYS14 samples
+    weight = reduceStat*getVarValue(chain, "weight")
     #MET
     met = getVarValue(chain, "met_pt")
     metPhi = getVarValue(chain, "met_phi")
@@ -455,14 +452,14 @@ if makepiechart:
 #######################################################
 #Some coloring
 
-TTJets_15["color"]=ROOT.kRed
+#TTJets_15["color"]=ROOT.kRed
 #WJetsHTToLNu["color"]=ROOT.kGreen
 #TTH["color"]=ROOT.kMagenta
 #TTW["color"]=ROOT.kMagenta-3
 #TTZ["color"]=ROOT.kMagenta-6
 #singleTop["color"]=ROOT.kOrange
 #DY["color"]=ROOT.kBlue
-DY_15["color"]=ROOT.kBlue
+DY_25ns["color"]=ROOT.kBlue
 #Plotvariables
 signal = {'path': ["SMS_T2tt_2J_mStop425_mLSP325","SMS_T2tt_2J_mStop500_mLSP325","SMS_T2tt_2J_mStop650_mLSP325","SMS_T2tt_2J_mStop850_mLSP100"], 'name': ["T2tt(425,325)","T2tt(500,325)","T2tt(650,325)","T2tt(850,100)"]}
 yminimum = 10**-0.5
@@ -504,8 +501,8 @@ if makedraw1D:
       signalPlot_2.SetLineColor(ROOT.kCyan)
       signalPlot_1.SetLineWidth(3)
       signalPlot_2.SetLineWidth(3)
-      signalPlot_1.Draw("same")
-      signalPlot_2.Draw("same")
+      signalPlot_1.Draw("HISTsame")
+      signalPlot_2.Draw("HISTsame")
       l.AddEntry(signalPlot_1, signal['name'][0]+" x " + str(signalscaling), "l")
       l.AddEntry(signalPlot_2, signal['name'][1]+" x " + str(signalscaling), "l")
       l.Draw()
