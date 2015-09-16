@@ -12,23 +12,25 @@ mt2Calc = mt2Calculator()
 
 #preselection: MET>40, njets>=2, n_bjets>=1, n_lep>=2
 #See here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
-preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)>=1&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
+preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)>=1&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)==2'
+#preselection = "met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2"
 
 #######################################################
 #        SELECT WHAT YOU WANT TO DO HERE              #
 #######################################################
 reduceStat = 1 #recude the statistics, i.e. 10 is ten times less samples to look at
-makedraw1D = True
+makedraw1D = False
 makedraw2D = False
-makelatextables = False #Ignore this if you're not Ward
+makelatextables = True #Ignore this if you're not Ward
 makepiechart = False    #Ignore this if you're not Ward
 
 #######################################################
 #                 load all the samples                #
 #######################################################
 #from StopsDilepton.samples.cmgTuplesPostProcessed_PHYS14 import *
-from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
-backgrounds = [DY_25ns]
+from StopsDilepton.samples.cmgTuples_Spring15_50ns_postProcessed import *
+#backgrounds = [singleTop_50ns,QCDMu_50ns,DY_50ns,TTJets_50ns]
+backgrounds = [TTJets_50ns]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
 #signals = []
 
@@ -235,6 +237,7 @@ dimensionalSF={\
   }
 }
 
+
 #######################################################
 #            Start filling in the histograms          #
 #######################################################
@@ -298,7 +301,9 @@ for s in backgrounds+signals:
   #Tree.Branch("MT2ee",MT2ee_n,"MT2ee/D")
   #Tree.Branch("MT2emu",MT2emu_n,"MT2emu/D")
   #Tree.Branch("MT2mumu",MT2mumu_n,"MT2mumu/D")
+
   for ev in range(nEvents):
+
     if ev%10000==0:print "At %i/%i"%(ev,nEvents)
     chain.GetEntry(eList.GetEntry(ev))
     mt2Calc.reset()
@@ -325,6 +330,7 @@ for s in backgrounds+signals:
       'e':   {'name': 'ee', 'file': electrons},
       'emu': {'name': 'emu', 'file': [electrons,muons]},
       }
+
     for lep in leptons.keys():
       twoleptons = False
       #Same Flavor
@@ -407,6 +413,7 @@ for s in backgrounds+signals:
             dimensional[leptons[lep]['name']]['metvsMinDphiMt2llcut']['histo'][s['name']].Fill(PhiMetJet2,met)
         
         plots[leptons[lep]['name']]['kinMetSig']['histo'][s["name"]].Fill(met/sqrt(ht), weight)
+
         plots[leptons[lep]['name']]['met']['histo'][s["name"]].Fill(met, weight)
         bjetspt = filter(lambda j:j['btagCSV']>0.814, jets)
         nobjets = filter(lambda j:j['btagCSV']<=0.814, jets)
@@ -430,13 +437,17 @@ for s in backgrounds+signals:
   #TreeFile.Close()
   del eList
 
+print plots['ee']['met']['histo'][TTJets_50ns['name']].Integral()
+print plots['emu']['met']['histo'][TTJets_50ns['name']].Integral()
+print plots['mumu']['met']['histo'][TTJets_50ns['name']].Integral()
+
 #######################################################
 #           provide tables from histograms            #
 #######################################################
 if makelatextables:
-  latexmaker(120.,'ee', plots)
-  latexmaker(120.,'mumu', plots)
-  latexmaker(120.,'emu',plots)
+  latexmaker(0.,'ee', plots)
+  latexmaker(0.,'mumu', plots)
+  latexmaker(0.,'emu',plots)
 
 
 #######################################################
@@ -452,17 +463,13 @@ if makepiechart:
 #######################################################
 #Some coloring
 
-#TTJets_15["color"]=ROOT.kRed
-#WJetsHTToLNu["color"]=ROOT.kGreen
-#TTH["color"]=ROOT.kMagenta
-#TTW["color"]=ROOT.kMagenta-3
-#TTZ["color"]=ROOT.kMagenta-6
-#singleTop["color"]=ROOT.kOrange
-#DY["color"]=ROOT.kBlue
-DY_25ns["color"]=ROOT.kBlue
+TTJets_50ns["color"]=7
+DY_50ns["color"]=8
+QCDMu_50ns["color"]=46
+singleTop_50ns["color"]=40
 #Plotvariables
 signal = {'path': ["SMS_T2tt_2J_mStop425_mLSP325","SMS_T2tt_2J_mStop500_mLSP325","SMS_T2tt_2J_mStop650_mLSP325","SMS_T2tt_2J_mStop850_mLSP100"], 'name': ["T2tt(425,325)","T2tt(500,325)","T2tt(650,325)","T2tt(850,100)"]}
-yminimum = 10**-0.5
+yminimum = 1
 legendtextsize = 0.028
 signalscaling = 100
 
@@ -472,7 +479,7 @@ if makedraw1D:
   for pk in plots.keys():
     for plot in plots[pk].keys():
       #Make a stack for backgrounds
-      l=ROOT.TLegend(0.6,0.8,1.0,1.0)
+      l=ROOT.TLegend(0.6,0.7,1.0,1.0)
       l.SetFillColor(0)
       l.SetShadowColor(ROOT.kWhite)
       l.SetBorderSize(1)
@@ -497,8 +504,8 @@ if makedraw1D:
       signalPlot_2 = plots[pk][plot]['histo'][signal['path'][2]].Clone()
       signalPlot_1.Scale(signalscaling)
       signalPlot_2.Scale(signalscaling)
-      signalPlot_1.SetLineColor(ROOT.kBlack)
-      signalPlot_2.SetLineColor(ROOT.kCyan)
+      signalPlot_1.SetLineColor(ROOT.kRed)
+      signalPlot_2.SetLineColor(ROOT.kBlue)
       signalPlot_1.SetLineWidth(3)
       signalPlot_2.SetLineWidth(3)
       signalPlot_1.Draw("HISTsame")
@@ -523,7 +530,7 @@ if makedraw1D:
     
   for plot in plotsSF['SF'].keys():
     bkg_stack_SF = ROOT.THStack("bkgs_SF","bkgs_SF")
-    l=ROOT.TLegend(0.6,0.8,1.0,1.0)
+    l=ROOT.TLegend(0.6,0.7,1.0,1.0)
     l.SetFillColor(0)
     l.SetShadowColor(ROOT.kWhite)
     l.SetBorderSize(1)
@@ -547,12 +554,12 @@ if makedraw1D:
     signalPlot_2.Add(plots['mumu'][plot]['histo'][signal['path'][2]])
     signalPlot_1.Scale(signalscaling)
     signalPlot_2.Scale(signalscaling)
-    signalPlot_1.SetLineColor(ROOT.kBlack)
-    signalPlot_2.SetLineColor(ROOT.kCyan)
+    signalPlot_1.SetLineColor(ROOT.kRed)
+    signalPlot_2.SetLineColor(ROOT.kBlue)
     signalPlot_1.SetLineWidth(3)
     signalPlot_2.SetLineWidth(3)
-    signalPlot_1.Draw("same")
-    signalPlot_2.Draw("same")
+    signalPlot_1.Draw("HISTsame")
+    signalPlot_2.Draw("HISTsame")
     l.AddEntry(signalPlot_1, signal['name'][0]+" x " + str(signalscaling), "l")
     l.AddEntry(signalPlot_2, signal['name'][1]+" x " + str(signalscaling), "l")
     l.Draw()

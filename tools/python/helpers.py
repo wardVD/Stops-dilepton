@@ -170,18 +170,14 @@ def latexmaker(mt2cut,channel,plots):
   
     output.write("\\begin{tabular}{|c|c|c|c|c|c|}" + '\n')
     output.write("\\hline" + '\n')
-    output.write("$M_{T2}$ cut (GeV) & Sample & Count \\\\"+ '\n')
+    output.write("$M_{T2}$ cut at " + str(mt2cut)  + " (GeV) & Count \\\\"+ '\n')
     output.write("\\hline" + '\n')
     output.write("\\hline" + '\n')
-    a = 0
+
     sortedhist = sorted(mt2ll['histo'].items(),key=lambda l:l[1].Integral(bin1,bin2)) #set histogram with highest value first
     for item in sortedhist:
       samplename = item[0].replace("_","\_")
-      if a == 0:
-        output.write("\\multirow{"+ str(len(sortedhist)) +"}{*}{"+ str(int(mt2cut)) +"} & " + samplename + " & " + str(round(item[1].Integral(bin1,bin2),2)) + "\\\\" + '\n')
-      else:
-        output.write(" & " + samplename + " & " + str(round(item[1].Integral(bin1,bin2),2)) + "\\\\" + '\n')
-      a+=1
+      output.write(samplename + " & " + str(round(item[1].Integral(bin1,bin2),2)) + "\\\\" + '\n')
     output.write("\\hline" + '\n')
     output.write("\\hline" + '\n')
   
