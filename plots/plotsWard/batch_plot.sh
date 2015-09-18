@@ -1,5 +1,5 @@
-cd /afs/cern.ch/work/w/wvandrie/public/STOPS/CMSSW_7_2_3_patch1/src/
+cd $CMSSW_BASE/src
 eval `scramv1 runtime -sh`;
 scram b -j9
-cd /afs/cern.ch/work/w/wvandrie/public/STOPS/CMSSW_7_2_3_patch1/src/StopsDilepton/plots/plotsWard
+cd ./StopsDilepton/plots/plotsWard
 python plot.py

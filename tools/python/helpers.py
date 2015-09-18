@@ -132,7 +132,7 @@ def genmatching(lepton,genparticles):
         print deltar
         print gen['motherId']
 
-def latexmaker(mt2cut,channel,plots):
+def latexmaker_1(mt2cut,channel,plots):
 
   mt2ll = plots[channel]['mt2ll']
 
@@ -147,7 +147,7 @@ def latexmaker(mt2cut,channel,plots):
     bin1 = int(mt2cut/binwidth) + 1
     bin2 = mt2ll['binning'][0] + 1 #include overflow bin
 
-    output = open("./table_"+channel+".tex","w")
+    output = open("./tables/table_"+channel+".tex","w")
 
     output.write("\\documentclass[8pt]{article}" + '\n')
     output.write("\\usepackage[margin=0.5in]{geometry}" + '\n')
@@ -186,6 +186,51 @@ def latexmaker(mt2cut,channel,plots):
     output.write("\\end{document}")
   
     output.close()
+
+
+def latexmaker_2(piechart,mt2llcut,channel):
+
+  mt2ll = piechart[str(mt2llcut)][channel]["(>=2,>=1)"]
+
+  output = open("./tables/table_"+channel+"_mt2ll"+str(mt2llcut)+".tex","w")
+
+  output.write("\\documentclass[8pt]{article}" + '\n')
+  output.write("\\usepackage[margin=0.5in]{geometry}" + '\n')
+  output.write("\\usepackage{verbatim}" + '\n')
+  output.write("\\usepackage{hyperref}" + '\n')
+  output.write("\\usepackage{epsfig}" + '\n')
+  output.write("\\usepackage{graphicx}" + '\n')
+  output.write("\\usepackage{epsfig}" + '\n')
+  output.write("\\usepackage{subfigure,              rotating,              rotate}" + '\n')
+  output.write("\\usepackage{relsize}" + '\n')
+  output.write("\\usepackage{fancyheadings}" + '\n')
+  output.write("\usepackage{multirow}" + '\n')
+  output.write("\\usepackage[latin1]{inputenc}" + '\n')
+  output.write("\\usepackage{footnpag}" + '\n')
+  output.write("\\usepackage{enumerate}" + '\n')
+  output.write("\\usepackage{color}" + '\n')
+  output.write("\\newcommand{\\doglobally}[1]{{\\globaldefs=1#1}}" + '\n')
+  output.write("\\begin{document}" + '\n')
+  
+  
+  output.write("\\begin{tabular}{|c|c|c|c|c|c|}" + '\n')
+  output.write("\\hline" + '\n')
+  output.write("$M_{T2}$ cut at " + str(mt2llcut)  + " (GeV) & Count \\\\"+ '\n')
+  output.write("\\hline" + '\n')
+  output.write("\\hline" + '\n')
+
+  sortedhist = sorted(mt2ll.items(),key=lambda l:l[1])
+  for item in sortedhist:
+    samplename = item[0].replace("_","\_")
+    output.write(samplename + " & " + str(round(item[1],2)) + "\\\\" + '\n')
+  output.write("\\hline" + '\n')
+  output.write("\\hline" + '\n')
+  
+  output.write("\\end{tabular}" + '\n')
+    
+  output.write("\\end{document}")
+    
+  output.close()
 
     
   

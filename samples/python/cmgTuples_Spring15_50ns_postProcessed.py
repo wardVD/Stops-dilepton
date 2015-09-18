@@ -2,6 +2,24 @@ import copy, os, sys
 from StopsDilepton.tools.localInfo import dataDir
 dir = dataDir 
 
+DoubleEG_50ns={\
+"name": "DoubleEG",
+"bins": ["DoubleEG_Run2015B-PromptReco-v1"],
+'dir' : dir
+}
+
+DoubleMuon_50ns={\
+"name": "DoubleMuon",
+"bins": ["DoubleMuon_Run2015B-PromptReco-v1"],
+'dir':dir
+}
+
+MuonEG_50ns={\
+"name": "MuonEG",
+"bins": ["MuonEG_Run2015B-PromptReco-v1"],
+'dir':dir
+}
+
 TTJets_50ns={\
 "name" : "tt+Jets",
 "bins" : ["TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1"],
@@ -25,7 +43,7 @@ diBosons_50ns={\
 'dir' : dir,
 }
 singleTop_50ns={\
-"name" : "single top",
+"name" : "singletop",
 "bins" : [
 "ST_t-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
 "ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2",

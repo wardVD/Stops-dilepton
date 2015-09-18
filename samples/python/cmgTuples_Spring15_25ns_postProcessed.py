@@ -35,7 +35,7 @@ diBosons_25ns={\
 'dir' : dir,
 }
 singleTop_25ns={\
-"name" : "single top",
+"name" : "singletop",
 "bins" : [
 "ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 "ST_t-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
