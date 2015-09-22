@@ -8,7 +8,7 @@ from StopsDilepton.tools.mt2Calculator import mt2Calculator
 mt2Calc = mt2Calculator()
 from StopsDilepton.tools.mtautau import mtautau as mtautau_
 from StopsDilepton.tools.helpers import getChain, getChunks, getObjDict, getEList, getVarValue
-from StopsDilepton.tools.objectSelection import getLeptons, getMuons, getElectrons, getGoodMuons, getGoodElectrons, getGoodLeptons, getJets 
+from StopsDilepton.tools.objectSelection import getLeptons, getMuons, getElectrons, getGoodMuons, getGoodElectrons, getGoodLeptons, getJets, getGoodBJets, getGoodJets 
 
 from StopsDilepton.tools.localInfo import *
 
@@ -190,7 +190,7 @@ for isample, sample in enumerate(allSamples):
 
         if options.skim.lower()=='dilep':
           leptons = getGoodLeptons(r)
-          print "Leptons", leptons 
+#          print "Leptons", leptons 
           if len(leptons)>=2:# and leptons[0]['pdgId']*leptons[1]['pdgId']<0 and abs(leptons[0]['pdgId'])==abs(leptons[1]['pdgId']): #OSSF choice
             mt2Calc.reset()
             s.l1_pt  = leptons[0]['pt'] 
@@ -226,8 +226,7 @@ for isample, sample in enumerate(allSamples):
             s.dl_mt2ll = mt2Calc.mt2ll()
             s.dl_mtautau, s.dl_alpha0, s.dl_alpha1 = mtautau_(r.met_pt,r.met_phi, s.l1_pt, s.l1_eta, s.l1_phi, s.l2_pt, s.l2_eta, s.l2_phi, retAll=True)
 
-            jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(r))
-            bjets = filter(lambda j:j['btagCSV']>0.890, jets)
+            bjets = getGoodBJets(r)
             if len(bjets)>=2:
               mt2Calc.setBJets(bjets[0]['pt'], bjets[0]['eta'], bjets[0]['phi'], bjets[1]['pt'], bjets[1]['eta'], bjets[1]['phi'])
               s.dl_mt2bb   = mt2Calc.mt2bb()
