@@ -1,7 +1,6 @@
 import ROOT
 import sys, os, copy, random, subprocess, datetime
 from array import array
-#from StopsDilepton.tool.cmgObjectSelection import cmgLooseLepIndices, splitIndList, get_cmg_jets_fromStruct, splitListOfObjects, cmgTightMuID, cmgTightEleID
 from StopsDilepton.tools.convertHelpers import compileClass, readVar, printHeader, typeStr, createClassString
 
 from math import *
@@ -9,7 +8,8 @@ from StopsDilepton.tools.mt2Calculator import mt2Calculator
 mt2Calc = mt2Calculator()
 from StopsDilepton.tools.mtautau import mtautau as mtautau_
 from StopsDilepton.tools.helpers import getChain, getChunks, getObjDict, getEList, getVarValue
-from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets
+from StopsDilepton.tools.objectSelection import getLeptons, getMuons, getElectrons, getGoodMuons, getGoodElectrons, getGoodLeptons, getJets 
+
 from StopsDilepton.tools.localInfo import *
 
 ROOT.gSystem.Load("libFWCoreFWLite.so")
@@ -20,11 +20,11 @@ from StopsDilepton.samples.cmgTuples_Data50ns_1l import *
 from StopsDilepton.samples.cmgTuples_Spring15_25ns import *
 from StopsDilepton.samples.cmgTuples_Spring15_50ns import *
 
-target_lumi = 4000 #pb-1 Which lumi to normalize to
+target_lumi = 1000 #pb-1 Which lumi to normalize to
 
-defSampleStr = "TBar_tWch_50ns"  #Which samples to run for by default (will be overritten by --samples option)
+defSampleStr = "MuonEG_Run2015B_PromptReco"  #Which samples to run for by default (will be overritten by --samples option)
 
-subDir = "/data/rschoefbeck/cmgTuples/postProcessed_Spring15" #Output directory -> The first path should go to localInfo (e.g. 'dataPath' or something)
+subDir = "/data/rschoefbeck/cmgTuples/postProcessed_Spring15_test" #Output directory -> The first path should go to localInfo (e.g. 'dataPath' or something)
 
 #branches to be kept for data and MC
 branchKeepStrings_DATAMC = ["run", "lumi", "evt", "isData", "rho", "nVert", 
@@ -116,12 +116,17 @@ for isample, sample in enumerate(allSamples):
 
   readVectors = [\
     {'prefix':'LepGood',  'nMax':8, 'vars':['pt/F', 'eta/F', 'phi/F', 'pdgId/I', 'charge/I', 'relIso03/F', 'tightId/I', 'miniRelIso/F','mass/F','sip3d/F','mediumMuonId/I', 'mvaIdPhys14/F','lostHits/I', 'convVeto/I', 'dxy/F', 'dz/F']},
-    {'prefix':'Jet',  'nMax':100, 'vars':['pt/F', 'eta/F', 'phi/F', 'id/I','btagCSV/F', 'btagCMVA/F']}, #, 'mcMatchFlav/I', 'partonId/I']},
+    {'prefix':'Jet',  'nMax':100, 'vars':['pt/F', 'eta/F', 'phi/F', 'id/I','btagCSV/F', 'btagCMVA/F', 'mcMatchFlav/I', 'partonId/I']},
   ]
   if not sample['isData']: 
     aliases.extend(['genMet:met_genPt', 'genMetPhi:met_genPhi'])
-#  if options.skim.lower() in ['dilep']:
-#    newVariables.extend( ['mll/F'] )
+  if options.skim.lower() in ['dilep']:
+    newVariables.extend( ['dl_pt/F', 'dl_eta/F', 'dl_phi/F', 'dl_mass/F' ] )
+    newVariables.extend( ['dl_mt2ll/F', 'dl_mt2bb/F', 'dl_mt2blbl/F', 'dl_mtautau/F', 'dl_alpha0/F',  'dl_alpha1/F' ] )
+    newVariables.extend( ['l1_pt/F', 'l1_eta/F', 'l1_phi/F', 'l1_mass/F', 'l1_pdgId/I', 'l1_index/I' ] )
+    newVariables.extend( ['l2_pt/F', 'l2_eta/F', 'l2_phi/F', 'l2_mass/F', 'l2_pdgId/I', 'l2_index/I' ] )
+    newVariables.extend( ['isEE/I', 'isMuMu/I', 'isEMu/I' ] )
+
   newVars = [readVar(v, allowRenaming=False, isWritten = True, isRead=False) for v in newVariables]
   
   readVars = [readVar(v, allowRenaming=False, isWritten=False, isRead=True) for v in readVariables]
@@ -176,36 +181,57 @@ for isample, sample in enumerate(allSamples):
         t.GetEntry(i)
         genWeight = 1 if sample['isData'] else t.GetLeaf('genWeight').GetValue()
         s.weight = lumiScaleFactor*genWeight
-          #print "reweighted:" , s.weight
+#  if options.skim.lower() in ['dilep']:
+#    newVariables.extend( ['dl_pt/F', 'dl_eta/F', 'dl_phi/F', 'dl_m/F' ] )
+#    newVariables.extend( ['dl_mt2ll/F', 'dl_mt2bb/F', 'dl_mt2blbl/F', 'dl_mtautau/F' ] )
+#    newVariables.extend( ['l1_pt/F', 'l1_eta/F', 'l1_phi/F', 'l1_E/F', 'l1_pdgId/I', 'l1_index/I' ] )
+#    newVariables.extend( ['l2_pt/F', 'l2_eta/F', 'l2_phi/F', 'l2_E/F', 'l2_pdgId/I', 'l2_index/I' ] )
+#    newVariables.extend( ['isEE/I', 'isMuMu/I', 'isEMu/I' ] )
 
-#        if options.skim=='dilep':
-#          mt2Calc.reset()
-#          #Leptons 
-#          leptons = filter(lambda l: looseMuID(l) or looseEleID(l), getLeptons(r))
-#          
-#          if len(leptons)>=2:# and leptons[0]['pdgId']*leptons[1]['pdgId']<0 and abs(leptons[0]['pdgId'])==abs(leptons[1]['pdgId']): #OSSF choice
-#            l0pt, l0eta, l0phi = leptons[0]['pt'],  leptons[0]['eta'],  leptons[0]['phi']
-#            l1pt, l1eta, l1phi = leptons[1]['pt'],  leptons[1]['eta'],  leptons[1]['phi']
-#            mll = sqrt(2.*l0pt*l1pt*(cosh(l0eta-l1eta)-cos(l0phi-l1phi)))
-#            jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(r))
-#            bjets = filter(lambda j:j['btagCSV']>0.890, jets)
-#            if len(bjets)==2:
-#              mt2Calc.setMet(met,metPhi)
-#              mt2Calc.setLeptons(l0pt, l0eta, l0phi, l1pt, l1eta, l1phi)
-#              mt2ll = mt2Calc.mt2ll()
-#    #          if mt2ll>120:
-#              if True:
-#                plots['mt2ll']['histo'][s["name"]].Fill(mt2ll, weight)
-#                ht = sum([j['pt'] for j in jets])
-#                plots['kinMetSig']['histo'][s["name"]].Fill(met/sqrt(ht), weight)
-#                mt2Calc.setBJets(bjets[0]['pt'], bjets[0]['eta'], bjets[0]['phi'], bjets[1]['pt'], bjets[1]['eta'], bjets[1]['phi'])
-#                mt2bb   = mt2Calc.mt2bb()
-#                mt2blbl = mt2Calc.mt2blbl()
-#                plots['mt2bb']['histo'][s["name"]].Fill(mt2bb, weight)
-#                plots['mt2blbl']['histo'][s["name"]].Fill(mt2blbl, weight)
-#                mtautau, alpha_0, alpha_1 = mtautau_(met,metPhi, l0pt, l0eta, l0phi, l1pt, l1eta, l1phi, retAll=True)
-#                plots['mtautau']['histo'][s["name"]].Fill(mtautau, weight)
-#                plots['mtautau_zoomed']['histo'][s["name"]].Fill(mtautau, weight)
+        if options.skim.lower()=='dilep':
+          leptons = getGoodLeptons(r)
+          print "Leptons", leptons 
+          if len(leptons)>=2:# and leptons[0]['pdgId']*leptons[1]['pdgId']<0 and abs(leptons[0]['pdgId'])==abs(leptons[1]['pdgId']): #OSSF choice
+            mt2Calc.reset()
+            s.l1_pt  = leptons[0]['pt'] 
+            s.l1_eta = leptons[0]['eta']
+            s.l1_phi = leptons[0]['phi']
+            s.l1_mass   = leptons[0]['mass']
+            s.l1_pdgId   = leptons[0]['pdgId']
+            s.l1_index   = leptons[0]['index']
+            s.l2_pt  = leptons[1]['pt'] 
+            s.l2_eta = leptons[1]['eta']
+            s.l2_phi = leptons[1]['phi']
+            s.l2_mass   = leptons[1]['mass']
+            s.l2_pdgId   = leptons[1]['pdgId']
+            s.l2_index   = leptons[1]['index']
+
+            l_pdgs = [abs(leptons[0]['pdgId']), abs(leptons[1]['pdgId'])]
+            l_pdgs.sort()
+            s.isMuMu = l_pdgs==[13,13] 
+            s.isEE = l_pdgs==[11,11] 
+            s.isEMu = l_pdgs==[11,13] 
+
+            l1 = ROOT.TLorentzVector()
+            l1.SetPtEtaPhiM(leptons[0]['pt'], leptons[0]['eta'], leptons[0]['phi'], 0 )
+            l2 = ROOT.TLorentzVector()
+            l2.SetPtEtaPhiM(leptons[1]['pt'], leptons[1]['eta'], leptons[1]['phi'], 0 )
+            dl = l1+l2
+            s.dl_pt  = dl.Pt()
+            s.dl_eta = dl.Eta()
+            s.dl_phi = dl.Phi()
+            s.dl_mass   = dl.M() 
+            mt2Calc.setMet(r.met_pt,r.met_phi)
+            mt2Calc.setLeptons(s.l1_pt, s.l1_eta, s.l1_phi, s.l2_pt, s.l2_eta, s.l2_phi)
+            s.dl_mt2ll = mt2Calc.mt2ll()
+            s.dl_mtautau, s.dl_alpha0, s.dl_alpha1 = mtautau_(r.met_pt,r.met_phi, s.l1_pt, s.l1_eta, s.l1_phi, s.l2_pt, s.l2_eta, s.l2_phi, retAll=True)
+
+            jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(r))
+            bjets = filter(lambda j:j['btagCSV']>0.890, jets)
+            if len(bjets)>=2:
+              mt2Calc.setBJets(bjets[0]['pt'], bjets[0]['eta'], bjets[0]['phi'], bjets[1]['pt'], bjets[1]['eta'], bjets[1]['phi'])
+              s.dl_mt2bb   = mt2Calc.mt2bb()
+              s.dl_mt2blbl = mt2Calc.mt2blbl()
 
         for v in newVars:
           v['branch'].Fill()
@@ -236,7 +262,7 @@ for isample, sample in enumerate(allSamples):
     for f in filesForHadd:
       size+=os.path.getsize(tmpDir+'/'+f)
       files.append(f)
-      if size>(0.5*(10**9)) or f==filesForHadd[-1]:
+      if size>(0.5*(10**9)) or f==filesForHadd[-1] or len(files)>300:
         ofile = outDir+'/'+sample['name']+'_'+str(counter)+'.root'
         print "Running hadd on", tmpDir, files
         os.system('cd '+tmpDir+';hadd -f '+ofile+' '+' '.join(files))

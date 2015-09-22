@@ -17,10 +17,12 @@ from StopsDilepton.tools.localInfo import *
 #For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
 
 #preselection = 'met_pt>40&&Sum$((Jet_pt)*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>100&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)==2&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
-preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)==2&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)>=2'
+preselection = 'Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)>=2'
+#preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)==2&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)>=2'
 prefix="def"
 #prefix="mt2ll-120"
 reduceStat = 1
+lumiScale = 42/4000.
 
 #load all the samples
 from StopsDilepton.samples.cmgTuples_Spring15_50ns_postProcessed import *
@@ -28,16 +30,18 @@ from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
 from StopsDilepton.samples.cmgTuples_Data50ns_1l_postProcessed import *
 
 #backgrounds = [TTJets_50ns, WJetsToLNu_50ns, diBosons_50ns, singleTop_50ns, DY_50ns]#, QCD]
-#backgrounds = [TTJets_50ns, diBosons_50ns, singleTop_50ns, DY_50ns]#, QCD]
-backgrounds = [TTJets_25ns, DY_25ns, singleTop_25ns, diBosons_25ns, WJetsHTToLNu_25ns]#, QCD]
+backgrounds = [TTJets_50ns, diBosons_50ns, singleTop_50ns, DY_50ns]#, QCD]
+for b in backgrounds:
+  b['isData']=False
+#backgrounds = [TTJets_25ns, DY_25ns, singleTop_25ns, diBosons_25ns, WJetsHTToLNu_25ns]#, QCD]
 
-data = 
-
+data = DoubleMuon_Run2015B 
+data['isData']=True
 signals = [] #SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
 
 
 #get the TChains for each sample
-for s in backgrounds+signals:
+for s in backgrounds+signals+[data]:
   s['chain'] = getChain(s,histname="")
 
 #plots
@@ -55,7 +59,7 @@ plots = {\
 
 
 #make plot in each sample: 
-for s in backgrounds+signals:
+for s in backgrounds+signals+[data]:
   for pk in plots.keys():
     plots[pk]['histo'][s['name']] = ROOT.TH1F("met_"+s["name"], "met_"+s["name"], *(plots[pk]['binning']))
 
@@ -68,15 +72,16 @@ for s in backgrounds+signals:
     if ev%10000==0:print "At %i/%i"%(ev,nEvents)
     chain.GetEntry(eList.GetEntry(ev))
     mt2Calc.reset()
-    weight = reduceStat*getVarValue(chain, "weight")
+    weight = reduceStat*getVarValue(chain, "weight")*lumiScale if not s['isData'] else 1
     met = getVarValue(chain, "met_pt")
+    plots['met']['histo'][s["name"]].Fill(met, weight)
     metPhi = getVarValue(chain, "met_phi")
     leptons = filter(lambda l: looseMuID(l) or looseEleID(l), getLeptons(chain))
     if len(leptons)==2 and leptons[0]['pdgId']*leptons[1]['pdgId']<0 and abs(leptons[0]['pdgId'])==abs(leptons[1]['pdgId']): #OSSF choice
       l0pt, l0eta, l0phi = leptons[0]['pt'],  leptons[0]['eta'],  leptons[0]['phi']
       l1pt, l1eta, l1phi = leptons[1]['pt'],  leptons[1]['eta'],  leptons[1]['phi']
       mll = sqrt(2.*l0pt*l1pt*(cosh(l0eta-l1eta)-cos(l0phi-l1phi)))
-      if mll>20 and abs(mll-90.2)<15:
+      if  mll>20 and abs(mll-90.2)<15:
         jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(chain))
         bjets = filter(lambda j:j['btagCSV']>0.890, jets)
         if len(bjets)==2:
@@ -98,10 +103,9 @@ for s in backgrounds+signals:
             plots['mtautau_zoomed']['histo'][s["name"]].Fill(mtautau, weight)
             plots['alpha0']['histo'][s["name"]].Fill(alpha_0, weight)
             plots['alpha1']['histo'][s["name"]].Fill(alpha_1, weight)
-
-            plots['met']['histo'][s["name"]].Fill(met, weight)
-        else:
-          print "Preselection and b-jet selection inconsistent"
+#
+#        else:
+#          print "Preselection and b-jet selection inconsistent"
         
   del eList
 
@@ -135,11 +139,13 @@ for pk in plots.keys():
   c1 = ROOT.TCanvas()
   bkg_stack.SetMaximum(2*bkg_stack.GetMaximum())
   bkg_stack.SetMinimum(10**-1.5)
-  bkg_stack.Draw()
+  bkg_stack.Draw('e')
   bkg_stack.GetXaxis().SetTitle(plots[pk]['title'])
   binning = plots[pk]['binning']
   bkg_stack.GetYaxis().SetTitle("Events / %i GeV"%( (binning[2]-binning[1])/binning[0]) )
   c1.SetLogy()
+
+  plots[pk]['histo'][data['name']].Draw('hsame')
 #  signal = "SMS_T2tt_2J_mStop650_mLSP325"#May chose different signal here
 #  signalPlot = plots[pk]['histo'][signal].Clone()
 #  signalPlot.Scale(100)
