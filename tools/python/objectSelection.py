@@ -4,7 +4,7 @@ from math import *
 mZ=90.2
    
 def getJets(c):
-  return [getObjDict(c, 'Jet_', ['eta','pt','phi','btagCMVA','btagCSV','mcMatchFlav' ,'partonId', 'id'], i) for i in range(int(getVarValue(c, 'nJet')))]
+  return [getObjDict(c, 'Jet_', ['eta','pt','phi','btagCMVA','btagCSV', 'id'], i) for i in range(int(getVarValue(c, 'nJet')))]
 
 def getGoodJets(c):
   return filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(c))

@@ -106,21 +106,23 @@ for isample, sample in enumerate(allSamples):
   if sample['isData']: 
     lumiScaleFactor=1
     branchKeepStrings = branchKeepStrings_DATAMC + branchKeepStrings_DATA 
+    jetMCInfo = []
   else:
     lumiScaleFactor = xsec[sample['dbsName']]*target_lumi/float(sumWeight)
     branchKeepStrings = branchKeepStrings_DATAMC + branchKeepStrings_MC
+    jetMCInfo = ['mcMatchFlav/I', 'partonId/I']
 
   readVariables = ['met_pt/F', 'met_phi/F']
   newVariables = ['weight/F']
   aliases = [ "met:met_pt", "metPhi:met_phi"]
-
   readVectors = [\
     {'prefix':'LepGood',  'nMax':8, 'vars':['pt/F', 'eta/F', 'phi/F', 'pdgId/I', 'charge/I', 'relIso03/F', 'tightId/I', 'miniRelIso/F','mass/F','sip3d/F','mediumMuonId/I', 'mvaIdPhys14/F','lostHits/I', 'convVeto/I', 'dxy/F', 'dz/F']},
-    {'prefix':'Jet',  'nMax':100, 'vars':['pt/F', 'eta/F', 'phi/F', 'id/I','btagCSV/F', 'btagCMVA/F', 'mcMatchFlav/I', 'partonId/I']},
+    {'prefix':'Jet',  'nMax':100, 'vars':['pt/F', 'eta/F', 'phi/F', 'id/I','btagCSV/F', 'btagCMVA/F'] + jetMCInfo},
   ]
   if not sample['isData']: 
     aliases.extend(['genMet:met_genPt', 'genMetPhi:met_genPhi'])
   if options.skim.lower() in ['dilep']:
+    newVariables.extend( ['nGoodMuons/I', 'nGoodElectrons/I' ] )
     newVariables.extend( ['dl_pt/F', 'dl_eta/F', 'dl_phi/F', 'dl_mass/F' ] )
     newVariables.extend( ['dl_mt2ll/F', 'dl_mt2bb/F', 'dl_mt2blbl/F', 'dl_mtautau/F', 'dl_alpha0/F',  'dl_alpha1/F' ] )
     newVariables.extend( ['l1_pt/F', 'l1_eta/F', 'l1_phi/F', 'l1_mass/F', 'l1_pdgId/I', 'l1_index/I' ] )
@@ -190,6 +192,8 @@ for isample, sample in enumerate(allSamples):
 
         if options.skim.lower()=='dilep':
           leptons = getGoodLeptons(r)
+          s.nGoodMuons      = len(filter( lambda l:abs(l['pdgId'])==13, leptons))
+          s.nGoodElectrons  = len(filter( lambda l:abs(l['pdgId'])==11, leptons))
 #          print "Leptons", leptons 
           if len(leptons)>=2:# and leptons[0]['pdgId']*leptons[1]['pdgId']<0 and abs(leptons[0]['pdgId'])==abs(leptons[1]['pdgId']): #OSSF choice
             mt2Calc.reset()
