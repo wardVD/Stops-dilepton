@@ -8,7 +8,7 @@ from StopsDilepton.tools.mt2Calculator import mt2Calculator
 mt2Calc = mt2Calculator()
 from StopsDilepton.tools.mtautau import mtautau as mtautau_
 from StopsDilepton.tools.helpers import getChain, getChunks, getObjDict, getEList, getVarValue
-from StopsDilepton.tools.objectSelection import getLeptons, getMuons, getElectrons, getGoodMuons, getGoodElectrons, getGoodLeptons, getJets, getGoodBJets, getGoodJets 
+from StopsDilepton.tools.objectSelection import getLeptons, getMuons, getElectrons, getGoodMuons, getGoodElectrons, getGoodLeptons, getJets, getGoodBJets, getGoodJets, isBJet 
 
 from StopsDilepton.tools.localInfo import *
 
@@ -127,7 +127,7 @@ for isample, sample in enumerate(allSamples):
     newVariables.extend( ['dl_mt2ll/F', 'dl_mt2bb/F', 'dl_mt2blbl/F', 'dl_mtautau/F', 'dl_alpha0/F',  'dl_alpha1/F' ] )
     newVariables.extend( ['l1_pt/F', 'l1_eta/F', 'l1_phi/F', 'l1_mass/F', 'l1_pdgId/I', 'l1_index/I' ] )
     newVariables.extend( ['l2_pt/F', 'l2_eta/F', 'l2_phi/F', 'l2_mass/F', 'l2_pdgId/I', 'l2_index/I' ] )
-    newVariables.extend( ['isEE/I', 'isMuMu/I', 'isEMu/I' ] )
+    newVariables.extend( ['isEE/I', 'isMuMu/I', 'isEMu/I', 'isOS/I' ] )
 
   newVars = [readVar(v, allowRenaming=False, isWritten = True, isRead=False) for v in newVariables]
   
@@ -183,13 +183,6 @@ for isample, sample in enumerate(allSamples):
         t.GetEntry(i)
         genWeight = 1 if sample['isData'] else t.GetLeaf('genWeight').GetValue()
         s.weight = lumiScaleFactor*genWeight
-#  if options.skim.lower() in ['dilep']:
-#    newVariables.extend( ['dl_pt/F', 'dl_eta/F', 'dl_phi/F', 'dl_m/F' ] )
-#    newVariables.extend( ['dl_mt2ll/F', 'dl_mt2bb/F', 'dl_mt2blbl/F', 'dl_mtautau/F' ] )
-#    newVariables.extend( ['l1_pt/F', 'l1_eta/F', 'l1_phi/F', 'l1_E/F', 'l1_pdgId/I', 'l1_index/I' ] )
-#    newVariables.extend( ['l2_pt/F', 'l2_eta/F', 'l2_phi/F', 'l2_E/F', 'l2_pdgId/I', 'l2_index/I' ] )
-#    newVariables.extend( ['isEE/I', 'isMuMu/I', 'isEMu/I' ] )
-
         if options.skim.lower()=='dilep':
           leptons = getGoodLeptons(r)
           s.nGoodMuons      = len(filter( lambda l:abs(l['pdgId'])==13, leptons))
@@ -215,6 +208,7 @@ for isample, sample in enumerate(allSamples):
             s.isMuMu = l_pdgs==[13,13] 
             s.isEE = l_pdgs==[11,11] 
             s.isEMu = l_pdgs==[11,13] 
+            s.isOS = s.l1_pdgId*s.l2_pdgId<0
 
             l1 = ROOT.TLorentzVector()
             l1.SetPtEtaPhiM(leptons[0]['pt'], leptons[0]['eta'], leptons[0]['phi'], 0 )
@@ -230,11 +224,15 @@ for isample, sample in enumerate(allSamples):
             s.dl_mt2ll = mt2Calc.mt2ll()
             s.dl_mtautau, s.dl_alpha0, s.dl_alpha1 = mtautau_(r.met_pt,r.met_phi, s.l1_pt, s.l1_eta, s.l1_phi, s.l2_pt, s.l2_eta, s.l2_phi, retAll=True)
 
-            bjets = getGoodBJets(r)
-            if len(bjets)>=2:
-              mt2Calc.setBJets(bjets[0]['pt'], bjets[0]['eta'], bjets[0]['phi'], bjets[1]['pt'], bjets[1]['eta'], bjets[1]['phi'])
+            jets = getGoodJets(r)
+            if len(jets)>=2:
+              bJets = filter(lambda j:isBJet(j), jets)
+              nonBJets = filter(lambda j:not isBJet(j), jets)
+              bj0, bj1 = (bJets+nonBJets)[:2]
+              mt2Calc.setBJets(bj0['pt'], bj0['eta'], bj0['phi'], bj1['pt'], bj1['eta'], bj1['phi'])
               s.dl_mt2bb   = mt2Calc.mt2bb()
               s.dl_mt2blbl = mt2Calc.mt2blbl()
+#              print len(bJets), len(nonBJets), s.dl_mt2bb, s.dl_mt2blbl
 
         for v in newVars:
           v['branch'].Fill()

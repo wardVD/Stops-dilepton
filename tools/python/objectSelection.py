@@ -9,8 +9,11 @@ def getJets(c):
 def getGoodJets(c):
   return filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(c))
 
+def isBJet(j):
+  return j['btagCSV']>0.890
+
 def getGoodBJets(c):
-  return filter(lambda j:j['btagCSV']>0.890, getGoodJets(c))
+  return filter(lambda j:isBJet(j), getGoodJets(c))
 
 def getGenLeps(c):
   return [getObjDict(c, 'genLep_', ['eta','pt','phi','charge', 'pdgId', 'sourceId'], i) for i in range(int(getVarValue(c, 'ngenLep')))]
