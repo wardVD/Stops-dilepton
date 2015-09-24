@@ -132,22 +132,13 @@ def genmatching(lepton,genparticles):
         print deltar
         print gen['motherId']
 
-def latexmaker_1(mt2cut,channel,plots):
+def latexmaker_1(channel,plots,mt2cut):
 
-  mt2ll = plots[channel]['mt2ll']
+  for cut in mt2cut:
 
-  binwidth = (mt2ll['binning'][2]-mt2ll['binning'][1])/(mt2ll['binning'][0])
+    mt2ll = plots[channel]['mt2llwithcut'+cut]
 
-  #integral from mt2cut and onwards. mt2cut has to be well defined so that mt2cut/binwidth is an integer
-  if mt2cut%binwidth != 0:
-    print '\n' + '\n' + "Binwidth for MT2ll and cut for MT2ll in table are not compatible, please change! No table for " +channel+  " is produced." + '\n' + '\n'
-
-  else:
-
-    bin1 = int(mt2cut/binwidth) + 1
-    bin2 = mt2ll['binning'][0] + 1 #include overflow bin
-
-    output = open("./tables/table_"+channel+".tex","w")
+    output = open("./tables/table_"+channel+"_mt2cutat"+cut+".tex","w")
 
     output.write("\\documentclass[8pt]{article}" + '\n')
     output.write("\\usepackage[margin=0.5in]{geometry}" + '\n')
@@ -166,23 +157,23 @@ def latexmaker_1(mt2cut,channel,plots):
     output.write("\\usepackage{color}" + '\n')
     output.write("\\newcommand{\\doglobally}[1]{{\\globaldefs=1#1}}" + '\n')
     output.write("\\begin{document}" + '\n')
-    
+  
   
     output.write("\\begin{tabular}{|c|c|c|c|c|c|}" + '\n')
     output.write("\\hline" + '\n')
-    output.write("$M_{T2}$ cut at " + str(mt2cut)  + " (GeV) & Count \\\\"+ '\n')
+    output.write("$M_{T2}$ cut at " + str(cut)  + " (GeV) & Count \\\\"+ '\n')
     output.write("\\hline" + '\n')
     output.write("\\hline" + '\n')
-
-    sortedhist = sorted(mt2ll['histo'].items(),key=lambda l:l[1].Integral(bin1,bin2)) #set histogram with highest value first
+  
+    sortedhist = sorted(mt2ll['histo'].items(),key=lambda l:l[1].Integral()) #set histogram with highest value first
     for item in sortedhist:
       samplename = item[0].replace("_","\_")
-      output.write(samplename + " & " + str(round(item[1].Integral(bin1,bin2),2)) + "\\\\" + '\n')
+      output.write(samplename + " & " + str(round(item[1].Integral(),2)) + "\\\\" + '\n')
     output.write("\\hline" + '\n')
     output.write("\\hline" + '\n')
   
     output.write("\\end{tabular}" + '\n')
-    
+  
     output.write("\\end{document}")
   
     output.close()

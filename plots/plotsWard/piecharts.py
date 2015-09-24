@@ -90,8 +90,8 @@ for s in backgrounds+signals:
     #event weight (L= 4fb^-1)
     weight = reduceStat*getVarValue(chain, "weight")
 
-    if s not in data: weight = weight*(1000./4000.)
-    if s in data:     weight = weight*(1000./42.)
+    if s not in data: weight = weight*(10000./4000.)
+    if s in data:     weight = weight*(10000./42.)
 
     #MET
     met = getVarValue(chain, "met_pt")
@@ -202,7 +202,7 @@ def makefigure(piechart,mt2llcut):
   fig1 = plt.figure(figsize=(10,10))
   gridx=len(piechart["SF"])+1
   gridy=4  #jet multiplicity, SF and OF and add one for legend
-  colors = ['yellowgreen', 'gold', 'lightskyblue', 'lightcoral']
+  colors = ['yellowgreen', 'gold', 'lightskyblue', 'lightcoral','mediumblue','gold','red']
   colors = colors[:len(piechart["SF"])]
   for ikey,key in enumerate(piechart.keys()):
     plt.subplot(gridx,gridy,ikey+2)
