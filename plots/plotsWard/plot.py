@@ -18,11 +18,10 @@ reduceStat = 100 #recude the statistics, i.e. 10 is ten times less samples to lo
 makedraw1D = False
 makedraw2D = False
 makelatextables = False #Ignore this if you're not Ward
-#mt2llcuts = {'80':80., '100':100., '110':110, '120':120., '130':130., '140':140., '150':150.}
-mt2llcuts = {}
-metcut = '40' 
-metsignifcut = 4.
-luminosity=10000.
+mt2llcuts = {'80':80., '100':100., '110':110, '120':120., '130':130., '140':140., '150':150.} #make plots named mt2llwithcutat..... I.E. lines 134-136
+metcut = '40'     #USED IN LINE 28
+metsignifcut = 0.    #USED IN LINE 401
+luminosity = 10000.    #USED IN LINES 345-346
 
 #preselection: MET>40, njets>=2, n_bjets>=1, n_lep>=2
 #See here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
@@ -34,11 +33,9 @@ preselection = 'met_pt>'+metcut+'&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet
 #######################################################
 #from StopsDilepton.samples.cmgTuplesPostProcessed_PHYS14 import *
 from StopsDilepton.samples.cmgTuples_Spring15_50ns_postProcessed import *
-#backgrounds = [diBosons_50ns,WJetsToLNu_50ns,singleTop_50ns,QCDMu_50ns,DY_50ns,TTJets_50ns]
+backgrounds = [diBosons_50ns,WJetsToLNu_50ns,singleTop_50ns,QCDMu_50ns,DY_50ns,TTJets_50ns]
 #backgrounds = [singleTop_50ns,DY_50ns,TTJets_50ns]
-backgrounds = [TTJets_50ns]
-#signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
-signals = []
+signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
 data = [DoubleEG_50ns,DoubleMuon_50ns,MuonEG_50ns]
 
 #######################################################
@@ -336,8 +333,6 @@ for s in backgrounds+signals+data:
 
   for ev in range(nEvents):
 
-    if ev > 40: continue
-
     increment = 50
     if nEvents>increment and ev%(nEvents/increment)==0: 
       sys.stdout.write('\r' + "=" * (ev / (nEvents/increment)) +  " " * ((nEvents - ev)/ (nEvents/increment)) + "]" +  str(round((ev+1) / (float(nEvents)/100),2)) + "%")
@@ -402,8 +397,6 @@ for s in backgrounds+signals+data:
         ht = sum([j['pt'] for j in jets])
         PhiMetJet1 = deltaPhi(metPhi,getVarValue(chain, "Jet_phi",0))
         PhiMetJet2 = deltaPhi(metPhi,getVarValue(chain, "Jet_phi",1))
-
-        print ev, met, weight
 
         if (met/sqrt(ht)) > metsignifcut:
 
@@ -508,9 +501,9 @@ for s in backgrounds+signals+data:
   TreeFile.Close()
   del eList
 
-print plots['ee']['mt2ll']['histo'][TTJets_50ns['name']].Integral()
-print plots['emu']['mt2ll']['histo'][TTJets_50ns['name']].Integral()
-print plots['mumu']['mt2ll']['histo'][TTJets_50ns['name']].Integral()
+#print plots['ee']['mt2ll']['histo'][TTJets_50ns['name']].Integral()
+#print plots['emu']['mt2ll']['histo'][TTJets_50ns['name']].Integral()
+#print plots['mumu']['mt2ll']['histo'][TTJets_50ns['name']].Integral()
 
 #######################################################
 #           provide tables from histograms            #
