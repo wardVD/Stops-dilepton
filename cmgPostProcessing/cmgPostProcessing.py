@@ -16,6 +16,7 @@ ROOT.gSystem.Load("libFWCoreFWLite.so")
 ROOT.AutoLibraryLoader.enable()
 
 from StopsDilepton.samples.xsec import xsec
+from StopsDilepton.samples.cmgTuples_Phys14_signals import *
 from StopsDilepton.samples.cmgTuples_Data50ns_1l import *
 from StopsDilepton.samples.cmgTuples_Spring15_25ns import *
 from StopsDilepton.samples.cmgTuples_Spring15_50ns import *
@@ -24,7 +25,7 @@ target_lumi = 1000 #pb-1 Which lumi to normalize to
 
 defSampleStr = "MuonEG_Run2015B_PromptReco"  #Which samples to run for by default (will be overritten by --samples option)
 
-subDir = "/data/rschoefbeck/cmgTuples/postProcessed_Spring15_test" #Output directory -> The first path should go to localInfo (e.g. 'dataPath' or something)
+subDir = "/data/rschoefbeck/cmgTuples/postProcessed_Spring15_pass2" #Output directory -> The first path should go to localInfo (e.g. 'dataPath' or something)
 
 #branches to be kept for data and MC
 branchKeepStrings_DATAMC = ["run", "lumi", "evt", "isData", "rho", "nVert", 
@@ -59,6 +60,7 @@ parser.add_option("--inputTreeName", dest="inputTreeName", default="treeProducer
 parser.add_option("--targetDir", dest="targetDir", default=subDir, type="string", action="store", help="target directory.")
 parser.add_option("--skim", dest="skim", default="dilep", type="string", action="store", help="any skim condition?")
 parser.add_option("--small", dest="small", default = False, action="store_true", help="Just do a small subset.")
+parser.add_option("--overwrite", dest="overwrite", default = False, action="store_true", help="Overwrite?")
 
 (options, args) = parser.parse_args()
 assert options.skim in ['none', 'dilep'], "Unknown skim: %s"%options.skim
@@ -92,17 +94,19 @@ def getTreeFromChunk(c, skimCond, iSplit, nSplit):
    
 exec('allSamples=['+options.allSamples+']')
 for isample, sample in enumerate(allSamples):
-  #chunks, sumWeight = getChunks(sample, options.inputTreeName)
+  outDir = options.targetDir+'/'+"/".join([options.skim, sample['name']])
+
   maxN = 1 if options.small else -1
   chunks, sumWeight = getChunks(sample, maxN=maxN)
-  #chunks, nTotEvents = getChunksFromDPM(sample, options.inputTreeName)
-#  print "Chunks:" , chunks 
-  outDir = options.targetDir+'/'+"/".join([options.skim, sample['name']])
+  
+  if os.path.exists(outDir) and os.listdir(outDir) != [] and not options.overwrite:
+    print "Found non-empty directory: %s -> skipping!"%outDir
+    continue
   tmpDir = outDir+'/tmp/'
-  os.system('mkdir -p ' + outDir) 
+  os.system('mkdir -p '+outDir) 
   os.system('mkdir -p '+tmpDir)
   os.system('rm -rf '+tmpDir+'/*')
-  
+
   if sample['isData']: 
     lumiScaleFactor=1
     branchKeepStrings = branchKeepStrings_DATAMC + branchKeepStrings_DATA 
@@ -194,14 +198,14 @@ for isample, sample in enumerate(allSamples):
             s.l1_eta = leptons[0]['eta']
             s.l1_phi = leptons[0]['phi']
             s.l1_mass   = leptons[0]['mass']
-            s.l1_pdgId   = leptons[0]['pdgId']
-            s.l1_index   = leptons[0]['index']
+            s.l1_pdgId  = leptons[0]['pdgId']
+            s.l1_index  = leptons[0]['index']
             s.l2_pt  = leptons[1]['pt'] 
             s.l2_eta = leptons[1]['eta']
             s.l2_phi = leptons[1]['phi']
             s.l2_mass   = leptons[1]['mass']
-            s.l2_pdgId   = leptons[1]['pdgId']
-            s.l2_index   = leptons[1]['index']
+            s.l2_pdgId  = leptons[1]['pdgId']
+            s.l2_index  = leptons[1]['index']
 
             l_pdgs = [abs(leptons[0]['pdgId']), abs(leptons[1]['pdgId'])]
             l_pdgs.sort()
@@ -238,8 +242,7 @@ for isample, sample in enumerate(allSamples):
           v['branch'].Fill()
       newFileName = sample['name']+'_'+chunk['name']+'_'+str(iSplit)+'.root'
       filesForHadd.append(newFileName)
-      if True or  not options.small:
-      #if options.small:
+      if not options.small:
         f = ROOT.TFile(tmpDir+'/'+newFileName, 'recreate')
         t.SetBranchStatus("*",0)
         for b in branchKeepStrings + [v['stage2Name'] for v in newVars] +  [v.split(':')[1] for v in aliases]:
@@ -256,6 +259,7 @@ for isample, sample in enumerate(allSamples):
         del v['branch']
 
   print "Event loop end"
+
   if not options.small: 
     size=0
     counter=0

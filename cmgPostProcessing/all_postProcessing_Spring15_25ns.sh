@@ -1,54 +1,16 @@
 #!/bin/sh 
-########Spring15###############
 
-python cmgPostProcessing.py --skim=dilep  --samples=TTJets_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=DYJetsToLL_M_10to50_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=DYJetsToLL_M_50_HT100to200_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=DYJetsToLL_M_50_HT200to400_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=DYJetsToLL_M_50_HT400to600_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=DYJetsToLL_M_50_HT600toInf_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=WJetsToLNu_HT100to200_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=WJetsToLNu_HT200to400_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=WJetsToLNu_HT400to600_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=WJetsToLNu_HT600toInf_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=WJetsToLNu_HT600to800_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=WJetsToLNu_HT800to1200_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=WJetsToLNu_HT1200to2500_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=WJetsToLNu_HT2500toInf_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=TToLeptons_sch_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=TToLeptons_tch_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=TBar_tWch_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=T_tWch_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_MuEnriched_Pt15to20_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_MuEnriched_Pt20to30_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_MuEnriched_Pt30to50_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_MuEnriched_Pt50to80_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_MuEnriched_Pt80to120_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_MuEnriched_Pt120to170_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_MuEnriched_Pt170to300_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_MuEnriched_Pt300to470_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_MuEnriched_Pt470to600_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_MuEnriched_Pt600to800_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_MuEnriched_Pt800to1000_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_MuEnriched_Pt1000toInf_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_EMEnriched_Pt15to20_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_EMEnriched_Pt20to30_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_EMEnriched_Pt30to50_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_EMEnriched_Pt50to80_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_EMEnriched_Pt80to120_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_EMEnriched_Pt120to170_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_EMEnriched_Pt170to300_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_EMEnriched_Pt300toInf_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_bcToE_Pt15to20_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_bcToE_Pt20to30_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_bcToE_Pt30to80_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_bcToE_Pt80to170_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_bcToE_Pt170to250_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=QCD_bcToE_Pt250toInf_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=WZ_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=WWTo2L2Nu_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=ZZ_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=ZJetsToNuNu_HT200to400_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=ZJetsToNuNu_HT400to600_25ns
-python cmgPostProcessing.py --skim=dilep  --samples=ZJetsToNuNu_HT600toInf_25ns
-
+#nohup krenew -t -K 10 -- bash -c "./all_postProcessing_Spring15_25ns_1.sh >& all_postProcessing_Spring15_25ns_1.log" &
+#nohup krenew -t -K 10 -- bash -c "./all_postProcessing_Spring15_25ns_2.sh >& all_postProcessing_Spring15_25ns_2.log" &
+#nohup krenew -t -K 10 -- bash -c "./all_postProcessing_Spring15_25ns_3.sh >& all_postProcessing_Spring15_25ns_3.log" &
+#nohup krenew -t -K 10 -- bash -c "./all_postProcessing_Spring15_25ns_4.sh >& all_postProcessing_Spring15_25ns_4.log" &
+#nohup krenew -t -K 10 -- bash -c "./all_postProcessing_Spring15_25ns_5.sh >& all_postProcessing_Spring15_25ns_5.log" &
+#nohup krenew -t -K 10 -- bash -c "./all_postProcessing_Spring15_25ns_6.sh >& all_postProcessing_Spring15_25ns_6.log" &
+#nohup krenew -t -K 10 -- bash -c "./all_postProcessing_Spring15_25ns_7.sh >& all_postProcessing_Spring15_25ns_7.log" &
+./all_postProcessing_Spring15_25ns_1.sh &
+./all_postProcessing_Spring15_25ns_2.sh &
+./all_postProcessing_Spring15_25ns_3.sh &
+./all_postProcessing_Spring15_25ns_4.sh &
+./all_postProcessing_Spring15_25ns_5.sh &
+./all_postProcessing_Spring15_25ns_6.sh &
+./all_postProcessing_Spring15_25ns_7.sh &
