@@ -17,7 +17,10 @@ from StopsDilepton.samples.cmgTuples_Spring15_50ns_postProcessed import *
 
 
 def main():
-  cutflow(SMS_T2tt_2J_mStop650_mLSP325)
+  if sys.argv[1]=='425' : cutflow(SMS_T2tt_2J_mStop425_mLSP325)
+  if sys.argv[1]=='500' : cutflow(SMS_T2tt_2J_mStop500_mLSP325)
+  if sys.argv[1]=='650' : cutflow(SMS_T2tt_2J_mStop650_mLSP325)
+  if sys.argv[1]=='850' : cutflow(SMS_T2tt_2J_mStop850_mLSP100)
 
 def cutflow(sig):
   #######################################################
@@ -234,14 +237,14 @@ def cutflow(sig):
       if bkgtot > 0: cutflow[cuttype]['cuts'][cut]['SoverB'] = 100 * (sigtot/sqrt(bkgtot))
       else:          cutflow[cuttype]['cuts'][cut]['SoverB'] = 0.
 
-  maketable(baselineamount, cutflow, mt2llcut, metcut)
+  maketable(baselineamount, cutflow, mt2llcut, metcut,signal,lumi)
 
 
-def maketable(baselineamount,cutflow,mt2llcut,metcut):
+def maketable(baselineamount,cutflow,mt2llcut,metcut,signal,lumi):
 
   output = open('./cutflows/cutflow_'+signal[0]['name']+'.txt','w')
 
-  output.write("[Lumi = "+str(lumi)+" fb{-1}]" + "\n" + '\n')
+  output.write("[Lumi = "+str(lumi/1000)+" fb{-1}]" + "\n" + '\n')
   
   extra = ''
   firstline = []
@@ -267,7 +270,7 @@ def maketable(baselineamount,cutflow,mt2llcut,metcut):
   for cuttype in cutflow.keys():
     for cut in sorted(cutflow[cuttype]['cuts'].keys()):
       line = []
-      line.append(cuttype+">"+str(cut))
+      line.append(cuttype+">="+str(cut))
       for s in sorted(baselineamount['samples'].keys()):
         line.append(str(round(cutflow[cuttype]['cuts'][cut]['samples'][s],2)))
       line.append(str(round(cutflow[cuttype]['cuts'][cut]['SoverB'],2)))

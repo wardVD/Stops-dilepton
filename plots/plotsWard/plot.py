@@ -14,14 +14,14 @@ mt2Calc = mt2Calculator()
 #######################################################
 #        SELECT WHAT YOU WANT TO DO HERE              #
 #######################################################
-reduceStat = 100 #recude the statistics, i.e. 10 is ten times less samples to look at
+reduceStat = 1 #recude the statistics, i.e. 10 is ten times less samples to look at
 makedraw1D = False
 makedraw2D = False
 makelatextables = False #Ignore this if you're not Ward
 mt2llcuts = {'80':80., '100':100., '110':110, '120':120., '130':130., '140':140., '150':150.} #make plots named mt2llwithcutat..... I.E. lines 134-136
 metcut = '40'     #USED IN LINE 28
 metsignifcut = 0.    #USED IN LINE 401
-luminosity = 10000.    #USED IN LINES 345-346
+luminosity = 42.    #USED IN LINES 345-346
 
 #preselection: MET>40, njets>=2, n_bjets>=1, n_lep>=2
 #See here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
@@ -49,10 +49,10 @@ for s in backgrounds+signals+data:
 #######################################################
 mllbinning = [25,25,325] 
 #mt2llbinning = [25,0,300]
-mt2llbinning = [4,0,300]
+mt2llbinning = [3,0,300]
 metbinning = [20,0,800]
-mt2bbbinning = [4,0,550]
-mt2blblbinning = [4,0,550]
+mt2bbbinning = [3,0,550]
+mt2blblbinning = [3,0,550]
 kinMetSigbinning = [25,0,25]
 leadingjetptbinning = [25,25,575]
 subleadingjetptbinning = [25,25,575]
@@ -87,7 +87,7 @@ plots = {\
   'CosMinDphiMt2llcut':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))', 'name':'CosMinDphiJetsMt2llcut', 'binning':cosbinning, 'histo':{},'tag':'MT2cut'},
   'MinDphi':{'title':'Min(dPhi(MET,jet_1|jet_2))','name':'MinDphiJets', 'binning':phibinning, 'histo':{}},
   'MinDphiMt2llcut':{'title':'Min(dPhi(MET,jet_1|jet_2))', 'name':'MinDphiJetsMt2llcut', 'binning':phibinning, 'histo':{},'tag':'MT2cut'},
-  'ht':{'title':'H_{T}', 'name':'HT', 'binning':htbinning, 'histo':{}},
+  'ht':{'title':'H_{T}', 'name':'HT (GeV)', 'binning':htbinning, 'histo':{}},
   },
   'ee':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': mllbinning, 'histo':{}},
@@ -107,7 +107,7 @@ plots = {\
   'CosMinDphiMt2llcut':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))', 'name':'CosMinDphiJetsMt2llcut', 'binning':cosbinning, 'histo':{},'tag':'MT2cut'},
   'MinDphi':{'title':'Min(dPhi(MET,jet_1|jet_2))','name':'MinDphiJets', 'binning':phibinning, 'histo':{}},
   'MinDphiMt2llcut':{'title':'Min(dPhi(MET,jet_1|jet_2))', 'name':'MinDphiJetsMt2llcut', 'binning':phibinning, 'histo':{},'tag':'MT2cut'},
-  'ht':{'title':'H_{T}', 'name':'HT', 'binning':htbinning, 'histo':{}},
+  'ht':{'title':'H_{T}', 'name':'HT (GeV)', 'binning':htbinning, 'histo':{}},
   },
   'emu':{\
   'mll': {'title':'M_{ll} (GeV)', 'name':'mll', 'binning': mllbinning, 'histo':{}},
@@ -127,7 +127,7 @@ plots = {\
   'CosMinDphiMt2llcut':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))', 'name':'CosMinDphiJetsMt2llcut', 'binning':cosbinning, 'histo':{},'tag':'MT2cut'},
   'MinDphi':{'title':'Min(dPhi(MET,jet_1|jet_2))','name':'MinDphiJets', 'binning':phibinning, 'histo':{}},
   'MinDphiMt2llcut':{'title':'Min(dPhi(MET,jet_1|jet_2))', 'name':'MinDphiJetsMt2llcut', 'binning':phibinning, 'histo':{},'tag':'MT2cut'},
-  'ht':{'title':'H_{T}', 'name':'HT', 'binning':htbinning, 'histo':{}},
+  'ht':{'title':'H_{T}', 'name':'HT (GeV)', 'binning':htbinning, 'histo':{}},
   },
 }
 
@@ -158,7 +158,7 @@ plotsSF = {\
   'CosMinDphiMt2llcut':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))', 'name':'CosMinDphiJetsMt2llcut', 'binning':cosbinning, 'histo':{},'tag':'MT2cut'},
   'MinDphi':{'title':'Min(dPhi(MET,jet_1|jet_2))','name':'MinDphiJets', 'binning':phibinning, 'histo':{}},
   'MinDphiMt2llcut':{'title':'Min(dPhi(MET,jet_1|jet_2))', 'name':'MinDphiJetsMt2llcut', 'binning':phibinning, 'histo':{},'tag':'MT2cut'},
-  'ht':{'title':'H_{T}', 'name':'HT', 'binning':htbinning, 'histo':{}},
+  'ht':{'title':'H_{T}', 'name':'HT (GeV)', 'binning':htbinning, 'histo':{}},
   },
 }
 
@@ -527,8 +527,8 @@ diBosons_50ns["color"]=ROOT.kOrange
 WJetsToLNu_50ns['color']=ROOT.kRed-10
 #Plotvariables
 signal = {'path': ["SMS_T2tt_2J_mStop425_mLSP325","SMS_T2tt_2J_mStop500_mLSP325","SMS_T2tt_2J_mStop650_mLSP325","SMS_T2tt_2J_mStop850_mLSP100"], 'name': ["T2tt(425,325)","T2tt(500,325)","T2tt(650,325)","T2tt(850,100)"]}
-yminimum = 10
-ymaximum = 100
+yminimum = 0.1
+ymaximum = 30
 legendtextsize = 0.028
 signalscaling = 100
 histopad =  [0.01, 0.2, 0.99, 0.99]
