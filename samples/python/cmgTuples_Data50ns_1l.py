@@ -19,8 +19,10 @@ JetHT_Run2015B_17Jul2015 = { "name" : "JetHT_Run2015B-17Jul2015-v1",}
 JetHT_Run2015B_PromptReco = { "name" : "JetHT_Run2015B-PromptReco-v1",}
 MET_Run2015B_17Jul2015 = { "name" : "MET_Run2015B-17Jul2015-v1",}
 MET_Run2015B_PromptReco = { "name" : "MET_Run2015B-PromptReco-v1",}
+MuonEG_Run2015B_17Jul2015 = { "name" : "MuonEG_Run2015B-17Jul2015-v1",}
+MuonEG_Run2015B_PromptReco = { "name" : "MuonEG_Run2015B-PromptReco-v1",}
 
-allSamples_Data50ns_1l = [SingleMuon_Run2015B_17Jul2015, SingleMuon_Run2015B_PromptReco, SingleMu_Run2015B_17Jul2015, SingleMu_Run2015B_PromptReco, SingleElectron_Run2015B_17Jul2015, SingleElectron_Run2015B_PromptReco, DoubleEG_Run2015B_17Jul2015, DoubleEG_Run2015B_PromptReco, EGamma_Run2015B_17Jul2015, EGamma_Run2015B_PromptReco, DoubleMuon_Run2015B_17Jul2015, DoubleMuon_Run2015B_PromptReco, JetHT_Run2015B_17Jul2015, JetHT_Run2015B_PromptReco, MET_Run2015B_17Jul2015, MET_Run2015B_PromptReco]
+allSamples_Data50ns_1l = [SingleMuon_Run2015B_17Jul2015, SingleMuon_Run2015B_PromptReco, SingleMu_Run2015B_17Jul2015, SingleMu_Run2015B_PromptReco, SingleElectron_Run2015B_17Jul2015, SingleElectron_Run2015B_PromptReco, DoubleEG_Run2015B_17Jul2015, DoubleEG_Run2015B_PromptReco, EGamma_Run2015B_17Jul2015, EGamma_Run2015B_PromptReco, DoubleMuon_Run2015B_17Jul2015, DoubleMuon_Run2015B_PromptReco, JetHT_Run2015B_17Jul2015, JetHT_Run2015B_PromptReco, MET_Run2015B_17Jul2015, MET_Run2015B_PromptReco, MuonEG_Run2015B_17Jul2015, MuonEG_Run2015B_PromptReco]
 
 for s in allSamples_Data50ns_1l:
   s['chunkString'] = s['name']
@@ -32,3 +34,7 @@ for s in allSamples_Data50ns_1l:
     'dir' : data_path
   })
 
+MuonEG_Run2015B_PromptReco["rootFileLocation"]="treeProducerSusySingleLepton/tree.root" 
+MuonEG_Run2015B_PromptReco["skimAnalyzerDir"]="skimAnalyzerCount" 
+#MuonEG_Run2015B_17Jul2015 ["rootFileLocation"]="treeProducerSusySingleLepton/tree.root" 
+#MuonEG_Run2015B_17Jul2015 ["skimAnalyzerDir"]="skimAnalyzerCount" 

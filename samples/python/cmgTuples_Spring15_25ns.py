@@ -10,12 +10,21 @@ TTJets_25ns={\
 'isData':False
 }
 
-
 DYJetsToLL_M_10to50_25ns={\
 'name' : "DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 'chunkString' : "DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 "dir": data_path,
 'dbsName':'/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+
+DYJetsToLL_M_50_25ns={\
+'name' : "DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v3",
+'chunkString' : "DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v3",
+"dir": data_path,
+'dbsName':'/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v3/MINIAODSIM',
 "rootFileLocation":"tree.root",
 "treeName":"tree",
 'isData':False
@@ -669,8 +678,101 @@ ZJetsToNuNu_HT400to600_25ns={\
 ZJetsToNuNu_HT600toInf_25ns={\
 "name" : "ZJetsToNuNu_HT-600ToInf_13TeV-madgraph_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 "chunkString":"ZJetsToNuNu_HT-600ToInf_13TeV-madgraph_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
-"dir": data_path,
 "dbsName" : "/ZJetsToNuNu_HT-600ToInf_13TeV-madgraph/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM",
+"dir": data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+
+
+
+TTWJetsToLNu={\
+"name" :      "TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
+"chunkString":"TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
+"dbsName" : "/TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM",
+"dir": data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+TTZToLLNuNu={\
+"name" :      "TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
+"chunkString":"TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
+"dbsName" : "/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM",
+"dir": data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+TTZToQQ={\
+"name" :      "TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
+"chunkString":"TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
+"dbsName" : "/TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM",
+"dir": data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+tZq_ll_4f={\
+"name" :      "tZq_ll_4f_13TeV-amcatnlo-pythia8_TuneCUETP8M1_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2",
+"chunkString":"tZq_ll_4f_13TeV-amcatnlo-pythia8_TuneCUETP8M1_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2",
+"dbsName" : "/tZq_ll_4f_13TeV-amcatnlo-pythia8_TuneCUETP8M1/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM",
+"dir": data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+tZq_nunu_4f={\
+"name" :      "tZq_nunu_4f_13TeV-amcatnlo-pythia8_TuneCUETP8M1_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2",
+"chunkString":"tZq_nunu_4f_13TeV-amcatnlo-pythia8_TuneCUETP8M1_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2",
+"dbsName" : "/tZq_nunu_4f_13TeV-amcatnlo-pythia8_TuneCUETP8M1/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM",
+"dir": data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+ttHJetToNonbb={\
+"name" :      "ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2",
+"chunkString":"ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2",
+"dbsName" : "/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM",
+"dir": data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+ttHJetToNonbb_ext={\
+"name" :      "ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v3",
+"chunkString":"ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v3",
+"dbsName" : "/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v3/MINIAODSIM",
+"dir": data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+ttHJetTobb={\
+"name" :      "ttHJetTobb_M125_13TeV_amcatnloFXFX_madspin_pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
+"chunkString":"ttHJetTobb_M125_13TeV_amcatnloFXFX_madspin_pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
+"dbsName" : "/ttHJetTobb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM",
+"dir": data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+ttHJetTobb_ext={\
+"name" :      "ttHJetTobb_M125_13TeV_amcatnloFXFX_madspin_pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v1",
+"chunkString":"ttHJetTobb_M125_13TeV_amcatnloFXFX_madspin_pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v1",
+"dbsName" : "/ttHJetTobb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v1/MINIAODSIM",
+"dir": data_path,
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+ttHToNonbb_pow={\
+"name" :      "ttHToNonbb_M125_13TeV_powheg_pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2",
+"chunkString":"ttHToNonbb_M125_13TeV_powheg_pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2",
+"dbsName" : "/ttHToNonbb_M125_13TeV_powheg_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM",
+"dir": data_path,
 "rootFileLocation":"tree.root",
 "treeName":"tree",
 'isData':False

@@ -1,5 +1,5 @@
 import ROOT
-from math import pi, sqrt, cos, sin, sinh, log
+from math import pi, sqrt, cos, sin, sinh, log, cosh
 from array import array
 ROOT.gROOT.LoadMacro("$CMSSW_BASE/src/StopsDilepton/tools/scripts/tdrstyle.C")
 ROOT.setTDRStyle()
@@ -45,8 +45,8 @@ def getChunks(sample,  maxN=-1):
   #print chunks
   chunks=chunks[:maxN] if maxN>0 else chunks
   sumWeights=0
-  allFiles=[]
   failedChunks=[]
+  goodChunks  =[] 
   const = 'All Events' if sample['isData'] else 'Sum Weights'
   for i, s in enumerate(chunks):
       if not sample.has_key("skimAnalyzerDir"):
@@ -62,17 +62,19 @@ def getChunks(sample,  maxN=-1):
         #print sumW, inputFilename
         if os.path.isfile(inputFilename):
           sumWeights+=sumW
-          allFiles.append(inputFilename)
           s['file']=inputFilename
+          goodChunks.append(s)
         else:
           failedChunks.append(chunks[i])
       else:
         print "log file not found:  ", logfile
         failedChunks.append(chunks[i])
 #    except: print "Chunk",s,"could not be added"
-  print "Found",len(chunks),"chunks for sample",sample["name"],'with a normalization constant of',sumWeights,
-  if len(chunks) > 0: print ". Failed for:",",".join([c['name'] for c in failedChunks]),"(",round(100*len(failedChunks)/float(len(chunks)),1),")%"
-  return chunks, sumWeights
+  eff = round(100*len(failedChunks)/float(len(chunks)),3)
+  print "Chunks: %i total, %i good (normalization constant %f), %i bad. Inefficiency: %f"%(len(chunks),len(goodChunks),sumWeights,len(failedChunks), eff)
+  for s in failedChunks: 
+    print "Failed:",s
+  return goodChunks, sumWeights
 
 def getObjFromFile(fname, hname):
   f = ROOT.TFile(fname)
@@ -86,14 +88,6 @@ def getObjFromFile(fname, hname):
   return res
 
 def getVarValue(c, var, n=-1):
-#  varNameHisto = var
-#  leaf = c.GetAlias(varNameHisto)
-#  if leaf!='':
-#    try:
-#      return c.GetLeaf(leaf).GetValue(n)
-#    except:
-#      raise Exception("Unsuccessful getVarValue for leaf %s and index %i"%(leaf, n))
-#  else:
   try:
     att = getattr(c, var)
     if n>=0:return att[n]
@@ -112,7 +106,9 @@ def getEList(chain, cut, newname='eListTMP'):
   return elistTMP
 
 def getObjDict(c, prefix, variables, i):
-  return {var: getVarValue(c, prefix+var, i) for var in variables}
+  res={var: getVarValue(c, prefix+var, i) for var in variables}
+  res['index']=i
+  return res
 #  return {var: c.GetLeaf(prefix+var).GetValue(i) for var in variables}
 
 def getWeight(c,sample,lumi,n=0):
@@ -266,3 +262,4 @@ def deltaPhi(phi1, phi2):
   if dphi <= -pi:
     dphi += 2.0*pi
   return abs(dphi)
+

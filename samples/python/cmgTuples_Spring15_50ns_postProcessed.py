@@ -51,7 +51,22 @@ singleTop_50ns={\
 ],
 'dir' : dir,
 }
+DYM10to50_50ns={\
+"name" : "DY M10-50",
+"bins" : [
+"DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
+],
+'dir' : dataDir,
+}
 DY_50ns={\
+"name" : "DY-M50",
+"bins" : [
+#"DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v3",
+"DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2"
+],
+'dir' : dataDir,
+}
+DYHT_50ns={\
 "name" : "DY",
 "bins" : [
 "DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
@@ -60,13 +75,6 @@ DY_50ns={\
 "DYJetsToLL_M-50_HT-600toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
 ],
 'dir' : dir,
-}
-DYM10to50_50ns={\
-"name" : "DY M10-50",
-"bins" : [
-"DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1",
-],
-'dir' : dataDir,
 }
 QCDMu_50ns={\
 "name" : "QCDMu",
