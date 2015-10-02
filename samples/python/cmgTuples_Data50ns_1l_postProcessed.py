@@ -53,6 +53,8 @@ import ROOT
 for s in allSamples_Data50ns_1l:
   s.update({ 
     'dir' : dir,
-    'color':ROOT.kBlack
+    'color':ROOT.kBlack,
+    'isData':True,
+    'lumi':42.
   })
 

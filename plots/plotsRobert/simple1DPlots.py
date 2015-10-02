@@ -9,6 +9,7 @@ small = False
 from StopsDilepton.samples.cmgTuples_Spring15_50ns_postProcessed import *
 from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
 from StopsDilepton.samples.cmgTuples_Data50ns_1l_postProcessed import *
+from StopsDilepton.samples.cmgTuples_Data25ns_postProcessed import *
 from StopsDilepton.tools.objectSelection import getLeptons, getMuons, getElectrons, getGoodMuons, getGoodElectrons, getGoodLeptons, mZ
 from Workspace.RA4Analysis.simplePlotHelpers import plot, stack, loopAndFill, drawNMStacks
 from optparse import OptionParser
@@ -22,17 +23,18 @@ parser.add_option("--OS", dest="OS", default = False, action="store_true", help=
 
 cutBranches = ["weight", "leptonPt", "met*", \
                'Jet_pt', "Jet_id", "Jet_eta", "Jet_btagCSV",
-               "LepGood_pdgId", "LepGood_mediumMuonId", "LepGood_miniRelIso", "LepGood_sip3d", "LepGood_dxy", "LepGood_dz", "LepGood_convVeto", "LepGood_lostHits" 
-               "Flag_HBHENoiseFilterMinZeroPatched", "Flag_goodVertices", "Flag_CSCTightHaloFilter", "Flag_eeBadScFilter",
+               "LepGood_pdgId", "LepGood_mediumMuonId", "LepGood_miniRelIso", "LepGood_sip3d", "LepGood_dxy", "LepGood_dz", "LepGood_convVeto", "LepGood_lostHits",
+               "Flag_HBHENoiseFilter", "Flag_HBHENoiseIsoFilter", "Flag_HBHENoiseFilterMinZeroPatched", "Flag_goodVertices", "Flag_CSCTightHaloFilter", "Flag_eeBadScFilter",
                "HLT_mumuIso", "HLT_ee_DZ", "HLT_mue",
                "is*","dl_*"
                 ]
 subdir = "/png50ns_2l/"
 
-lumiScaleFac = 42./1000.
 prefix = '_'.join([options.mode, options.zMode]) 
 
-filterCut = "(Flag_HBHENoiseFilterMinZeroPatched&&Flag_goodVertices&&Flag_CSCTightHaloFilter&&Flag_eeBadScFilter)"
+filterCut = "(Flag_HBHENoiseFilter&&Flag_HBHENoiseIsoFilter&&Flag_goodVertices&&Flag_CSCTightHaloFilter&&Flag_eeBadScFilter)"
+#filterCut = "(Flag_HBHENoiseFilterMinZeroPatched&&Flag_goodVertices&&Flag_CSCTightHaloFilter&&Flag_eeBadScFilter)"
+#filterCut = "(1)"
 
 #nMu = "Sum$(abs(LepGood_pdgId)==13&&LepGood_mediumMuonId==1&&LepGood_miniRelIso<0.1&&LepGood_sip3d<4.0&&abs(LepGood_dxy)<0.05&&abs(LepGood_dz)<0.1)"
 #nEle = "Sum$(abs(LepGood_pdgId)==11&&LepGood_convVeto==1&&LepGood_miniRelIso<0.2&&LepGood_sip3d<4.0&&abs(LepGood_dxy)<0.05&&abs(LepGood_dz)<0.1&&LepGood_lostHits==0)"
@@ -40,7 +42,8 @@ triggerMuMu = "HLT_mumuIso"
 triggerEleEle = "HLT_ee_DZ"
 triggerMuEle = "HLT_mue"
 
-preselHad="((Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>=2)"
+preselCuts = ["((Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>=2)"]
+if options.OS : preselCuts.append("isOS")
 
 def getZCut(mode):
   zstr = "abs(dl_mass - "+str(mZ)+")"
@@ -49,18 +52,19 @@ def getZCut(mode):
   return "(1)"
 
 if options.mode=="doubleMu":
-  presel = "&&".join(["isMuMu==1", preselHad, getZCut(options.zMode)])
+  presel = "&&".join(["isMuMu==1", getZCut(options.zMode)] + preselCuts)
   dataCut = "&&".join([triggerMuMu, filterCut])
-  dataSample = DoubleMuon_Run2015B
+  dataSample = DoubleMuon_Run2015D
 if options.mode=="doubleEle":
-  presel = "&&".join(["isEE==1", preselHad, getZCut(options.zMode)])
+  presel = "&&".join(["isEE==1", getZCut(options.zMode)] + preselCuts)
   dataCut = "&&".join([triggerEleEle, filterCut])
-  dataSample = DoubleEG_Run2015B
+  dataSample = DoubleEG_Run2015D
 if options.mode=="muEle":
-#  presel = "&&".join([nEle+">=1&&"+nMu+">=1", preselHad])
-  presel = "&&".join(["isEMu==1", preselHad, getZCut(options.zMode)])
+  presel = "&&".join(["isEMu==1", getZCut(options.zMode)] + preselCuts)
   dataCut = "&&".join([triggerMuEle, filterCut])
-  dataSample = MuonEG_Run2015B
+  dataSample = MuonEG_Run2015D
+
+lumiScaleFac = dataSample["lumi"]/1000.
 
 cutString=presel
 
@@ -89,6 +93,7 @@ def getStack(labels, var, binning, cut, options={}):
   MC_QCD             = plot(var, binning, cut, sample=QCDMu_50ns,        style=style_QCD, weight={'string':'weight'})
 
   mcStack = [MC_TTJets, MC_DY,  MC_QCD, MC_singleTop, MC_WJetsToLNu]
+#  mcStack = []
   for s in mcStack:
     s.sample['scale'] = lumiScaleFac
 
@@ -99,16 +104,15 @@ def getStack(labels, var, binning, cut, options={}):
       p.sample['small']=small
 
   opt = {'small':small, 'yHeadRoomFac':12, 'labels':labels, 'logX':False, 'logY':True, 'yRange':[0.11, "auto"], 'ratio':ratioOps, 'fileName':var['name']}
-#  opt['texLines'] = [{'pos':(0.15, 0.95),'text':'CMS Simulation',        'options':{'size':0.045}},\
-#                     {'pos':(0.7, 0.95), 'text':'L=4fb{}^{-1} (13 TeV)', 'options':{'size':0.045}}]
-#  opt['legend'] = {'coordinates':[0.6,0.95 - len(plotLists)*0.09,.98,.93],'boxed':True}
+#  opt = {'small':small, 'yHeadRoomFac':12, 'labels':labels, 'logX':False, 'logY':True, 'yRange':[0.11, "auto"], 'ratio':None, 'fileName':var['name']}
+
   if opt.has_key('ratio') and opt['ratio']:
     opt['texLines'] = [{'pos':(0.15, 0.95),'text':'CMS Preliminary', 'options':{'size':0.052}},\
-                       {'pos':(0.7, 0.95), 'text':'L=42pb{}^{-1} (13 TeV)', 'options':{'size':0.052}}]
+                       {'pos':(0.7, 0.95), 'text':'L='+str(dataSample['lumi'])+' pb{}^{-1} (13 TeV)', 'options':{'size':0.052}}]
     opt['legend'] = {'coordinates':[0.55,0.90 - len(mcStack)*0.05,.98,.93],'boxed':True}
   else:
     opt['texLines'] = [{'pos':(0.16, 0.965), 'text':'CMS Preliminary',       'options':{'size':0.038}},\
-                       {'pos':(0.7, 0.965),  'text':'L=42pb{}^{-1} (13 TeV)','options':{'size':0.038}}]
+                       {'pos':(0.7, 0.965),  'text':'L='+str(dataSample['lumi'])+' pb{}^{-1} (13 TeV)','options':{'size':0.038}}]
     opt['legend'] = {'coordinates':[0.55,0.90 - len(mcStack)*0.05,.98,.95],'boxed':True}
 
   opt.update(options)
