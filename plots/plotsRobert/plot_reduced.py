@@ -3,24 +3,6 @@ import ROOT
 ROOT.gROOT.LoadMacro("$CMSSW_BASE/src/StopsDilepton/tools/scripts/tdrstyle.C")
 ROOT.setTDRStyle()
 
-## this is for the mTauTau vairable used by the degenerate stop dilepton analysis:
-#from StopsDilepton.tools.mtautau import mtautau as mtautau_
-
-## to simplify life: helpers for dealing with chains, retrieving values etc.
-#from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue
-
-## Here is an extremly simple implementation of getVarValue which just gets a number from a leaf in a TTree/TChain. I implement it, so that this script is mostly self-contained.
-## If you ask for a branch that has Status "0", you'll get 0. This can be quite dangerous, so I'm careful when using SetBranchStatus (below).
-def getVarValue(chain, var, n=0):
-  return chain.GetLeaf(var).GetValue(n)
-
-## to simplify life further: usage of common object selection:
-#from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets 
-
-## our mt2 calculator
-#from StopsDilepton.tools.mt2Calculator import mt2Calculator
-#mt2Calc = mt2Calculator()
-
 ## localInfo so that the code runs for different people
 from StopsDilepton.tools.localInfo import *
 
@@ -28,7 +10,7 @@ from StopsDilepton.tools.localInfo import *
 preselectionHadronic = 'Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)>=1'
 
 ## let's require opposite-sign di-muons off the Z-peak. You can also remove this selection and select later in the loop.
-## However, if you don't preselect, the event loop will be slow.
+## However, if you don't preselect, the event loop will be slow because you process all events.
 preselection = "&&".join([preselectionHadronic, "isMuMu", "isOS", "abs(dl_mass-90.2)>15."])
 print "Using cut %s"%preselection
 
@@ -46,6 +28,11 @@ print "Samples I know of: %s"% ", ".join(s['name'] for s in samples)
 
 lumiScaleFactor = data['lumi']/1000. #The 'weight' in the MC samples is for 1fb^-1, so we need to scale it according to the lumi in the data sample
 print "Data amounts to %5.2f/pb, therefore I scale with %5.5f"%(data['lumi'],lumiScaleFactor)
+
+## Here is an extremly simple implementation of getVarValue which just gets a number from a leaf in a TTree/TChain. I implement it, so that this script is mostly self-contained.
+## If you ask for a branch that has Status "0", you'll get 0. This can be quite dangerous, so I'm careful when using SetBranchStatus (below).
+def getVarValue(chain, var, n=0):
+  return chain.GetLeaf(var).GetValue(n)
 
 ##Let's load the TChains. I use 'getChain' below, but I commented it and now do it by hand
 ##Get the TChains for each sample. I 
