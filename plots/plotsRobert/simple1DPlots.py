@@ -1,3 +1,12 @@
+from optparse import OptionParser
+parser = OptionParser()
+parser.add_option("--mode", dest="mode", default="doubleMu", type="string", action="store", help="doubleMu, doubleEle, eleMu")
+parser.add_option("--zMode", dest="zMode", default="None", type="string", action="store", help="onZ, offZ, None")
+#parser.add_option("--small", dest="small", default = False, action="store_true", help="small")
+parser.add_option("--OS", dest="OS", default = False, action="store_true", help="require OS?")
+
+(options, args) = parser.parse_args()
+
 import ROOT
 from array import array
 from math import cos,sin,sqrt,cosh,pi
@@ -12,14 +21,6 @@ from StopsDilepton.samples.cmgTuples_Data50ns_1l_postProcessed import *
 from StopsDilepton.samples.cmgTuples_Data25ns_postProcessed import *
 from StopsDilepton.tools.objectSelection import getLeptons, getMuons, getElectrons, getGoodMuons, getGoodElectrons, getGoodLeptons, mZ
 from Workspace.RA4Analysis.simplePlotHelpers import plot, stack, loopAndFill, drawNMStacks
-from optparse import OptionParser
-parser = OptionParser()
-parser.add_option("--mode", dest="mode", default="doubleMu", type="string", action="store", help="doubleMu, doubleEle, eleMu")
-parser.add_option("--zMode", dest="zMode", default="None", type="string", action="store", help="onZ, offZ, None")
-#parser.add_option("--small", dest="small", default = False, action="store_true", help="small")
-parser.add_option("--OS", dest="OS", default = False, action="store_true", help="require OS?")
-
-(options, args) = parser.parse_args()
 
 cutBranches = ["weight", "leptonPt", "met*", \
                'Jet_pt', "Jet_id", "Jet_eta", "Jet_btagCSV",
@@ -28,7 +29,7 @@ cutBranches = ["weight", "leptonPt", "met*", \
                "HLT_mumuIso", "HLT_ee_DZ", "HLT_mue",
                "is*","dl_*"
                 ]
-subdir = "/png50ns_2l/"
+subdir = "/png25ns_2l/"
 
 prefix = '_'.join([options.mode, options.zMode]) 
 
@@ -81,21 +82,23 @@ def getStack(labels, var, binning, cut, options={}):
 
   style_DY           = {'legendText':'DY + Jets',  'style':"f", 'linethickNess':0, 'errorBars':False,       'color':8, 'markerStyle':None, 'markerSize':None}
 #  style_TTVH         = {'legendText':'t#bar{t} + W/Z/H',  'style':"f", 'linethickNess':0, 'errorBars':False, 'color':color("TTVH"), 'markerStyle':None, 'markerSize':None}
+#  style_diBoson         = {'legendText':'t#bar{t} + W/Z/H',  'style':"f", 'linethickNess':0, 'errorBars':False, 'color':ROOT.kGreen-5, 'markerStyle':None, 'markerSize':None}
   style_QCD          = {'legendText':'QCD',  'style':"f", 'linethickNess':0, 'errorBars':False,             'color':46, 'markerStyle':None, 'markerSize':None}
   style_singleTop    = {'legendText':'single top',  'style':"f", 'linethickNess':0, 'errorBars':False,      'color':40, 'markerStyle':None, 'markerSize':None}
   
   data               = plot(var, binning, cut, sample=dataSample,       style=style_Data)
-  MC_TTJets          = plot(var, binning, cut, sample=TTJets_50ns,       style=style_TTJets, weight={'string':'weight'})
-  MC_WJetsToLNu      = plot(var, binning, cut, sample=WJetsToLNu_50ns,   style=style_WJets, weight={'string':'weight'})
-  MC_DY              = plot(var, binning, cut, sample=DY_50ns,           style=style_DY, weight={'string':'weight'})
-#  MC_TTVH            = plot(var, binning, cut, sample=TTVH,       style=style_TTVH, weight={'string':'weight'})
-  MC_singleTop       = plot(var, binning, cut, sample=singleTop_50ns,    style=style_singleTop, weight={'string':'weight'})
-  MC_QCD             = plot(var, binning, cut, sample=QCDMu_50ns,        style=style_QCD, weight={'string':'weight'})
+  MC_TTJets          = plot(var, binning, cut, sample=TTJets_25ns,       style=style_TTJets, weight={'string':'weight'})
+  MC_WJetsToLNu      = plot(var, binning, cut, sample=WJetsToLNu_25ns,   style=style_WJets, weight={'string':'weight'})
+  MC_DY              = plot(var, binning, cut, sample=DY_25ns,           style=style_DY, weight={'string':'weight'})
+#  MC_diBoson         = plot(var, binning, cut, sample=diBosons_25ns,     style=style_diBoson, weight={'string':'weight'})
+  MC_singleTop       = plot(var, binning, cut, sample=singleTop_25ns,    style=style_singleTop, weight={'string':'weight'})
+  MC_QCD             = plot(var, binning, cut, sample=QCDMu_25ns,        style=style_QCD, weight={'string':'weight'})
 
   mcStack = [MC_TTJets, MC_DY,  MC_QCD, MC_singleTop, MC_WJetsToLNu]
 #  mcStack = []
-  for s in mcStack:
-    s.sample['scale'] = lumiScaleFac
+#  for s in mcStack:
+#    print s,s.sample
+#    s.sample['scale'] = lumiScaleFac
 
   plotLists = [mcStack, [data]]
 
