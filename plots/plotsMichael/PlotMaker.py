@@ -1,32 +1,35 @@
 import ROOT
-from ROOT import TTree, TFile, AddressOf, gROOT, TH1F
+from ROOT import TTree, TFile, AddressOf, gROOT, TH1F, TString
 from array import array
 import numpy as n
 from math import *
+import string
 
 
-#list_of_plots = [
-#    Plot("et"           , TH1F("pho_et"           , "Lead #gamma: E_{T};E_{T} (GeV);entries/bin", 25, 0.0, 100.0)),
-#    Plot("eta"          , TH1F("pho_eta"          , "Lead #gamma: #eta;#eta;entries/bin"        , 25, -3.0, 3.0)),
-#    Plot("sigmaIetaIeta", TH1F("pho_sigmaIEtaIEta", "Lead #gamma: #sigma_{i#etai#eta};#sigma_{i#etai#eta};entries/bin",20, 0, 0.06)),
-#    Plot("metEt/et"     , TH1F("metEt_over_phoEt" , "MET / E_{T}(#gamma);MET/E_{T}(sc);entries/bin"   , 20, 0.0, 3.0)),
-#    Plot("phi:eta"      , TH2F("phoPhi_vs_phoEta" , "Lead #gamma: #phi vs #eta;#eta;#phi"             , 50, -2.5, 2.5, 18, -3.14, 3.14))
-#    ]
 
-MET = TH1F("MET", 'E_{T}', 25, 0, 500) 
+dataset_name 		= ["T2ttS425N325", "T2ttS650N325", "TTJets", "WJets", "QCDMu", "DrellYan", "QCDMu", "singleTop", "DoubleElec", "DoubleMuon", "MuonElec"] 
+#plot_name 			= ["mt2ll", "mt2bb", "mt2blbl"]
 
-f = ROOT.TFile.Open("outfile.root")
+mt2ll = TH1F("mt2ll", "mt2ll", 50, 0, 1000) 
+
+f = ROOT.TFile.Open("ntuples/"+dataset_name[2]+".root")
+
+#for process in range(len(dataset_name)):
+
+lumi = 0.204
 
 for event in f.AnaTree :
+		#print dataset_name[process] 
 
-#    print "met = %d: mt2ll = %d: mt2bb = %d: mt2blbl %d" % (event.MET,event.mt2ll,event.mt2bb,event.mt2blbl)
-
-       MET.Fill( event.MET )
-
+#	if event.isElecElec and abs(event.dileptonInvariantMass - 90.2) >15.:
+	if event.isMuonMuon and abs(event.dileptonInvariantMass - 90.2) >15.:
+  		mt2ll.Fill( event.mt2ll , event.eventWeight*lumi)
+#	if event.isMuonMuon and abs(event.dileptonInvariantMass - 90.2) >15.:
+#  		mt2ll.Fill( event.mt2ll , event.eventWeight*lumi)
 
 c1 = ROOT.TCanvas()
-#bkg_stack.SetMaximum(2*bkg_stack.GetMaximum())
-#bkg_stack.SetMinimum(10**-1.5)
-MET.Draw('')
+mt2ll.Draw('')
 c1.SetLogy()
-c1.Print("~/www/php-plots/test.png")
+c1.Print("~/www/php-plots/mt2bb_test.png")
+
+print mt2ll.Integral()
