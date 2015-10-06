@@ -8,28 +8,26 @@ import string
 
 
 dataset_name 		= ["T2ttS425N325", "T2ttS650N325", "TTJets", "WJets", "QCDMu", "DrellYan", "QCDMu", "singleTop", "DoubleElec", "DoubleMuon", "MuonElec"] 
-#plot_name 			= ["mt2ll", "mt2bb", "mt2blbl"]
 
-mt2ll = TH1F("mt2ll", "mt2ll", 50, 0, 1000) 
+plot = TH1F("plot", "plot", 50, 0, 1000) 
 
 f = ROOT.TFile.Open("ntuples/"+dataset_name[2]+".root")
 
 #for process in range(len(dataset_name)):
 
-lumi = 0.204
+lumi = 0.2042
 
 for event in f.AnaTree :
-		#print dataset_name[process] 
 
-#	if event.isElecElec and abs(event.dileptonInvariantMass - 90.2) >15.:
-	if event.isMuonMuon and abs(event.dileptonInvariantMass - 90.2) >15.:
-  		mt2ll.Fill( event.mt2ll , event.eventWeight*lumi)
-#	if event.isMuonMuon and abs(event.dileptonInvariantMass - 90.2) >15.:
-#  		mt2ll.Fill( event.mt2ll , event.eventWeight*lumi)
+	#if event.MET > 80 and event.MET/sqrt(event.HT) > 5 and cos(event.METPhi - event.LeadingJet.Phi())<cos(0.25) and cos(event.METPhi - event.SubLeadingJet.Phi())<cos(0.25): 
+	if event.MET > 80 and event.MET/sqrt(event.HT) > 5: 
 
-c1 = ROOT.TCanvas()
-mt2ll.Draw('')
-c1.SetLogy()
-c1.Print("~/www/php-plots/mt2bb_test.png")
+  		plot.Fill( event.MET , event.eventWeight*lumi)
+  		print event.eventWeight
+#c1 = ROOT.TCanvas()
+#mt2ll.Draw('')
+#c1.SetLogy()
+#c1.Print("~/www/php-plots/mt2bb_test.png")
 
-print mt2ll.Integral()
+print plot.Integral()
+print plot.GetEntries()
