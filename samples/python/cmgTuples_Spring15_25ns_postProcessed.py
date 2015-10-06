@@ -11,7 +11,7 @@ TTJets_25ns={\
 'dir' : dir,
 }
 WJetsHTToLNu_25ns={\
-"name" : "W+Jets",
+"name" : "W+Jets HT binned",
 "bins" : [
 "WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 "WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
@@ -21,6 +21,13 @@ WJetsHTToLNu_25ns={\
 "WJetsToLNu_HT-800To1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 "WJetsToLNu_HT-1200To2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 "WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2",
+],
+'dir' : dir,
+}
+WJetsToLNu_25ns={\
+"name" : "W+Jets",
+"bins" : [
+"WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1"
 ],
 'dir' : dir,
 }
@@ -120,8 +127,8 @@ def getSignalSample(signal):
   if signal in allSignalStrings:
     return {
       "name" : signal,
-      #'dir' : dir,
-      'dir' : "/afs/cern.ch/work/w/wvandrie/public/STOPS/ANALYSIS/CMSSW_7_4_7_patch1/src/StopsDilepton/samplesCopyWard_Phys14/",
+      'dir' : dir,
+      #'dir' : "/afs/cern.ch/work/w/wvandrie/public/STOPS/ANALYSIS/CMSSW_7_4_7_patch1/src/StopsDilepton/samplesCopyWard_Phys14/",
       'bins':[signal]}
   else:
     print "Signal",signal,"unknown. Available: ",", ".join(allSignalStrings)

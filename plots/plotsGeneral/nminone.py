@@ -14,14 +14,14 @@ mt2Calc = mt2Calculator()
 #######################################################
 #        SELECT WHAT YOU WANT TO DO HERE              #
 #######################################################
-reduceStat = 1 #recude the statistics, i.e. 10 is ten times less samples to look at
+reduceStat = 100 #recude the statistics, i.e. 10 is ten times less samples to look at
 makedraw1D = True
 makedraw2D = False
 makelatextables = False #Ignore this if you're not Ward
 metcut = '0'     #USED IN LINE 28
-metsignifcut = 0.    #USED IN LINE 401
+metsignifcut = 7.    #USED IN LINE 401
 luminosity = 10000.    #USED IN LINES 345-346
-mt2llcut = 80.
+mt2llcut = 0.
 
 #preselection: MET>40, njets>=2, n_bjets>=1, n_lep>=2
 #See here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
@@ -48,36 +48,40 @@ for s in backgrounds+signals+data:
 #######################################################
 #           define binning of 1D histograms           #
 #######################################################
+mt2llbinning = [25,0,300]
 metbinning = [20,0,800]
-mt2llbinning = [30,0,300]
-mt2bbbinning = [30,0,550]
-mt2blblbinning = [30,0,550]
 kinMetSigbinning = [25,0,25]
 njetsbinning = [15,0,15]
 nbjetsbinning = [10,0,10]
-htbinning = [20,0,1500]
+dphibinning = [20,0,pi]
 
 #######################################################
 #             make plot in each sample:               #
 #######################################################
 plots = {\
   'mumu':{\
+  'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': mt2llbinning, 'histo':{}},
   'met': {'title':'E^{miss}_{T} (GeV), #jets>=2, #bjets>=1', 'name':'MET', 'binning': metbinning, 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2}), #jets>=2, #bjets>=1', 'name':'kinMetSig', 'binning': kinMetSigbinning, 'histo':{}},
   'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
   'nbjets': {'title': 'nbjets', 'name':'nbjets', 'binning': nbjetsbinning, 'histo':{}},
+  'dPhi': {'title': 'dPhi(MET,jet1|jet2)', 'name': 'dphi', 'binning': dphibinning, 'histo':{}},
   },
   'ee':{\
+  'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': mt2llbinning, 'histo':{}},
   'met': {'title':'E^{miss}_{T} (GeV), #jets>=2, #bjets>=1', 'name':'MET', 'binning': metbinning, 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2}), #jets>=2, #bjets>=1', 'name':'kinMetSig', 'binning': kinMetSigbinning, 'histo':{}},
   'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
   'nbjets': {'title': 'nbjets', 'name':'nbjets', 'binning': nbjetsbinning, 'histo':{}},
+  'dPhi': {'title': 'dPhi(MET,jet1|jet2)', 'name': 'dphi', 'binning': dphibinning, 'histo':{}},
   },
   'emu':{\
+  'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': mt2llbinning, 'histo':{}},
   'met': {'title':'E^{miss}_{T} (GeV), #jets>=2, #bjets>=1', 'name':'MET', 'binning': metbinning, 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2}), #jets>=2, #bjets>=1', 'name':'kinMetSig', 'binning': kinMetSigbinning, 'histo':{}},
   'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
   'nbjets': {'title': 'nbjets', 'name':'nbjets', 'binning': nbjetsbinning, 'histo':{}},
+  'dPhi': {'title': 'dPhi(MET,jet1|jet2)', 'name': 'dphi', 'binning': dphibinning, 'histo':{}},
   },
 }
 
@@ -86,10 +90,12 @@ plots = {\
 #######################################################
 plotsSF = {\
   'SF':{\
+  'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': mt2llbinning, 'histo':{}},
   'met': {'title':'E^{miss}_{T} (GeV), #jets>=2, #bjets>=1', 'name':'MET', 'binning': metbinning, 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2}), #jets>=2, #bjets>=1', 'name':'kinMetSig', 'binning': kinMetSigbinning, 'histo':{}},
   'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
   'nbjets': {'title': 'nbjets', 'name':'nbjets', 'binning': nbjetsbinning, 'histo':{}},
+  'dPhi': {'title': 'dPhi(MET,jet1|jet2)', 'name': 'dphi', 'binning': dphibinning, 'histo':{}},
   },
 }
 
@@ -212,23 +218,29 @@ for s in backgrounds+signals+data:
         ht = sum([j['pt'] for j in jets])
         bjetspt = filter(lambda j:j['btagCSV']>0.89, jets)
         nobjets = filter(lambda j:j['btagCSV']<=0.89, jets)
+        PhiMetJet1 = deltaPhi(metPhi,getVarValue(chain, "Jet_phi",0))
+        PhiMetJet2 = deltaPhi(metPhi,getVarValue(chain, "Jet_phi",1))
+
+        if PhiMetJet1 <= PhiMetJet2: PhiMetJet_small = PhiMetJet1
+        else:                        PhiMetJet_small = PhiMetJet2
 
         mt2Calc.setMet(met,metPhi)
         mt2Calc.setLeptons(l0pt, l0eta, l0phi, l1pt, l1eta, l1phi)
           
         mt2ll = mt2Calc.mt2ll()
         
-        if (met/sqrt(ht)) > metsignifcut and mt2ll > mt2llcut:
+        if mt2ll > mt2llcut:
+          
+          if met>40:
 
-          plots[leptons[lep]['name']]['njets']['histo'][s["name"]].Fill(len(jets),weight)
-          plots[leptons[lep]['name']]['nbjets']['histo'][s["name"]].Fill(len(bjetspt),weight)
-
-          if len(jets) >= 2 and len(bjetspt) >= 1:
-
-            plots[leptons[lep]['name']]['kinMetSig']['histo'][s["name"]].Fill(met/sqrt(ht), weight)
-
-            plots[leptons[lep]['name']]['met']['histo'][s["name"]].Fill(met, weight)
-
+            plots[leptons[lep]['name']]['njets']['histo'][s["name"]].Fill(len(jets),weight)
+            plots[leptons[lep]['name']]['nbjets']['histo'][s["name"]].Fill(len(bjetspt),weight)
+            if len(jets)>=2 and len(bjetspt)>=1:
+              plots[leptons[lep]['name']]['mt2ll']['histo'][s["name"]].Fill(mt2ll,weight)
+              plots[leptons[lep]['name']]['kinMetSig']['histo'][s["name"]].Fill(met/sqrt(ht), weight)
+              plots[leptons[lep]['name']]['met']['histo'][s["name"]].Fill(met, weight)
+              plots[leptons[lep]['name']]['dPhi']['histo'][s["name"]].Fill(PhiMetJet_small, weight)
+            
   #Add overflow bin to last bin
   for pk in plots.keys():
     for plot in plots[pk].keys():
@@ -237,7 +249,6 @@ for s in backgrounds+signals+data:
       plots[pk][plot]['histo'][s['name']].AddBinContent(nXbins, overflow) 
       plots[pk][plot]['histo'][s['name']].SetBinContent(nXbins+1, 0)
       overflow2 = plots[pk][plot]['histo'][s['name']].GetBinContent(nXbins+1)
-      if s == TTJets_50ns and plot == 'met': print '\n', nXbins, overflow, overflow2
 
   del eList
 

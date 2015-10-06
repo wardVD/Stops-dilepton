@@ -19,8 +19,9 @@ makedraw1D = False
 makedraw2D = False
 makelatextables = False #Ignore this if you're not Ward
 mt2llcuts = {'80':80., '100':100., '110':110, '120':120., '130':130., '140':140., '150':150.} #make plots named mt2llwithcutat..... I.E. lines 134-136
-metcut = '40'     #USED IN LINE 28
-metsignifcut = 0.    #USED IN LINE 401
+metcut = '80'     #USED IN LINE 28
+metsignifcut = 5.  #USED IN LINE 401
+dphicut = 0.25
 luminosity = 10000.    #USED IN LINES 345-346
 
 #preselection: MET>40, njets>=2, n_bjets>=1, n_lep>=2
@@ -395,7 +396,7 @@ for s in backgrounds+signals+data:
         PhiMetJet1 = deltaPhi(metPhi,getVarValue(chain, "Jet_phi",0))
         PhiMetJet2 = deltaPhi(metPhi,getVarValue(chain, "Jet_phi",1))
 
-        if (met/sqrt(ht)) > metsignifcut:
+        if (met/sqrt(ht)) > metsignifcut and :
 
           plots[leptons[lep]['name']]['leadingjetpt']['histo'][s["name"]].Fill(leadingjetpt, weight)
           plots[leptons[lep]['name']]['subleadingjetpt']['histo'][s["name"]].Fill(subleadingjetpt, weight)

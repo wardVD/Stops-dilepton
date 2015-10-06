@@ -18,6 +18,7 @@ ROOT.AutoLibraryLoader.enable()
 from StopsDilepton.samples.xsec import xsec
 from StopsDilepton.samples.cmgTuples_Phys14_signals import *
 from StopsDilepton.samples.cmgTuples_Data50ns_1l import *
+from StopsDilepton.samples.cmgTuples_Data25ns import *
 from StopsDilepton.samples.cmgTuples_Spring15_25ns import *
 from StopsDilepton.samples.cmgTuples_Spring15_50ns import *
 

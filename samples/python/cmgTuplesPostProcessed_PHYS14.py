@@ -32,15 +32,10 @@ singleTop={\
 "bins" : ["TBarToLeptons_sch", "TBarToLeptons_tch", "TBar_tWch", "TToLeptons_sch", "TToLeptons_tch", "T_tWch"],
 'dir' : dir,
 }
-# DY={\
-# "name" : "DY",
-# "bins" : ["DYJetsToLL_M50_HT100to200", "DYJetsToLL_M50_HT200to400", "DYJetsToLL_M50_HT400to600", "DYJetsToLL_M50_HT600toInf"],
-# 'dir' : dir,
-# }
 DY={\
 "name" : "DY",
 "bins" : ["DYJetsToLL_M50_HT100to200", "DYJetsToLL_M50_HT200to400", "DYJetsToLL_M50_HT400to600", "DYJetsToLL_M50_HT600toInf"],
-'dir' : "/afs/cern.ch/work/w/wvandrie/public/STOPS/CMSSW_7_4_7/src/CMGTools/TTHAnalysis/cfg/phys14/",
+'dir' : dir,
 }
 QCD={\
 "name" : "QCD",
@@ -59,8 +54,7 @@ def getSignalSample(signal):
   if signal in allSignalStrings:
     return {
       "name" : signal,
-      #'dir' : dir,
-      'dir' : "/afs/cern.ch/work/w/wvandrie/public/STOPS/ANALYSIS/CMSSW_7_4_7_patch1/src/StopsDilepton/samplesCopyWard_Phys14/",
+      'dir' : dir,
       'bins':[signal]}
   else:
     print "Signal",signal,"unknown. Available: ",", ".join(allSignalStrings)
