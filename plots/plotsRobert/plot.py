@@ -16,11 +16,12 @@ from StopsDilepton.tools.localInfo import *
 #Once we decided in HT definition and b-tag WP we add those variables to the tuple.
 #For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
 
-
+#preselection = 'met_pt>40&&Sum$((Jet_pt)*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>100&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)==2&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
 preselection = 'Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)>=2'
+#preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)==2&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)>=2'
 prefix="def"
 #prefix="mt2ll-120"
-reduceStat = 100
+reduceStat = 1
 lumiScale = 42/4000.
 
 #load all the samples
@@ -28,26 +29,22 @@ from StopsDilepton.samples.cmgTuples_Spring15_50ns_postProcessed import *
 from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
 from StopsDilepton.samples.cmgTuples_Data50ns_1l_postProcessed import *
 
-backgrounds = [diBosons_50ns,WJetsToLNu_50ns,singleTop_50ns,QCDMu_50ns,DYHT_50ns,TTJets_50ns]
-
+#backgrounds = [TTJets_50ns, WJetsToLNu_50ns, diBosons_50ns, singleTop_50ns, DY_50ns]#, QCD]
+backgrounds = [TTJets_50ns, diBosons_50ns, singleTop_50ns, DY_50ns]#, QCD]
 for b in backgrounds:
   b['isData']=False
+#backgrounds = [TTJets_25ns, DY_25ns, singleTop_25ns, diBosons_25ns, WJetsHTToLNu_25ns]#, QCD]
 
-data = [DoubleEG_50ns,DoubleMuon_50ns,MuonEG_50ns]
-
-for d in data:
-  d['isData']=True
-
-signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
-
-for s in signals:
-  s['isData']=False
+data = DoubleMuon_Run2015B 
+data['isData']=True
+signals = [] #SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
 
 
 #get the TChains for each sample
-for s in backgrounds+signals+data:
+for s in backgrounds+signals+[data]:
   s['chain'] = getChain(s,histname="")
 
+#plots
 plots = {\
   'met': {'title':'#slash{E}_{T} (GeV)', 'name':'met', 'binning': [26,0,520], 'histo':{}},
   'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'mt2ll', 'binning': [26,0,520], 'histo':{}},
@@ -62,7 +59,7 @@ plots = {\
 
 
 #make plot in each sample: 
-for s in backgrounds+signals+data:
+for s in backgrounds+signals+[data]:
   for pk in plots.keys():
     plots[pk]['histo'][s['name']] = ROOT.TH1F("met_"+s["name"], "met_"+s["name"], *(plots[pk]['binning']))
 
@@ -113,16 +110,16 @@ for s in backgrounds+signals+data:
   del eList
 
 #Some coloring
-TTJets_50ns["color"]=7
-DYHT_50ns["color"]=8
-QCDMu_50ns["color"]=46
-singleTop_50ns["color"]=40
-diBosons_50ns["color"]=42
-WJetsToLNu_50ns['color']=40
-
-
-signal = {'path': ["SMS_T2tt_2J_mStop425_mLSP325","SMS_T2tt_2J_mStop500_mLSP325","SMS_T2tt_2J_mStop650_mLSP325","SMS_T2tt_2J_mStop850_mLSP100"], 
-		  'name': ["T2tt(425,325)","T2tt(500,325)","T2tt(650,325)","T2tt(850,100)"]}
+TTJets_50ns["color"]=ROOT.kRed
+TTJets_25ns["color"]=ROOT.kRed
+WJetsHTToLNu_25ns["color"]=ROOT.kGreen
+#TTVH["color"]=ROOT.kMagenta
+diBosons_50ns["color"]=ROOT.kMagenta
+diBosons_25ns["color"]=ROOT.kMagenta
+singleTop_50ns["color"]=ROOT.kOrange
+singleTop_25ns["color"]=ROOT.kOrange
+DY_50ns["color"]=ROOT.kBlue
+DY_25ns["color"]=ROOT.kBlue
 
 for pk in plots.keys():
   #Make a stack for backgrounds
@@ -130,22 +127,16 @@ for pk in plots.keys():
   l.SetFillColor(0)
   l.SetShadowColor(ROOT.kWhite)
   l.SetBorderSize(1)
-
-
   bkg_stack = ROOT.THStack("bkgs","bkgs")
   for b in reversed(backgrounds):
     plots[pk]['histo'][b['name']].SetFillColor(b["color"])
     plots[pk]['histo'][b['name']].SetMarkerColor(b["color"])
     plots[pk]['histo'][b['name']].SetMarkerSize(0)
-    plots[pk]['histo'][b['name']].SetLineWidth(0)
 #    plots[pk]['histo'][b['name']].GetYaxis().SetRangeUser(10**-2.5, 2*plots[pk]['histo'][b['name']].GetMaximum())
     bkg_stack.Add(plots[pk]['histo'][b['name']],"h")
     l.AddEntry(plots[pk]['histo'][b['name']], b["name"])
-
   #Plot!
   c1 = ROOT.TCanvas()
-
-
   bkg_stack.SetMaximum(2*bkg_stack.GetMaximum())
   bkg_stack.SetMinimum(10**-1.5)
   bkg_stack.Draw('e')
@@ -154,28 +145,11 @@ for pk in plots.keys():
   bkg_stack.GetYaxis().SetTitle("Events / %i GeV"%( (binning[2]-binning[1])/binning[0]) )
   c1.SetLogy()
 
-  data_stack = ROOT.THStack("data","data")
-  for d in reversed(data):
-    data_stack.Add(plots[pk]['histo'][d['name']],"h")
-    data_stack.Draw('pesame')
-
-  signalPlot_1 = plots[pk]['histo'][signal['path'][0]].Clone()
-  signalPlot_2 = plots[pk]['histo'][signal['path'][2]].Clone()
-  signalPlot_1.Scale(100)
-  signalPlot_2.Scale(100)
-  signalPlot_1.SetLineColor(ROOT.kRed)
-  signalPlot_2.SetLineColor(ROOT.kBlue)
-  signalPlot_1.SetLineWidth(3)
-  signalPlot_2.SetLineWidth(3)
-  signalPlot_1.Draw("HISTsame")
-  signalPlot_2.Draw("HISTsame")
-  data_stack.Draw("HISTesame")
-
-  #plots[pk]['histo'][d['name']].Draw('hsame')
-
-  #data_stack.Draw('pesame')
-  l.AddEntry(signalPlot_1, signal['path'][0]+" x 100" ,"l")
-  l.AddEntry(signalPlot_2, signal['path'][2]+" x 100", "l")
-  #l.AddEntry(, "p")
+  plots[pk]['histo'][data['name']].Draw('hsame')
+#  signal = "SMS_T2tt_2J_mStop650_mLSP325"#May chose different signal here
+#  signalPlot = plots[pk]['histo'][signal].Clone()
+#  signalPlot.Scale(100)
+#  signalPlot.Draw("same")
+#  l.AddEntry(signalPlot, signal+" x 100")
   l.Draw()
   c1.Print(plotDir+"/"+prefix+'_'+plots[pk]["name"]+".png")
