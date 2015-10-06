@@ -14,18 +14,20 @@ mt2Calc = mt2Calculator()
 #######################################################
 #        SELECT WHAT YOU WANT TO DO HERE              #
 #######################################################
-reduceStat = 100 #recude the statistics, i.e. 10 is ten times less samples to look at
+reduceStat = 1 #recude the statistics, i.e. 10 is ten times less samples to look at
 makedraw1D = False
 makedraw2D = False
 makelatextables = False #Ignore this if you're not Ward
-mt2llcuts = {'80':80., '100':100., '110':110, '120':120., '130':130., '140':140., '150':150.} #make plots named mt2llwithcutat..... I.E. lines 134-136
+mt2llcuts = {'0':0.,'80':80., '100':100., '110':110., '120':120., '130':130., '140':140., '150':150.} #make plots named mt2llwithcutat..... I.E. lines 134-136
+btagcoeff = 0.89
 metcut = '40'     #USED IN LINE 28
 metsignifcut = 0.    #USED IN LINE 401
+dphicut = 0.
 luminosity = 10000.    #USED IN LINES 345-346
 
 #preselection: MET>40, njets>=2, n_bjets>=1, n_lep>=2
 #See here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
-preselection = 'met_pt>'+metcut+'&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.89)>=1&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)==2'
+preselection = 'met_pt>'+metcut+'&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>'+str(btagcoeff)+')>=1&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)==2'
 #preselection = "met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2"
 
 #######################################################
@@ -34,9 +36,11 @@ preselection = 'met_pt>'+metcut+'&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet
 #from StopsDilepton.samples.cmgTuplesPostProcessed_PHYS14 import *
 from StopsDilepton.samples.cmgTuples_Spring15_50ns_postProcessed import *
 backgrounds = [diBosons_50ns,WJetsToLNu_50ns,singleTop_50ns,QCDMu_50ns,DYHT_50ns,TTJets_50ns]
-#backgrounds = [singleTop_50ns,DYHT_50ns,TTJets_50ns]
+#backgrounds = [DYHT_50ns]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
+#signals = []
 data = [DoubleEG_50ns,DoubleMuon_50ns,MuonEG_50ns]
+#data= []
 
 #######################################################
 #            get the TChains for each sample          #
@@ -158,7 +162,7 @@ plotsSF = {\
   'CosMinDphiMt2llcut':{'title':'Cos(Min(dPhi(MET,jet_1|jet_2)))', 'name':'CosMinDphiJetsMt2llcut', 'binning':cosbinning, 'histo':{},'tag':'MT2cut'},
   'MinDphi':{'title':'Min(dPhi(MET,jet_1|jet_2))','name':'MinDphiJets', 'binning':phibinning, 'histo':{}},
   'MinDphiMt2llcut':{'title':'Min(dPhi(MET,jet_1|jet_2))', 'name':'MinDphiJetsMt2llcut', 'binning':phibinning, 'histo':{},'tag':'MT2cut'},
-  'ht':{'title':'H_{T} GeV', 'name':'HT', 'binning':htbinning, 'histo':{}},
+  'ht':{'title':'H_{T} (GeV)', 'name':'HT', 'binning':htbinning, 'histo':{}},
   },
 }
 
@@ -395,7 +399,10 @@ for s in backgrounds+signals+data:
         PhiMetJet1 = deltaPhi(metPhi,getVarValue(chain, "Jet_phi",0))
         PhiMetJet2 = deltaPhi(metPhi,getVarValue(chain, "Jet_phi",1))
 
-        if (met/sqrt(ht)) > metsignifcut:
+        if PhiMetJet1 <= PhiMetJet2: PhiMetJet_small = PhiMetJet1
+        else:                        PhiMetJet_small = PhiMetJet2
+
+        if (met/sqrt(ht)) >= metsignifcut and PhiMetJet_small >= dphicut:
 
           plots[leptons[lep]['name']]['leadingjetpt']['histo'][s["name"]].Fill(leadingjetpt, weight)
           plots[leptons[lep]['name']]['subleadingjetpt']['histo'][s["name"]].Fill(subleadingjetpt, weight)
@@ -407,6 +414,7 @@ for s in backgrounds+signals+data:
           mt2ll = mt2Calc.mt2ll()
 
           plots[leptons[lep]['name']]['mt2ll']['histo'][s["name"]].Fill(mt2ll, weight)
+
           for mt2llcut in mt2llcuts.keys():
             if mt2ll >= mt2llcuts[mt2llcut]: plots[leptons[lep]['name']]['mt2llwithcut'+mt2llcut]['histo'][s["name"]].Fill(mt2ll, weight)
 
@@ -447,8 +455,8 @@ for s in backgrounds+signals+data:
           plots[leptons[lep]['name']]['kinMetSig']['histo'][s["name"]].Fill(met/sqrt(ht), weight)
 
           plots[leptons[lep]['name']]['met']['histo'][s["name"]].Fill(met, weight)
-          bjetspt = filter(lambda j:j['btagCSV']>0.89, jets)
-          nobjets = filter(lambda j:j['btagCSV']<=0.89, jets)
+          bjetspt = filter(lambda j:j['btagCSV']>btagcoeff, jets)
+          nobjets = filter(lambda j:j['btagCSV']<=btagcoeff, jets)
           plots[leptons[lep]['name']]['njets']['histo'][s["name"]].Fill(len(jets),weight)
           plots[leptons[lep]['name']]['nbjets']['histo'][s["name"]].Fill(len(bjetspt),weight)
           plots[leptons[lep]['name']]['ht']['histo'][s["name"]].Fill(ht,weight)
@@ -468,7 +476,7 @@ for s in backgrounds+signals+data:
           dimensional[leptons[lep]['name']]['mt2blblvsmt2ll']['histo'][s["name"]].Fill(mt2ll,mt2blbl, weight)
           threedimensional[leptons[lep]['name']]['mt2bbvsmt2blblvsmt2ll']['histo'][s["name"]].Fill(mt2ll,mt2blbl,mt2bb,weight)
 
-  #Add overflow bin to last bin
+   #Add overflow bin to last bin
   for pk in plots.keys():
     for plot in plots[pk].keys():
       nXbins = plots[pk][plot]['histo'][s['name']].GetNbinsX()
@@ -476,6 +484,7 @@ for s in backgrounds+signals+data:
       plots[pk][plot]['histo'][s['name']].AddBinContent(nXbins, overflow) 
       plots[pk][plot]['histo'][s['name']].SetBinContent(nXbins+1, 0)
       overflow2 = plots[pk][plot]['histo'][s['name']].GetBinContent(nXbins+1)
+
 
   for pk in plots:
 
