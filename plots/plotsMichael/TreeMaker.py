@@ -22,17 +22,16 @@ from StopsDilepton.tools.localInfo import *
 #For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
 
 
-#preselection = 'met_pt>40&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)==2&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)>=2'
 preselection = 'Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)==2&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)>=2'
 prefix="def"
 reduceStat = 1
-lumiScale = 1000./4000.
+lumiScale = 1.
 
 #load all the samples
 from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
 
 #backgrounds = [diBosons_25ns,WJetsToLNu_25ns,singleTop_25ns,QCDMu_25ns,DYHT_25ns,TTJets_25ns]
-backgrounds = [TTJets_25ns]
+backgrounds = [TTJets_25ns] 
 for b in backgrounds:
   b['isData']=0
 
@@ -41,7 +40,7 @@ signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_
 for s in signals:
   s['isData']=0
 
-data = [DoubleEG_50ns,DoubleMuon_50ns,MuonEG_50ns]
+data = [DoubleEG_25ns,DoubleMuon_25ns,MuonEG_25ns]
 for d in data:
   d['isData']=1
 
@@ -56,6 +55,7 @@ for s in backgrounds:
   t = TTree('AnaTree','Tree of variables')
 
   MET 		 			= n.zeros(1, dtype=float)
+  METPhi 		 		= n.zeros(1, dtype=float)
   ptLeadingJet 			= n.zeros(1, dtype=float)
   ptSubLeadingJet 		= n.zeros(1, dtype=float)
   ptLeadingLepton 		= n.zeros(1, dtype=float)
@@ -83,9 +83,9 @@ for s in backgrounds:
   jet2 = ROOT.TLorentzVector()
   bjet1 = ROOT.TLorentzVector()
   bjet2 = ROOT.TLorentzVector()
-  METT3 = ROOT.TVector3()
 
   t.Branch("MET", MET, "MET/D")
+  t.Branch("METPhi", METPhi, "METPhi/D")
   t.Branch("ptLeadingJet", ptLeadingJet, "ptLeadingJet/D")
   t.Branch("ptSubLeadingJet", ptSubLeadingJet, "ptSubLeadingJet/D")
   t.Branch("ptLeadingLepton", ptLeadingLepton, "ptLeadingLepton/D")
@@ -110,7 +110,6 @@ for s in backgrounds:
   t.Branch("SubLeadingBJet","TLorentzVector",bjet2)
   t.Branch("LeadingJet","TLorentzVector",jet1)
   t.Branch("SubLeadingJet","TLorentzVector",jet2)
-  t.Branch("METT3","TVector3",METT3)
   t.Branch('Process', Process, 'Process[200]/C')
 
 
@@ -134,6 +133,7 @@ for s in backgrounds:
     mt2bb[0] = 0
     mt2blbl[0] = 0
     MET[0] = met 
+    METPhi[0] = metPhi 
     eventWeight[0] = weight
     isMC[0] = 1-s['isData']
     isElecElec[0] = 0 
@@ -190,11 +190,10 @@ for s in backgrounds:
       
       if  mll>20 and nbjets[0]>0 and nleptons[0]>1 and njets[0]>1:  
 
-        del eList
         t.Fill()
 
 
-  #del eList
+  del eList
 
   fout.Write()
   fout.Close()
