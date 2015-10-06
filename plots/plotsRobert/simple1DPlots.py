@@ -20,7 +20,12 @@ from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
 from StopsDilepton.samples.cmgTuples_Data50ns_1l_postProcessed import *
 from StopsDilepton.samples.cmgTuples_Data25ns_postProcessed import *
 from StopsDilepton.tools.objectSelection import getLeptons, getMuons, getElectrons, getGoodMuons, getGoodElectrons, getGoodLeptons, mZ
+from StopsDilepton.tools.helpers import getVarValue
 from Workspace.RA4Analysis.simplePlotHelpers import plot, stack, loopAndFill, drawNMStacks
+from StopsDilepton.tools.puReweighting import getReweightingFunction
+
+puReweightingFunc = getReweightingFunction(era="Run2015D_205pb")
+puReweighting = lambda c:puReweightingFunc(getVarValue(c, "nVert"))
 
 cutBranches = ["weight", "leptonPt", "met*", \
                'Jet_pt', "Jet_id", "Jet_eta", "Jet_phi", "Jet_btagCSV",
@@ -31,7 +36,28 @@ cutBranches = ["weight", "leptonPt", "met*", \
                 ]
 subdir = "/png25ns_2l/"
 
-prefix = '_'.join([options.mode, options.zMode]) 
+def getZCut(mode):
+  zstr = "abs(dl_mass - "+str(mZ)+")"
+  if mode=="onZ": return zstr+"<15"
+  if mode=="offZ": return zstr+">15"
+  return "(1)"
+
+
+
+presel = [
+ ("njet2", "(Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>=2"),
+ ("nbtag1", "Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)>=1"),
+ ("mll20", "dl_mass>20"),
+ ("met80", "met_pt>80"),
+ ("metSig5", "met_pt/sqrt(Sum$(Jet_pt*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)))>5"),
+ ("dPhiJet0", "cos(met_phi-Jet_phi[0])<cos(0.25)"),
+ ("dPhiJet1", "cos(met_phi-Jet_phi[1])<cos(0.25)"),
+  ]
+
+if options.OS : presel.append(("isOS","isOS"))
+
+prefix = '_'.join([options.mode, options.zMode, '-'.join([p[0] for p in presel])]) 
+preselCuts = [p[1] for p in presel]
 
 #filterCut = "(Flag_HBHENoiseFilter&&Flag_HBHENoiseIsoFilter&&Flag_goodVertices&&Flag_CSCTightHaloFilter&&Flag_eeBadScFilter)"
 filterCut = "(Flag_HBHENoiseFilterMinZeroPatched&&Flag_goodVertices&&Flag_CSCTightHaloFilter&&Flag_eeBadScFilter)"
@@ -42,25 +68,6 @@ filterCut = "(Flag_HBHENoiseFilterMinZeroPatched&&Flag_goodVertices&&Flag_CSCTig
 triggerMuMu = "HLT_mumuIso"
 triggerEleEle = "HLT_ee_DZ"
 triggerMuEle = "HLT_mue"
-
-#preselCuts = ["((Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>=2)"]
-preselCuts = [
-  "(Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>=2",
-  "Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)>=1",
-  "met_pt>80",
-  "dl_mass>20",
-  "met_pt/sqrt(Sum$(Jet_pt*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)))>5",
-  "cos(met_phi-Jet_phi[0])<cos(0.25)",
-  "cos(met_phi-Jet_phi[1])<cos(0.25)"
-  ]
-
-if options.OS : preselCuts.append("isOS")
-
-def getZCut(mode):
-  zstr = "abs(dl_mass - "+str(mZ)+")"
-  if mode=="onZ": return zstr+"<15"
-  if mode=="offZ": return zstr+">15"
-  return "(1)"
 
 if options.mode=="doubleMu":
   presel = "&&".join(["isMuMu==1", getZCut(options.zMode)] + preselCuts)
@@ -97,12 +104,12 @@ def getStack(labels, var, binning, cut, options={}):
   style_singleTop    = {'legendText':'single top',  'style':"f", 'linethickNess':0, 'errorBars':False,      'color':40, 'markerStyle':None, 'markerSize':None}
   
   data               = plot(var, binning, cut, sample=dataSample,       style=style_Data)
-  MC_TTJets          = plot(var, binning, cut, sample=TTJets_25ns,       style=style_TTJets, weight={'string':'weight'})
-  MC_WJetsToLNu      = plot(var, binning, cut, sample=WJetsToLNu_25ns,   style=style_WJets, weight={'string':'weight'})
-  MC_DY              = plot(var, binning, cut, sample=DY_25ns,           style=style_DY, weight={'string':'weight'})
+  MC_TTJets          = plot(var, binning, cut, sample=TTJets_25ns,       style=style_TTJets,    weightString="weight", weightFunc=puReweighting)
+  MC_WJetsToLNu      = plot(var, binning, cut, sample=WJetsToLNu_25ns,   style=style_WJets,     weightString="weight", weightFunc=puReweighting)
+  MC_DY              = plot(var, binning, cut, sample=DY_25ns,           style=style_DY,        weightString="weight", weightFunc=puReweighting)
+  MC_singleTop       = plot(var, binning, cut, sample=singleTop_25ns,    style=style_singleTop, weightString="weight", weightFunc=puReweighting)
+  MC_QCD             = plot(var, binning, cut, sample=QCDMu_25ns,        style=style_QCD,       weightString="weight", weightFunc=puReweighting)
 #  MC_diBoson         = plot(var, binning, cut, sample=diBosons_25ns,     style=style_diBoson, weight={'string':'weight'})
-  MC_singleTop       = plot(var, binning, cut, sample=singleTop_25ns,    style=style_singleTop, weight={'string':'weight'})
-  MC_QCD             = plot(var, binning, cut, sample=QCDMu_25ns,        style=style_QCD, weight={'string':'weight'})
 
   mcStack = [MC_TTJets, MC_DY,  MC_QCD, MC_singleTop, MC_WJetsToLNu]
 #  mcStack = []
@@ -264,6 +271,14 @@ l2_pdgId_stack  = getStack(
     )
 allStacks.append(l2_pdgId_stack)
 
+metZoomed_stack  = getStack(
+    labels={'x':'#slash{E}_{T} (GeV)','y':'Number of Events / 10 GeV'},
+    var={'name':'metZoomed','leaf':'met', 'overFlow':'upper'},
+    binning={'binning':[22,0,220]},
+    cut={'string':cutString,'func':cutFunc,'dataCut':dataCut},
+    )
+allStacks.append(metZoomed_stack)
+
 met_stack  = getStack(
     labels={'x':'#slash{E}_{T} (GeV)','y':'Number of Events / 50 GeV'},
     var={'name':'met','leaf':'met', 'overFlow':'upper'},
@@ -287,6 +302,24 @@ ht_stack  = getStack(
     binning={'binning':[2600/100,0,2600]},
     cut={'string':cutString,'func':cutFunc, 'dataCut':dataCut})
 allStacks.append(ht_stack)
+
+cosMetJet0phi_stack  = getStack(
+    labels={'x':'Cos(#phi(#slash{E}_{T}, Jet[0]))','y':'Number of Events'},
+#    var={'name':'mll','func':mll, 'overFlow':'upper', 'branches':[]},
+    var={'name':'cosMetJet0phi','TTreeFormula':"cos(met_phi-Jet_phi[0])", 'overFlow':'upper', 'branches':[]},
+    binning={'binning':[30,-1,1]},
+    cut={'string':cutString,'func':cutFunc,'dataCut':dataCut},
+    )
+allStacks.append(cosMetJet0phi_stack)
+
+cosMetJet1phi_stack  = getStack(
+    labels={'x':'Cos(#phi(#slash{E}_{T}, Jet[1]))','y':'Number of Events'},
+#    var={'name':'mll','func':mll, 'overFlow':'upper', 'branches':[]},
+    var={'name':'cosMetJet0phi','TTreeFormula':"cos(met_phi-Jet_phi[1])", 'overFlow':'upper', 'branches':[]},
+    binning={'binning':[30,-1,1]},
+    cut={'string':cutString,'func':cutFunc,'dataCut':dataCut},
+    )
+allStacks.append(cosMetJet1phi_stack)
 
 lepGood_pt0_stack  = getStack(
     labels={'x':'p_{T}(l) (GeV)','y':'Number of Events / 25 GeV'},
