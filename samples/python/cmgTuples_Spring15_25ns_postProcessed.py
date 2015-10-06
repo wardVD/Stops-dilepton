@@ -5,6 +5,24 @@ dir = dataDir
 #"ZJetsToNuNu_HT-400To600_13TeV-madgraph_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 #"ZJetsToNuNu_HT-600ToInf_13TeV-madgraph_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 
+DoubleEG_25ns={\
+"name": "DoubleEG",
+"bins": ["DoubleEG_Run2015D-PromptReco-v3/"],
+'dir' : dir
+}
+
+DoubleMuon_25ns={\
+"name": "DoubleMuon",
+"bins": ["DoubleMuon_Run2015D-PromptReco-v3/"],
+'dir':dir
+}
+
+MuonEG_25ns={\
+"name": "MuonEG",
+"bins": ["MuonEG_Run2015D-PromptReco-v3/"],
+'dir':dir
+}
+
 TTJets_25ns={\
 "name" : "tt+Jets",
 "bins" : ["TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1"],
@@ -33,7 +51,7 @@ WJetsToLNu_25ns={\
 }
 
 diBosons_25ns={\
-"name" : "WW/WZ/ZZ",
+"name" : "WW+WZ+ZZ",
 "bins" : [
 "WWTo2L2Nu_13TeV-powheg_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 "WZ_TuneCUETP8M1_13TeV-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
