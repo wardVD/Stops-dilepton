@@ -51,7 +51,7 @@ WJetsToLNu_25ns={\
 }
 
 diBosons_25ns={\
-"name" : "WW/WZ/ZZ",
+"name" : "WW+WZ+ZZ",
 "bins" : [
 "WWTo2L2Nu_13TeV-powheg_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 "WZ_TuneCUETP8M1_13TeV-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",

@@ -14,8 +14,8 @@ mt2Calc = mt2Calculator()
 #######################################################
 #        SELECT WHAT YOU WANT TO DO HERE              #
 #######################################################
-reduceStat = 1 #recude the statistics, i.e. 10 is ten times less samples to look at
-makedraw1D = False
+reduceStat = 100 #recude the statistics, i.e. 10 is ten times less samples to look at
+makedraw1D = True
 makedraw2D = False
 makelatextables = False #Ignore this if you're not Ward
 mt2llcuts = {'0':0.,'80':80., '100':100., '110':110., '120':120., '130':130., '140':140., '150':150.} #make plots named mt2llwithcutat..... I.E. lines 134-136
@@ -38,7 +38,7 @@ from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
 #backgrounds = [diBosons_50ns,WJetsToLNu_50ns,singleTop_50ns,QCDMu_50ns,DYHT_50ns,TTJets_50ns]
 backgrounds = [diBosons_25ns,WJetsToLNu_25ns,singleTop_25ns,QCDMu_25ns,DYHT_25ns,TTJets_25ns]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
-data = [DoubleEG_50ns,DoubleMuon_50ns,MuonEG_50ns]
+data = [DoubleEG_25ns,DoubleMuon_25ns,MuonEG_25ns]
 
 #######################################################
 #            get the TChains for each sample          #
@@ -342,7 +342,7 @@ for s in backgrounds+signals+data:
     #event weight (L= 4fb^-1)
     weight = reduceStat*getVarValue(chain, "weight")
 
-    if s not in data: weight = weight*(luminosity/4000.)
+    if s not in data: weight = weight*(luminosity/1000.)
 
     #MET
     met = getVarValue(chain, "met_pt")
