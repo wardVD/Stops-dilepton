@@ -23,18 +23,18 @@ from StopsDilepton.tools.objectSelection import getLeptons, getMuons, getElectro
 from Workspace.RA4Analysis.simplePlotHelpers import plot, stack, loopAndFill, drawNMStacks
 
 cutBranches = ["weight", "leptonPt", "met*", \
-               'Jet_pt', "Jet_id", "Jet_eta", "Jet_btagCSV",
+               'Jet_pt', "Jet_id", "Jet_eta", "Jet_phi", "Jet_btagCSV",
                "LepGood_pdgId", "LepGood_mediumMuonId", "LepGood_miniRelIso", "LepGood_sip3d", "LepGood_dxy", "LepGood_dz", "LepGood_convVeto", "LepGood_lostHits",
                "Flag_HBHENoiseFilter", "Flag_HBHENoiseIsoFilter", "Flag_HBHENoiseFilterMinZeroPatched", "Flag_goodVertices", "Flag_CSCTightHaloFilter", "Flag_eeBadScFilter",
                "HLT_mumuIso", "HLT_ee_DZ", "HLT_mue",
-               "is*","dl_*"
+               "is*","dl_*","l1_*","l2_*"
                 ]
 subdir = "/png25ns_2l/"
 
 prefix = '_'.join([options.mode, options.zMode]) 
 
-filterCut = "(Flag_HBHENoiseFilter&&Flag_HBHENoiseIsoFilter&&Flag_goodVertices&&Flag_CSCTightHaloFilter&&Flag_eeBadScFilter)"
-#filterCut = "(Flag_HBHENoiseFilterMinZeroPatched&&Flag_goodVertices&&Flag_CSCTightHaloFilter&&Flag_eeBadScFilter)"
+#filterCut = "(Flag_HBHENoiseFilter&&Flag_HBHENoiseIsoFilter&&Flag_goodVertices&&Flag_CSCTightHaloFilter&&Flag_eeBadScFilter)"
+filterCut = "(Flag_HBHENoiseFilterMinZeroPatched&&Flag_goodVertices&&Flag_CSCTightHaloFilter&&Flag_eeBadScFilter)"
 #filterCut = "(1)"
 
 #nMu = "Sum$(abs(LepGood_pdgId)==13&&LepGood_mediumMuonId==1&&LepGood_miniRelIso<0.1&&LepGood_sip3d<4.0&&abs(LepGood_dxy)<0.05&&abs(LepGood_dz)<0.1)"
@@ -43,7 +43,17 @@ triggerMuMu = "HLT_mumuIso"
 triggerEleEle = "HLT_ee_DZ"
 triggerMuEle = "HLT_mue"
 
-preselCuts = ["((Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>=2)"]
+#preselCuts = ["((Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>=2)"]
+preselCuts = [
+  "(Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>=2",
+  "Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)>=1",
+  "met_pt>80",
+  "dl_mass>20",
+  "met_pt/sqrt(Sum$(Jet_pt*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)))>5",
+  "cos(met_phi-Jet_phi[0])<cos(0.25)",
+  "cos(met_phi-Jet_phi[1])<cos(0.25)"
+  ]
+
 if options.OS : preselCuts.append("isOS")
 
 def getZCut(mode):
@@ -75,7 +85,7 @@ ratioOps = {'yLabel':'Data/MC', 'numIndex':1, 'denIndex':0 ,'yRange':None, 'logY
 
 def getStack(labels, var, binning, cut, options={}):
 
-  style_Data         = {'legendText':'Single Muon',      'style':"e", 'lineThickness':0, 'errorBars':True, 'color':ROOT.kBlack, 'markerStyle':20, 'markerSize':1}
+  style_Data         = {'legendText':dataSample['name'],      'style':"e", 'lineThickness':0, 'errorBars':True, 'color':ROOT.kBlack, 'markerStyle':20, 'markerSize':1}
 
   style_WJets        = {'legendText':'W + Jets',         'style':"f", 'lineThickness':0, 'errorBars':False, 'color':42, 'markerStyle':None, 'markerSize':None}
   style_TTJets       = {'legendText':'t#bar{t} + Jets',  'style':"f", 'linethickNess':0, 'errorBars':False, 'color':7, 'markerStyle':None, 'markerSize':None}
@@ -96,9 +106,9 @@ def getStack(labels, var, binning, cut, options={}):
 
   mcStack = [MC_TTJets, MC_DY,  MC_QCD, MC_singleTop, MC_WJetsToLNu]
 #  mcStack = []
-#  for s in mcStack:
+  for s in mcStack:
 #    print s,s.sample
-#    s.sample['scale'] = lumiScaleFac
+    s.sample['scale'] = lumiScaleFac
 
   plotLists = [mcStack, [data]]
 
@@ -261,6 +271,14 @@ met_stack  = getStack(
     cut={'string':cutString,'func':cutFunc,'dataCut':dataCut},
     )
 allStacks.append(met_stack)
+
+metSig_stack  = getStack(
+    labels={'x':'#slash{E}_{T}/#sqrt(H_{T}) (GeV^{1/2})','y':'Number of Events / 100 GeV'},
+#    var={'name':'ht','leaf':'htJet40ja', 'overFlow':'upper'},
+    var={'name':'metSig','TTreeFormula':'met_pt/sqrt(Sum$(Jet_pt*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)))', 'overFlow':'upper'},
+    binning={'binning':[20,0,20]},
+    cut={'string':cutString,'func':cutFunc, 'dataCut':dataCut})
+allStacks.append(metSig_stack)
 
 ht_stack  = getStack(
     labels={'x':'H_{T} (GeV)','y':'Number of Events / 100 GeV'},
