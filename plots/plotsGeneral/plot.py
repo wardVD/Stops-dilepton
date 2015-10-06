@@ -20,10 +20,10 @@ makedraw2D = False
 makelatextables = False #Ignore this if you're not Ward
 mt2llcuts = {'0':0.,'80':80., '100':100., '110':110., '120':120., '130':130., '140':140., '150':150.} #make plots named mt2llwithcutat..... I.E. lines 134-136
 btagcoeff = 0.89
-metcut = '40'     #USED IN LINE 28
-metsignifcut = 0.    #USED IN LINE 401
+metcut = '40'
+metsignifcut = 0.
 dphicut = 0.
-luminosity = 10000.    #USED IN LINES 345-346
+luminosity = 10000.
 
 #preselection: MET>40, njets>=2, n_bjets>=1, n_lep>=2
 #See here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
@@ -34,13 +34,11 @@ preselection = 'met_pt>'+metcut+'&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet
 #                 load all the samples                #
 #######################################################
 #from StopsDilepton.samples.cmgTuplesPostProcessed_PHYS14 import *
-from StopsDilepton.samples.cmgTuples_Spring15_50ns_postProcessed import *
-backgrounds = [diBosons_50ns,WJetsToLNu_50ns,singleTop_50ns,QCDMu_50ns,DYHT_50ns,TTJets_50ns]
-#backgrounds = [DYHT_50ns]
+from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
+#backgrounds = [diBosons_50ns,WJetsToLNu_50ns,singleTop_50ns,QCDMu_50ns,DYHT_50ns,TTJets_50ns]
+backgrounds = [diBosons_25ns,WJetsToLNu_25ns,singleTop_25ns,QCDMu_25ns,DYHT_25ns,TTJets_25ns]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
-#signals = []
 data = [DoubleEG_50ns,DoubleMuon_50ns,MuonEG_50ns]
-#data= []
 
 #######################################################
 #            get the TChains for each sample          #
