@@ -30,7 +30,7 @@ lumiScale = 1000./4000.
 #load all the samples
 from StopsDilepton.samples.cmgTuples_Spring15_50ns_postProcessed import *
 
-backgrounds = [diBosons_50ns,WJetsToLNu_50ns,singleTop_50ns,QCDMu_50ns,DYHT_50ns,TTJets_50ns]
+backgrounds = [diBosons_25ns,WJetsToLNu_25ns,singleTop_25ns,QCDMu_25ns,DYHT_25ns,TTJets_25ns]
 for b in backgrounds:
   b['isData']=0
 
@@ -47,8 +47,8 @@ for d in data:
 for s in backgrounds+signals+data:
   s['chain'] = getChain(s,histname="")
 
-for s in backgrounds+signals+data:
-#for s in signals:
+#for s in backgrounds+signals+data:
+for s in backgrounds:
 
   fout = TFile(s["name"]+'.root','RECREATE')
   t = TTree('AnaTree','Tree of variables')
@@ -188,10 +188,11 @@ for s in backgrounds+signals+data:
       
       if  mll>20 and nbjets[0]>0 and nleptons[0]>1 and njets[0]>1:  
 
+        del eList
         t.Fill()
 
 
-  del eList
+  #del eList
 
   fout.Write()
   fout.Close()
