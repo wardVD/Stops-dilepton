@@ -3,7 +3,7 @@ parser = OptionParser()
 parser.add_option("--mode", dest="mode", default="doubleMu", type="string", action="store", help="doubleMu, doubleEle, eleMu")
 parser.add_option("--zMode", dest="zMode", default="None", type="string", action="store", help="onZ, offZ, None")
 #parser.add_option("--small", dest="small", default = False, action="store_true", help="small")
-parser.add_option("--OS", dest="OS", default = False, action="store_true", help="require OS?")
+#parser.add_option("--OS", dest="OS", default = True, action="store_true", help="require OS?")
 
 (options, args) = parser.parse_args()
 
@@ -42,9 +42,9 @@ def getZCut(mode):
   if mode=="offZ": return zstr+">15"
   return "(1)"
 
+presel = [("isOS","isOS")]
 
-
-presel = [
+presel.extend([
  ("njet2", "(Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>=2"),
  ("nbtag1", "Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)>=1"),
  ("mll20", "dl_mass>20"),
@@ -53,8 +53,7 @@ presel = [
  ("dPhiJet0", "cos(met_phi-Jet_phi[0])<cos(0.25)"),
  ("dPhiJet1", "cos(met_phi-Jet_phi[1])<cos(0.25)"),
   ]
-
-if options.OS : presel.append(("isOS","isOS"))
+)
 
 prefix = '_'.join([options.mode, options.zMode, '-'.join([p[0] for p in presel])]) 
 preselCuts = [p[1] for p in presel]
