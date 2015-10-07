@@ -22,7 +22,10 @@ from StopsDilepton.tools.localInfo import *
 #For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
 
 
-preselection = 'Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)>=1&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)==2'
+preselectionMC = 'Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)>=1&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)==2'
+preselectionData = 'Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)>=1&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)==2&&Flag_goodVertices&&Flag_CSCTightHaloFilter&&Flag_eeBadScFilter&&Flag_HBHENoiseFilterMinZeroPatched'
+
+
 prefix="def"
 reduceStat = 1
 lumiScale = 1.
@@ -30,8 +33,8 @@ lumiScale = 1.
 #load all the samples
 from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
 
-#backgrounds = [diBosons_25ns,WJetsToLNu_25ns,singleTop_25ns,QCDMu_25ns,DYHT_25ns,TTJets_25ns]
-backgrounds = [TTJets_25ns] 
+backgrounds = [diBosons_25ns,WJetsToLNu_25ns,singleTop_25ns,QCDMu_25ns,DYHT_25ns,TTJets_25ns]
+#backgrounds = [TTJets_25ns] 
 for b in backgrounds:
   b['isData']=0
 
@@ -48,11 +51,11 @@ for d in data:
 for s in backgrounds+signals+data:
   s['chain'] = getChain(s,histname="")
 
-#for s in backgrounds+signals+data:
-for s in backgrounds:
+for s in backgrounds+signals+data:
+#for s in signals+data: 
 
   fout = TFile(s["name"]+'.root','RECREATE')
-  t = TTree('AnaTree','Tree of variables')
+  t = TTree('anaTree','Tree of variables')
 
   MET 		 			= n.zeros(1, dtype=float)
   METPhi 		 		= n.zeros(1, dtype=float)
@@ -65,7 +68,8 @@ for s in backgrounds:
   mt2blbl 				= n.zeros(1, dtype=float)
   HT 					= n.zeros(1, dtype=float)
   dileptonInvariantMass	= n.zeros(1, dtype=float)
-  eventWeight 			= n.zeros(1, dtype=float)
+  xsecWeight 			= n.zeros(1, dtype=float)
+  pileupWeight 			= n.zeros(1, dtype=float)
   nbjets 				= n.zeros(1, dtype=int)
   njets	 				= n.zeros(1, dtype=int)
   nleptons 				= n.zeros(1, dtype=int)
@@ -95,7 +99,8 @@ for s in backgrounds:
   t.Branch("mt2blbl", mt2blbl, "mt2blbl/D")
   t.Branch("HT", HT, "HT/D")
   t.Branch("dileptonInvariantMass", dileptonInvariantMass, "dileptonInvariantMass/D")
-  t.Branch("eventWeight", eventWeight, "eventWeight/D")
+  t.Branch("xsecWeight", xsecWeight, "xsecWeight/D")
+  t.Branch("pileupWeight", pileupWeight, "pileupWeight/D")
   t.Branch("nbjets", nbjets, "nbjets/I")
   t.Branch("njets", njets, "njets/I")
   t.Branch("nleptons", nleptons, "nleptons/I")
@@ -115,9 +120,17 @@ for s in backgrounds:
 
   chain = s["chain"]
   print "Looping over %s" % s["name"]
-  eList = getEList(chain, preselection) 
-  nEvents = eList.GetN()/reduceStat
-  print "Found %i events in %s after preselection %s, looping over %i" % (eList.GetN(),s["name"],preselection,nEvents)
+
+  if s['isData']==0:
+   eList = getEList(chain, preselectionMC) 
+   nEvents = eList.GetN()/reduceStat
+   print "Found %i events in %s after preselection %s, looping over %i" % (eList.GetN(),s["name"],preselectionMC,nEvents)
+
+  else:
+   eList = getEList(chain, preselectionData) 
+   nEvents = eList.GetN()/reduceStat
+   print "Found %i events in %s after preselection %s, looping over %i" % (eList.GetN(),s["name"],preselectionData,nEvents)
+
 
   for ev in range(nEvents):
     if ev%10000==0:print "At %i/%i"%(ev,nEvents)
@@ -134,11 +147,33 @@ for s in backgrounds:
     mt2blbl[0] = 0
     MET[0] = met 
     METPhi[0] = metPhi 
-    eventWeight[0] = weight
+    xsecWeight[0] = weight
+    pileupWeight[0] = getVarValue(chain,"puWeight")
     isMC[0] = 1-s['isData']
     isElecElec[0] = 0 
     isMuonMuon[0] = 0 
     isMuonElec[0] = 0 
+
+    triggerMuMu = getVarValue(chain,"HLT_mumuIso")
+    triggerEleEle = getVarValue(chain,"HLT_ee_DZ")
+    triggerMuEle = getVarValue(chain,"HLT_mue")
+    trigger = 0
+
+    if s['isData'] == 0:
+      trigger = 1
+    if not s["name"].find("DoubleEG") and triggerEleEle :
+      trigger = 1
+    if not s["name"].find("DoubleEG") and triggerEleEle==0 :
+      trigger = 0
+    if not s["name"].find("DoubleMuon") and triggerMuMu :
+      trigger = 1
+    if not s["name"].find("DoubleMuon") and triggerMuMu==0 :
+      trigger = 0
+    if not s["name"].find("MuonEG") and triggerMuEle :
+      trigger = 1
+    if not s["name"].find("MuonEG") and triggerMuEle==0 :
+      trigger = 0
+    
 
     leptons = filter(lambda l: looseMuID(l) or looseEleID(l), getLeptons(chain))
     jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(chain))
@@ -150,7 +185,6 @@ for s in backgrounds:
     Process[:200] = s["name"]
 
     if len(leptons)==2: 
-  
  
       ## OF SF choice 
       if leptons[0]['pdgId']+leptons[1]['pdgId']==0 and abs(leptons[0]['pdgId'])==11:
@@ -185,8 +219,9 @@ for s in backgrounds:
         mt2Calc.setBJets(bjets[0]['pt'], bjets[0]['eta'], bjets[0]['phi'], bjets[1]['pt'], bjets[1]['eta'], bjets[1]['phi'])
         mt2bb[0]   = mt2Calc.mt2bb()
         mt2blbl[0] = mt2Calc.mt2blbl()
-      
-  if  nbjets[0]>0 and nleptons[0]==2 and njets[0]>1:  
+
+  
+  if  nbjets[0]>0 and nleptons[0]==2 and njets[0]>1 and trigger==1:  
 
     t.Fill()
 
@@ -206,7 +241,7 @@ os.system("mv SMS_T2tt_2J_mStop500_mLSP325.root ntuples/T2ttS500N325.root")
 os.system("mv SMS_T2tt_2J_mStop650_mLSP325.root ntuples/T2ttS650N325.root")
 os.system("mv SMS_T2tt_2J_mStop850_mLSP100.root ntuples/T2ttS850N100.root")
 os.system("mv DY.root ntuples/DrellYan.root")
-os.system("mv QCDMu.root ntuples/QCDMu.root")
+os.system("mv QCD (MuPt5 enriched).root ntuples/QCDMu.root")
 os.system("mv tt+Jets.root ntuples/TTJets.root")
 os.system("mv WW+WZ+ZZ.root ntuples/DiBosons.root")
 os.system("mv W+Jets.root ntuples/WJets.root")
