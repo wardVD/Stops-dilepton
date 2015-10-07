@@ -22,7 +22,7 @@ from StopsDilepton.tools.localInfo import *
 #For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
 
 
-preselection = 'Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)==2&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>2&&Sum$(LepGood_pt>20)>=2'
+preselection = 'Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)>=1&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)==2'
 prefix="def"
 reduceStat = 1
 lumiScale = 1.
@@ -150,7 +150,8 @@ for s in backgrounds:
     Process[:200] = s["name"]
 
     if len(leptons)==2: 
-   
+  
+ 
       ## OF SF choice 
       if leptons[0]['pdgId']+leptons[1]['pdgId']==0 and abs(leptons[0]['pdgId'])==11:
           isElecElec[0] = 1
@@ -159,9 +160,6 @@ for s in backgrounds:
       if abs(leptons[0]['pdgId'])+abs(leptons[1]['pdgId'])==24: 
           isMuonElec[0] = 1
 
-      #print "****" 
-      #print "isElecElec[0] = %i, isMuonMuon[0] = %i, isMuonElec[0] = %i " % (isElecElec[0],isMuonMuon[0],isMuonElec[0])
-      #print "****" 
 
       l0pt, l0eta, l0phi, l0mass = leptons[0]['pt'],  leptons[0]['eta'],  leptons[0]['phi'],  leptons[0]['mass']
       l1pt, l1eta, l1phi, l1mass = leptons[1]['pt'],  leptons[1]['eta'],  leptons[1]['phi'],  leptons[1]['mass'] 
@@ -188,9 +186,9 @@ for s in backgrounds:
         mt2bb[0]   = mt2Calc.mt2bb()
         mt2blbl[0] = mt2Calc.mt2blbl()
       
-      if  mll>20 and nbjets[0]>0 and nleptons[0]>1 and njets[0]>1:  
+  if  nbjets[0]>0 and nleptons[0]==2 and njets[0]>1:  
 
-        t.Fill()
+    t.Fill()
 
 
   del eList
