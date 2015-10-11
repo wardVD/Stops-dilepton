@@ -56,13 +56,13 @@ triggerMuEle = "HLT_mue"
 cuts=[
  ("njet2", "(Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>=2"),
  ("nbtag1", "Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)>=1"),
- ("mll20", "dl_mass>20"),
+# ("mll20", "dl_mass>20"),
  ("met80", "met_pt>80"),
  ("metSig5", "met_pt/sqrt(Sum$(Jet_pt*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)))>5"),
  ("dPhiJet0-dPhiJet1", "abs(cos(met_phi-Jet_phi[0]))<cos(0.25)&&abs(cos(met_phi-Jet_phi[1]))<cos(0.25)"),
   ]
-#for i in [len(cuts)]:# reversed(range(len(cuts)+1)):
-for i in reversed(range(len(cuts)+1)):
+#for i in reversed(range(len(cuts)+1)):
+for i in range(len(cuts)+1):
   for comb in itertools.combinations(cuts,i):
     presel = [("isOS","isOS")]
 #    print i, comb
@@ -149,10 +149,10 @@ for i in reversed(range(len(cuts)+1)):
     allStacks=[]
 
     dl_mass_stack  = getStack(
-        labels={'x':'m(ll) (GeV)','y':'Number of Events / 5 GeV'},
+        labels={'x':'m(ll) (GeV)','y':'Number of Events / 3 GeV'},
     #    var={'name':'mll','func':mll, 'overFlow':'upper', 'branches':[]},
         var={'name':'dl_mass','leaf':"dl_mass", 'overFlow':'upper', 'branches':[]},
-        binning={'binning':[100/5,50,150]},
+        binning={'binning':[150/3,0,150]},
         cut={'string':cutString,'func':cutFunc,'dataCut':dataCut},
         )
     allStacks.append(dl_mass_stack)
