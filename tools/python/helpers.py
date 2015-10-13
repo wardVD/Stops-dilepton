@@ -118,6 +118,64 @@ def getWeight(c,sample,lumi,n=0):
   sumofweights_value = sum(sample['totalweight'])
   return (genweight_value*lumi_value*xsec_value)/sumofweights_value
 
+
+def getCutYieldFromChain(c, cutString = "(1)", cutFunc = None, weight = "weight", weightFunc = None, returnVar=False):
+  c.Draw(">>eList", cutString)
+  elist = ROOT.gDirectory.Get("eList")
+  number_events = elist.GetN()
+  res = 0.
+  resVar=0.
+  for i in range(number_events): 
+    c.GetEntry(elist.GetEntry(i))
+    if (not cutFunc) or cutFunc(c):
+      if weight:
+        w = c.GetLeaf(weight).GetValue()
+      else:
+        w=1.
+      if weightFunc:
+        w*=weightFunc(c)
+      res += w
+      resVar += w**2
+  del elist
+  if returnVar:
+    return res, resVar
+  return res
+
+def getYieldFromChain(c, cutString = "(1)", weight = "weight", returnError=False):
+  h = ROOT.TH1F('h_tmp', 'h_tmp', 1,0,2)
+  h.Sumw2()
+  c.Draw("1>>h_tmp", "("+weight+")*("+cutString+")", 'goff')
+  res = h.GetBinContent(1)
+  resErr = h.GetBinError(1)
+#  print "1>>h_tmp", weight+"*("+cutString+")",res,resErr
+  del h
+  if returnError:
+    return res, resErr
+  return res 
+
+def getPlotFromChain(c, var, binning, cutString = "(1)", weight = "weight", binningIsExplicit=False, addOverFlowBin=''):
+  if binningIsExplicit:
+    h = ROOT.TH1F('h_tmp', 'h_tmp', len(binning)-1, array('d', binning))
+#    h.SetBins(len(binning), array('d', binning))
+  else:
+    if len(binning)==6:
+      h = ROOT.TH2F('h_tmp', 'h_tmp', *binning)
+    else:
+      h = ROOT.TH1F('h_tmp', 'h_tmp', *binning)
+  c.Draw(var+">>h_tmp", weight+"*("+cutString+")", 'goff')
+  res = h.Clone()
+  h.Delete()
+  del h
+  if addOverFlowBin.lower() == "upper" or addOverFlowBin.lower() == "both":
+    nbins = res.GetNbinsX()
+#    print "Adding", res.GetBinContent(nbins + 1), res.GetBinError(nbins + 1)
+    res.SetBinContent(nbins , res.GetBinContent(nbins) + res.GetBinContent(nbins + 1))
+    res.SetBinError(nbins , sqrt(res.GetBinError(nbins)**2 + res.GetBinError(nbins + 1)**2))
+  if addOverFlowBin.lower() == "lower" or addOverFlowBin.lower() == "both":
+    res.SetBinContent(1 , res.GetBinContent(0) + res.GetBinContent(1))
+    res.SetBinError(1 , sqrt(res.GetBinError(0)**2 + res.GetBinError(1)**2))
+  return res
+
 def genmatching(lepton,genparticles):
   for gen in genparticles:
       deltaphi = abs(lepton['phi'] - gen['phi'])

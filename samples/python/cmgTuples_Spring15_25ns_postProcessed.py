@@ -66,7 +66,6 @@ WJetsToLNu_25ns={\
 ],
 'dir' : dir,
 }
-
 diBosons_25ns={\
 "name" : "WW+WZ+ZZ",
 "bins" : [
@@ -89,6 +88,7 @@ singleTop_25ns={\
 DY_25ns={\
 "name" : "DY",
 "bins" : [
+"DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 "DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v3"
 ],
 'dir' : dataDir,
