@@ -11,6 +11,16 @@ TTJets_25ns={\
 'isData':False
 }
 
+TTJets_25ns={\
+"name" : "TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
+"chunkString":"TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
+"dir": data_path,
+"dbsName" : "/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM",
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+
 TTLep_pow_25ns={\
 "name" : "TTTo2L2Nu_13TeV-powheg_RunII_Spring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 "chunkString":"TTLep_pow",

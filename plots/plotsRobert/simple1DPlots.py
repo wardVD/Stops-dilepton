@@ -1,7 +1,7 @@
 from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("--mode", dest="mode", default="doubleMu", type="string", action="store", help="doubleMu, doubleEle, muEle")
-parser.add_option("--zMode", dest="zMode", default="offZ", type="string", action="store", help="onZ, offZ, allZ")
+parser.add_option("--zMode", dest="zMode", default="onZ", type="string", action="store", help="onZ, offZ, allZ")
 #parser.add_option("--small", dest="small", default = False, action="store_true", help="small")
 #parser.add_option("--OS", dest="OS", default = True, action="store_true", help="require OS?")
 
@@ -25,7 +25,8 @@ from StopsDilepton.tools.localInfo import plotDir
 from Workspace.RA4Analysis.simplePlotHelpers import plot, stack, loopAndFill, drawNMStacks
 from StopsDilepton.tools.puReweighting import getReweightingFunction
 
-puReweightingFunc = getReweightingFunction(era="Run2015D_205pb")
+#puReweightingFunc = getReweightingFunction(era="Run2015D_205pb")
+puReweightingFunc = getReweightingFunction(era="Run2015D_205pb_doubleMu_onZ_isOS")
 puReweighting = lambda c:puReweightingFunc(getVarValue(c, "nVert"))
 
 cutBranches = ["weight", "leptonPt", "met*", \
@@ -36,6 +37,7 @@ cutBranches = ["weight", "leptonPt", "met*", \
                "is*","dl_*","l1_*","l2_*", "nGoodMuons", "nGoodElectrons"
                 ]
 subdir = "png25ns_2l"
+preprefixes = ["PUDoubleMuOnZIsOS"]
 
 def getZCut(mode):
   zstr = "abs(dl_mass - "+str(mZ)+")"
@@ -54,21 +56,21 @@ triggerEleEle = "HLT_ee_DZ"
 triggerMuEle = "HLT_mue"
 
 cuts=[
- ("njet2", "(Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>=2"),
- ("nbtag1", "Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)>=1"),
-# ("mll20", "dl_mass>20"),
- ("met80", "met_pt>80"),
- ("metSig5", "met_pt/sqrt(Sum$(Jet_pt*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)))>5"),
- ("dPhiJet0-dPhiJet1", "abs(cos(met_phi-Jet_phi[0]))<cos(0.25)&&abs(cos(met_phi-Jet_phi[1]))<cos(0.25)"),
+# ("njet2", "(Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>=2"),
+# ("nbtag1", "Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)>=1"),
+## ("mll20", "dl_mass>20"),
+# ("met80", "met_pt>80"),
+# ("metSig5", "met_pt/sqrt(Sum$(Jet_pt*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)))>5"),
+# ("dPhiJet0-dPhiJet1", "abs(cos(met_phi-Jet_phi[0]))<cos(0.25)&&abs(cos(met_phi-Jet_phi[1]))<cos(0.25)"),
   ]
 #for i in reversed(range(len(cuts)+1)):
 for i in range(len(cuts)+1):
   for comb in itertools.combinations(cuts,i):
+#    presel = [("isOS","isOS"), ("mRelIso01", "LepGood_miniRelIso[l1_index]<0.1&&LepGood_miniRelIso[l2_index]<0.1")]
     presel = [("isOS","isOS")]
-#    print i, comb
     presel.extend( comb )
 
-    prefix = '_'.join([options.mode, options.zMode, '-'.join([p[0] for p in presel])]) 
+    prefix = '_'.join(preprefixes+[options.mode, options.zMode, '-'.join([p[0] for p in presel])]) 
     preselCuts = [p[1] for p in presel]
 
     if options.mode=="doubleMu":
