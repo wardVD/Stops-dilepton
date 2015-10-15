@@ -1,4 +1,5 @@
 data_path = "/data/rschoefbeck/cmgTuples/Spring15/MC25ns_1l/" 
+data_path_2l = "/data/rschoefbeck/cmgTuples/Spring15/MC25ns_2l/" 
 
 TTJets_25ns={\
 "name" : "TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
@@ -7,6 +8,27 @@ TTJets_25ns={\
 "dbsName" : "/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM",
 "rootFileLocation":"tree.root",
 "treeName":"tree",
+'isData':False
+}
+
+TTJets_25ns={\
+"name" : "TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
+"chunkString":"TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
+"dir": data_path,
+"dbsName" : "/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM",
+"rootFileLocation":"tree.root",
+"treeName":"tree",
+'isData':False
+}
+
+TTLep_pow_25ns={\
+"name" : "TTTo2L2Nu_13TeV-powheg_RunII_Spring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
+"chunkString":"TTLep_pow",
+"dir": data_path_2l,
+"dbsName" : "/TTTo2L2Nu_13TeV-powheg/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM",
+"rootFileLocation":"treeProducerSusySingleLepton/tree.root",
+"treeName":"tree",
+"skimAnalyzerDir":"skimAnalyzerCount",
 'isData':False
 }
 
@@ -67,6 +89,62 @@ DYJetsToLL_M_50_HT600toInf_25ns={\
 'dbsName':'/DYJetsToLL_M-50_HT-600toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
 "rootFileLocation":"tree.root",
 "treeName":"tree",
+'isData':False
+}
+
+DYJetsToLL_M_5to50_25ns={\
+'name' : "DYJetsToLL_M-5to50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
+#'name' : "DYJetsToLL_M5to50",
+'chunkString' : "DYJetsToLL_M5to50",
+"dir": data_path_2l,
+'dbsName':'/DYJetsToLL_M-5to50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',
+"rootFileLocation":"treeProducerSusySingleLepton/tree.root",
+"treeName":"tree",
+"skimAnalyzerDir":"skimAnalyzerCount",
+'isData':False
+}
+
+DYJetsToLL_M_5to50_HT100to200_25ns={\
+"name" : "DYJetsToLL_M-5to50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
+"chunkString" : "DYJetsToLL_M5to50_HT100to200",
+"dir": data_path_2l,
+'dbsName':'/DYJetsToLL_M-5to50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',
+"rootFileLocation":"treeProducerSusySingleLepton/tree.root",
+"treeName":"tree",
+"skimAnalyzerDir":"skimAnalyzerCount",
+'isData':False
+}
+
+DYJetsToLL_M_5to50_HT200to400_25ns={\
+"name" : "DYJetsToLL_M-5to50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
+"chunkString" : "DYJetsToLL_M5to50_HT200to400",
+"dir": data_path_2l,
+'dbsName':'/DYJetsToLL_M-5to50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',
+"rootFileLocation":"treeProducerSusySingleLepton/tree.root",
+"treeName":"tree",
+"skimAnalyzerDir":"skimAnalyzerCount",
+'isData':False
+}
+
+DYJetsToLL_M_5to50_HT400to600_25ns={\
+"name" : "DYJetsToLL_M-5to50_HT-400to600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1", 
+"chunkString" : "DYJetsToLL_M5to50_HT400to600",
+"dir": data_path_2l,
+'dbsName':'/DYJetsToLL_M-5to50_HT-400to600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',
+"rootFileLocation":"treeProducerSusySingleLepton/tree.root",
+"treeName":"tree",
+"skimAnalyzerDir":"skimAnalyzerCount",
+'isData':False
+}
+
+DYJetsToLL_M_5to50_HT600toInf_25ns={\
+"name" : "DYJetsToLL_M-5to50_HT-600toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
+"chunkString" : "DYJetsToLL_M5to50_HT600toInf",
+"dir": data_path_2l,
+'dbsName':'/DYJetsToLL_M-5to50_HT-600toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',
+"rootFileLocation":"treeProducerSusySingleLepton/tree.root",
+"treeName":"tree",
+"skimAnalyzerDir":"skimAnalyzerCount",
 'isData':False
 }
 

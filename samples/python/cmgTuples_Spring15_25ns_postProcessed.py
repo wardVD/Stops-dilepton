@@ -5,6 +5,16 @@ dir = dataDir
 #"ZJetsToNuNu_HT-400To600_13TeV-madgraph_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 #"ZJetsToNuNu_HT-600ToInf_13TeV-madgraph_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 
+Rare_25ns={\
+"name": "Rare",
+"bins": [
+"TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/",
+"TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/",
+"TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/",
+],
+'dir' :dir
+}
+
 DoubleEG_25ns={\
 "name": "DoubleEG",
 "bins": ["DoubleEG_Run2015D-PromptReco-v3/"],
@@ -23,11 +33,18 @@ MuonEG_25ns={\
 'dir':dir
 }
 
-TTJets_25ns={\
+TTJets_inclusive_25ns={\
 "name" : "tt+Jets",
-"bins" : ["TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1"],
+"bins" : ["TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/"],
 'dir' : dir,
 }
+
+TTLep_25ns={\
+"name" : "tt+Jets to 2L2Nu",
+"dir": dir,
+"bins" : ["TTTo2L2Nu_13TeV-powheg_RunII_Spring15DR74-Asympt25ns_MCRUN2_74_V9-v1"],
+}
+
 WJetsHTToLNu_25ns={\
 "name" : "W+Jets HT binned",
 "bins" : [
@@ -49,7 +66,6 @@ WJetsToLNu_25ns={\
 ],
 'dir' : dir,
 }
-
 diBosons_25ns={\
 "name" : "WW+WZ+ZZ",
 "bins" : [
@@ -72,6 +88,7 @@ singleTop_25ns={\
 DY_25ns={\
 "name" : "DY",
 "bins" : [
+"DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 "DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v3"
 ],
 'dir' : dataDir,
@@ -94,7 +111,7 @@ DYM10to50_25ns={\
 'dir' : dataDir,
 }
 QCDMu_25ns={\
-"name" : "QCD (MuPt5 enriched)",
+"name" : "QCD_Mu",
 "bins" : [
 "QCD_Pt-15to20_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 "QCD_Pt-20to30_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2",
@@ -114,7 +131,7 @@ QCDMu_25ns={\
 
 
 QCDEle_25ns={\
-"name" : "QCD (Ele)",
+"name" : "QCD_Ele",
 "bins" : [
 "QCD_Pt_15to20_bcToE_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 "QCD_Pt_20to30_bcToE_TuneCUETP8M1_13TeV_pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
