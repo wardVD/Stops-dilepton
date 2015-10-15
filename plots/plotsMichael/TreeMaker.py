@@ -26,7 +26,7 @@ lumiScale = 1.
 #load all the samples
 from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
 
-backgrounds = [diBosons_25ns,WJetsToLNu_25ns,singleTop_25ns,QCDMu_25ns,DYHT_25ns,TTJets_25ns, TTLep_25ns]
+backgrounds = [diBosons_25ns,WJetsToLNu_25ns,singleTop_25ns,QCDMu_25ns,DYHT_25ns,TTJets_inclusive_25ns,TTLep_25ns]
 #backgrounds = [TTLep_25ns]
 for b in backgrounds:
   b['isData']=0
