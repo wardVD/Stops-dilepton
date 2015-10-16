@@ -13,8 +13,9 @@ mt2Calc = mt2Calculator()
 from StopsDilepton.tools.localInfo import *
 
 #preselection = 'met_pt>40&&Sum$((Jet_pt)*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>100&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.814)==2&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2'
-preselection = '(1)'
-prefix="def"
+preselection = 'isOS&&abs(dl_mass-90.2)<=15.&&isMuMu==1&&nGoodMuons==2&&nGoodElectrons==0'
+dataCut = "(HLT_mumuIso&&Flag_HBHENoiseFilterMinZeroPatched&&Flag_goodVertices&&Flag_CSCTightHaloFilter&&Flag_eeBadScFilter)"
+prefix="doubleMu_onZ_isOS"
 
 #load all the samples
 from StopsDilepton.samples.cmgTuples_Spring15_50ns_postProcessed import *
@@ -22,16 +23,16 @@ from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
 from StopsDilepton.samples.cmgTuples_Data50ns_1l_postProcessed import *
 from StopsDilepton.samples.cmgTuples_Data25ns_postProcessed import *
 
-backgrounds = [TTJets_25ns, DY_25ns, singleTop_25ns, diBosons_25ns, WJetsHTToLNu_25ns]#, QCD]
+backgrounds = [TTJets_25ns, DY_25ns, singleTop_25ns, WJetsToLNu_25ns, QCDMu_25ns]
+#backgrounds = [TTJets_25ns, DY_25ns, singleTop_25ns, diBosons_25ns, WJetsHTToLNu_25ns]#, QCD]
 for b in backgrounds:
   b['isData']=False
 
 data = DoubleMuon_Run2015D
 data['isData']=True
-signals = [] 
 
 #get the TChains for each sample
-for s in backgrounds+signals+[data]:
+for s in backgrounds+[data]:
   s['chain'] = getChain(s,histname="")
 
 #plots
@@ -40,9 +41,12 @@ plots = {\
 }
 
 #make plot in each sample: 
-for s in backgrounds+signals+[data]:
+for s in backgrounds:
   for pk in plots.keys():
     plots[pk]['histo'][s['name']] = getPlotFromChain(s['chain'], plots[pk]['name'], plots[pk]['binning'], cutString = preselection)
+for s in [data]:
+  for pk in plots.keys():
+    plots[pk]['histo'][s['name']] = getPlotFromChain(s['chain'], plots[pk]['name'], plots[pk]['binning'], cutString = preselection+"&&"+dataCut)
 
 for pk in plots.keys():
   plots[pk]['sum'] =  plots[pk]['histo'][backgrounds[0]['name']].Clone() 
@@ -54,9 +58,12 @@ for pk in plots.keys():
 TTJets_50ns["color"]=ROOT.kRed
 TTJets_25ns["color"]=ROOT.kRed
 WJetsHTToLNu_25ns["color"]=ROOT.kGreen
+WJetsToLNu_25ns["color"]=ROOT.kGreen
 #TTVH["color"]=ROOT.kMagenta
 diBosons_50ns["color"]=ROOT.kMagenta
 diBosons_25ns["color"]=ROOT.kMagenta
+#QCDMu_50ns["color"]=ROOT.kMagenta
+QCDMu_25ns["color"]=ROOT.kMagenta
 singleTop_50ns["color"]=ROOT.kOrange
 singleTop_25ns["color"]=ROOT.kOrange
 DY_50ns["color"]=ROOT.kBlue

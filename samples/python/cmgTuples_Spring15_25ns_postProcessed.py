@@ -39,10 +39,10 @@ TTJets_inclusive_25ns={\
 'dir' : dir,
 }
 
-TTJets_25ns={\
-"name" : "tt+Jets",
-"bins" : ["TTTo2L2Nu_13TeV-powheg_RunII_Spring15DR74-Asympt25ns_MCRUN2_74_V9-v1/"],
-'dir' : dir,
+TTLep_25ns={\
+"name" : "tt+Jets to 2L2Nu",
+"dir": dir,
+"bins" : ["TTTo2L2Nu_13TeV-powheg_RunII_Spring15DR74-Asympt25ns_MCRUN2_74_V9-v1"],
 }
 
 WJetsHTToLNu_25ns={\
