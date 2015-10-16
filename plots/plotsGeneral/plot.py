@@ -34,12 +34,12 @@ preselection = 'met_pt>'+metcut+'&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet
 #######################################################
 #from StopsDilepton.samples.cmgTuplesPostProcessed_PHYS14 import *
 from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
-backgrounds = [diBosons_25ns,WJetsToLNu_25ns,singleTop_25ns,QCDMu_25ns,Rare_25ns,DY_25ns,TTJets_25ns]
-#backgrounds = []
+backgrounds = [diBosons_25ns,WJetsToLNu_25ns,singleTop_25ns,QCDMu_25ns,Rare_25ns,DY_25ns,TTLep_25ns]
+backgrounds = [TTLep_25ns]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
-#signals = []
+signals = []
 data = [DoubleEG_25ns,DoubleMuon_25ns,MuonEG_25ns]
-#data = []
+data = []
 
 #######################################################
 #            get the TChains for each sample          #
@@ -333,6 +333,12 @@ for s in backgrounds+signals+data:
   chain.SetBranchStatus("Jet_btagCSV",1)
   chain.SetBranchStatus("Jet_id",1)
   chain.SetBranchStatus("weight",1)
+  chain.SetBranchStatus("l1_pt",1)
+  chain.SetBranchStatus("l2_pt",1)
+  chain.SetBranchStatus("dl_mass",1)
+  chain.SetBranchStatus("dl_mt2ll",1)
+  chain.SetBranchStatus("dl_mt2bb",1)
+  chain.SetBranchStatus("dl_mt2blbl",1)
   if s not in data: 
     chain.SetBranchStatus("genWeight",1)
     chain.SetBranchStatus("Jet_mcMatchFlav",1)
@@ -366,6 +372,11 @@ for s in backgrounds+signals+data:
     #jetpt
     leadingjetpt = getVarValue(chain, "Jet_pt",0)
     subleadingjetpt = getVarValue(chain, "Jet_pt",1)
+    #leptons
+    l0pt = getVarValue(chain, "l1_pt")
+    l1pt = getVarValue(chain, "l2_pt")
+    mll = getVarValue(chain,"dl_mass")
+          
     #Leptons 
     allLeptons = getGoodLeptons(chain)
     muons = getGoodMuons(chain)
@@ -385,26 +396,12 @@ for s in backgrounds+signals+data:
       if lep != 'emu':
         if len(leptons[lep]['file'])==2 and (len(muons)+len(electrons))==2 and leptons[lep]['file'][0]['pdgId']*leptons[lep]['file'][1]['pdgId']<0:
           twoleptons = True
-          l0pt, l0eta, l0phi = leptons[lep]['file'][0]['pt'],  leptons[lep]['file'][0]['eta'],  leptons[lep]['file'][0]['phi']
-          l1pt, l1eta, l1phi = leptons[lep]['file'][1]['pt'],  leptons[lep]['file'][1]['eta'],  leptons[lep]['file'][1]['phi']
-          leadingleptonpt = l0pt
-          subleadingleptonpt = l1pt
-          mll = sqrt(2.*l0pt*l1pt*(cosh(l0eta-l1eta)-cos(l0phi-l1phi)))
           plots[leptons[lep]['name']]['mll']['histo'][s["name"]].Fill(mll,weight) #mll as n-1 plot without Z-mass cut
           zveto = True
       #Opposite Flavor
       if lep == 'emu':
         if len(leptons[lep]['file'][0])==1 and len(leptons[lep]['file'][1])==1 and leptons[lep]['file'][0][0]['pdgId']*leptons[lep]['file'][1][0]['pdgId']<0:
           twoleptons = True
-          l0pt, l0eta, l0phi = leptons[lep]['file'][0][0]['pt'],  leptons[lep]['file'][0][0]['eta'],  leptons[lep]['file'][0][0]['phi']
-          l1pt, l1eta, l1phi = leptons[lep]['file'][1][0]['pt'],  leptons[lep]['file'][1][0]['eta'],  leptons[lep]['file'][1][0]['phi']
-          if l1pt > l0pt :
-            leadingleptonpt = l1pt
-            subleadingleptonpt = l0pt
-          else:
-            leadingleptonpt = l0pt
-            subleadingleptonpt = l1pt
-          mll = sqrt(2.*l0pt*l1pt*(cosh(l0eta-l1eta)-cos(l0phi-l1phi)))
           plots[leptons[lep]['name']]['mll']['histo'][s["name"]].Fill(mll,weight) #mll as n-1 plot without Z-mass cut
           zveto = False
       if (twoleptons and mll>20 and not zveto) or (twoleptons and mll > 20 and zveto and abs(mll-90.2)>15):
@@ -420,12 +417,14 @@ for s in backgrounds+signals+data:
 
           plots[leptons[lep]['name']]['leadingjetpt']['histo'][s["name"]].Fill(leadingjetpt, weight)
           plots[leptons[lep]['name']]['subleadingjetpt']['histo'][s["name"]].Fill(subleadingjetpt, weight)
-          plots[leptons[lep]['name']]['leadingleptonpt']['histo'][s["name"]].Fill(leadingleptonpt, weight)
-          plots[leptons[lep]['name']]['subleadingleptonpt']['histo'][s["name"]].Fill(subleadingleptonpt, weight)
-          mt2Calc.setMet(met,metPhi)
-          mt2Calc.setLeptons(l0pt, l0eta, l0phi, l1pt, l1eta, l1phi)
+          plots[leptons[lep]['name']]['leadingleptonpt']['histo'][s["name"]].Fill(l0pt, weight)
+          plots[leptons[lep]['name']]['subleadingleptonpt']['histo'][s["name"]].Fill(l1pt, weight)
+          # mt2Calc.setMet(met,metPhi)
+          # mt2Calc.setLeptons(l0pt, l0eta, l0phi, l1pt, l1eta, l1phi)
           
-          mt2ll = mt2Calc.mt2ll()
+          # mt2ll = mt2Calc.mt2ll()
+    
+          mt2ll = getVarValue(chain,"dl_mt2ll")
 
           if mt2ll>mt2llbinning[-1]:  mt2ll = mt2llbinning[-1]-1 #overflow bin
           if mt2ll<mt2llbinning[-2]:  mt2ll = mt2llbinning[-2]+1 #underflow bin
@@ -466,17 +465,9 @@ for s in backgrounds+signals+data:
           plots[leptons[lep]['name']]['njets']['histo'][s["name"]].Fill(len(jets),weight)
           plots[leptons[lep]['name']]['nbjets']['histo'][s["name"]].Fill(len(bjetspt),weight)
           plots[leptons[lep]['name']]['ht']['histo'][s["name"]].Fill(ht,weight)
-          if s not in data: plots[leptons[lep]['name']]['leadingjetpartonId']['histo'][s["name"]].Fill(getVarValue(chain,"Jet_partonId",0),weight)
-          #2 or more bjets: two highest pt
-          if len(bjetspt)>=2:
-            mt2Calc.setBJets(bjetspt[0]['pt'], bjetspt[0]['eta'], bjetspt[0]['phi'], bjetspt[1]['pt'], bjetspt[1]['eta'], bjetspt[1]['phi'])
-          #1 bjets: bjet+jet with highest pt
-          if len(bjetspt)==1 and len(nobjets)>0:
-            mt2Calc.setBJets(bjetspt[0]['pt'], bjetspt[0]['eta'], bjetspt[0]['phi'], nobjets[0]['pt'], nobjets[0]['eta'], nobjets[0]['phi'])
-          if (len(bjetspt)==0) or (len(bjetspt)==1 and len(nobjets)==0): #last one seems necessary if btagCSV is 'nan'
-            continue
-          mt2bb   = mt2Calc.mt2bb()
-          mt2blbl = mt2Calc.mt2blbl()
+
+          mt2bb = getVarValue(chain, "dl_mt2bb",0)
+          mt2blbl = getVarValue(chain, "dl_mt2blbl",0)
 
           if mt2bb>mt2bbbinning[-1]:  mt2bb = mt2bbbinning[-1] - 1 #overflow bin
           if mt2bb<mt2bbbinning[-2]:  mt2bb = mt2bbbinning[-2] + 1 #underflow bin
@@ -556,7 +547,10 @@ for s in backgrounds+signals+data:
     TreeFile.Close()
   del eList
 
-#print plots['emu']['mt2ll']['histo'][TTJets_50ns['name']].Integral()
+
+
+#print plots['emu']['mt2ll']['histo'][TTLep_25ns['name']].Integral()
+#print plots['emu']['met']['histo'][TTLep_25ns['name']].Integral()
 #print plots['mumu']['mt2ll']['histo'][TTJets_50ns['name']].Integral()
 
 #######################################################
@@ -573,7 +567,7 @@ if makelatextables:
 #######################################################
 #Some coloring
 
-TTJets_25ns["color"]=7
+TTLep_25ns["color"]=7
 DY_25ns["color"]=8
 QCDMu_25ns["color"]=46
 singleTop_25ns["color"]=40
