@@ -26,8 +26,9 @@ lumiScale = 1.
 #load all the samples
 from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
 
-backgrounds = [diBosons_25ns,WJetsToLNu_25ns,singleTop_25ns,QCDMu_25ns,DYHT_25ns,TTJets_inclusive_25ns,TTLep_25ns]
-#backgrounds = [TTLep_25ns]
+#backgrounds = [diBosons_25ns,WJetsToLNu_25ns,singleTop_25ns,QCDMu_25ns,DYHT_25ns,TTJets_inclusive_25ns,TTLep_25ns]
+backgrounds = [DY_25ns]
+
 for b in backgrounds:
   b['isData']=0
 
@@ -242,8 +243,8 @@ for s in backgrounds+signals+data:
 			mt2bb[0]   = mt2Calc.mt2bb()
 			mt2blbl[0] = mt2Calc.mt2blbl()
 		
-		#if mll>20 and nbjets[0]>0 and nleptons[0]==2 and njets[0]>1 and trigger==1: 
-		if  mll>20 and trigger==1:
+		if mll>20 and njets[0] > 0 and nleptons[0]==2 and trigger==1: 
+
 			t.Fill()
 
 
@@ -264,7 +265,7 @@ os.system("mv SMS_T2tt_2J_mStop500_mLSP325.root "+outdir+"/T2ttS500N325.root")
 os.system("mv SMS_T2tt_2J_mStop650_mLSP325.root "+outdir+"/T2ttS650N325.root")
 os.system("mv SMS_T2tt_2J_mStop850_mLSP100.root "+outdir+"/T2ttS850N100.root")
 os.system("mv DY.root "+outdir+"/DrellYan.root")
-os.system("mv QCD\ \(MuPt5\ enriched\).root "+outdir+"/QCDMu.root")
+os.system("mv QCD_Mu.root "+outdir+"/QCDMu.root")
 os.system("mv tt+Jets.root "+outdir+"/TTJetsInclusive.root")
 os.system("mv WW+WZ+ZZ.root "+outdir+"/DiBosons.root")
 os.system("mv W+Jets.root "+outdir+"/WJets.root")

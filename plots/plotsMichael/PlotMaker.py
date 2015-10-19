@@ -2,7 +2,7 @@ import ROOT
 ROOT.gROOT.LoadMacro("$CMSSW_BASE/src/StopsDilepton/tools/scripts/tdrstyle.C")
 ROOT.setTDRStyle()
 
-from ROOT import TTree, TFile, AddressOf, gROOT, TH1F, TH2F, TString, TColor
+from ROOT import TTree, TFile, AddressOf, gROOT, TH1D, TH2F, TString, TColor
 from array import array
 import numpy as n
 from math import *
@@ -13,7 +13,7 @@ from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarVa
 
 
 #dataset_name 		= ["T2ttS425N325", "T2ttS650N325", "TTJets", "WJets", "QCDMu", "DrellYan", "QCDMu", "singleTop", "DoubleElec", "DoubleMuon", "MuonElec"] 
-dataset_name 		= ["T2ttS425N325"] 
+dataset_name 		= ["TTJets2L2Nu"] 
 
 
 
@@ -24,7 +24,7 @@ for process in range(len(dataset_name)):
 	lumi = 10.  
 
 	f = ROOT.TFile.Open("ntuples/"+dataset_name[process]+".root")
-	plot = TH1F("plot", "plot", 50, 0, 10000) 
+	plot = TH1D("plot", "plot", 50, 0, 10000) 
 
 	for event in f.anaTree :
 
@@ -38,8 +38,11 @@ for process in range(len(dataset_name)):
 		if event.isMuonElec:
 			isOF=1
 
-#		if event.HT > 0. and event.MET > 80 and event.mindPhiMetJet12 > 0.25 and event.MET/sqrt(event.HT) > 5 and event.nbjets >0 and event.nleptons==2 and event.njets > 1 and isSF and ZVeto: 
-		if event.HT > 0. and event.MET > 80 and event.mindPhiMetJet12 > 0.25 and event.MET/sqrt(event.HT) > 5 and event.nbjets >0 and event.nleptons==2 and event.njets > 1 and isOF: 
+
+		finalSelection = event.HT > 0. and event.MET > 80 and event.mindPhiMetJet12 > 0.25 and event.MET/sqrt(event.HT) > 5 and event.nbjets >0 and event.nleptons==2 and event.njets > 1
+
+		if finalSelection and isSF and ZVeto: 
+#		if isOF:
 
 			if event.isMC: 
 				plot.Fill( event.MET, event.xsecWeight*lumi)
@@ -47,10 +50,9 @@ for process in range(len(dataset_name)):
 				plot.Fill( event.MET)
 
 
-
 #	print event.xsecWeight*lumi
-#	print plot.GetEntries()
-	print plot.Integral()
+	print plot.GetEntries()
+#	print plot.Integral()
 
 
 
