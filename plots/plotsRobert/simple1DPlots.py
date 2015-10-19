@@ -22,14 +22,14 @@ from StopsDilepton.samples.cmgTuples_Data25ns_postProcessed import *
 from StopsDilepton.tools.objectSelection import getLeptons, getMuons, getElectrons, getGoodMuons, getGoodElectrons, getGoodLeptons, mZ
 from StopsDilepton.tools.helpers import getVarValue, getYieldFromChain, getChain
 from StopsDilepton.tools.localInfo import plotDir
-from Workspace.RA4Analysis.simplePlotHelpers import plot, stack, loopAndFill, drawNMStacks
+from simplePlotHelpers import plot, stack, loopAndFill, drawNMStacks
 from StopsDilepton.tools.puReweighting import getReweightingFunction
 
-#puReweightingFunc = getReweightingFunction(era="Run2015D_205pb")
-puReweightingFunc = getReweightingFunction(era="Run2015D_205pb_doubleMu_onZ_isOS")
+puReweightingFunc = getReweightingFunction(era="Run2015D_205pb")
+#puReweightingFunc = getReweightingFunction(era="Run2015D_205pb_doubleMu_onZ_isOS")
 puReweighting = lambda c:puReweightingFunc(getVarValue(c, "nVert"))
 
-cutBranches = ["weight", "leptonPt", "met*", \
+cutBranches = ["weight", "leptonPt", "met*", "nVert",\
                'Jet_pt', "Jet_id", "Jet_eta", "Jet_phi", "Jet_btagCSV",
                "LepGood_pdgId", "LepGood_mediumMuonId", "LepGood_miniRelIso", "LepGood_sip3d", "LepGood_dxy", "LepGood_dz", "LepGood_convVeto", "LepGood_lostHits",
                "Flag_HBHENoiseFilter", "Flag_HBHENoiseIsoFilter", "Flag_HBHENoiseFilterMinZeroPatched", "Flag_goodVertices", "Flag_CSCTightHaloFilter", "Flag_eeBadScFilter",
@@ -37,7 +37,8 @@ cutBranches = ["weight", "leptonPt", "met*", \
                "is*","dl_*","l1_*","l2_*", "nGoodMuons", "nGoodElectrons"
                 ]
 subdir = "png25ns_2l"
-preprefixes = ["PUDoubleMuOnZIsOS"]
+#preprefixes = ["PUDoubleMuOnZIsOS"]
+preprefixes = []
 
 def getZCut(mode):
   zstr = "abs(dl_mass - "+str(mZ)+")"
@@ -56,15 +57,15 @@ triggerEleEle = "HLT_ee_DZ"
 triggerMuEle = "HLT_mue"
 
 cuts=[
-# ("njet2", "(Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>=2"),
-# ("nbtag1", "Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)>=1"),
-## ("mll20", "dl_mass>20"),
+ ("njet2", "(Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))>=2"),
+ ("nbtag1", "Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)>=1"),
+ ("mll20", "dl_mass>20"),
 # ("met80", "met_pt>80"),
 # ("metSig5", "met_pt/sqrt(Sum$(Jet_pt*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)))>5"),
-# ("dPhiJet0-dPhiJet1", "abs(cos(met_phi-Jet_phi[0]))<cos(0.25)&&abs(cos(met_phi-Jet_phi[1]))<cos(0.25)"),
+# ("dPhiJet0-dPhiJet1", "cos(met_phi-Jet_phi[0])<cos(0.25)&&cos(met_phi-Jet_phi[1])<cos(0.25)"),
   ]
-#for i in reversed(range(len(cuts)+1)):
 for i in range(len(cuts)+1):
+#for i in reversed(range(len(cuts)+1)):
   for comb in itertools.combinations(cuts,i):
 #    presel = [("isOS","isOS"), ("mRelIso01", "LepGood_miniRelIso[l1_index]<0.1&&LepGood_miniRelIso[l2_index]<0.1")]
     presel = [("isOS","isOS")]
@@ -88,7 +89,7 @@ for i in range(len(cuts)+1):
 
     cutFunc = None
     lumiScaleFac = dataSample["lumi"]/1000.
-    backgrounds = [TTJets_25ns, WJetsToLNu_25ns, DY_25ns, singleTop_25ns, QCDMu_25ns]
+    backgrounds = [TTLep_25ns, WJetsToLNu_25ns, DY_25ns, singleTop_25ns, QCDMu_25ns]
     data = getYieldFromChain(getChain(dataSample,histname=""), cutString = "&&".join([cutString, dataCut]), weight='weight') 
     bkg  = 0. 
     for s in backgrounds:
@@ -99,6 +100,7 @@ for i in range(len(cuts)+1):
     print "After lumiscale %3.3f there is bkg %7.1f and data %7.1f: re-normalizing scaleFac by %3.3f"%(lumiScaleFac, lumiScaleFac*bkg, data, scaleFac)
      
     ratioOps = {'yLabel':'Data/MC', 'numIndex':1, 'denIndex':0 ,'yRange':None, 'logY':False, 'color':ROOT.kBlack, 'yRange':(0.1, 2.1)}
+    #ratioOps = None
 
     def getStack(labels, var, binning, cut, options={}):
 
@@ -106,26 +108,27 @@ for i in range(len(cuts)+1):
       style_WJets        = {'legendText':'W + Jets',         'style':"f", 'lineThickness':0, 'errorBars':False, 'color':42, 'markerStyle':None, 'markerSize':None}
       style_TTJets       = {'legendText':'t#bar{t} + Jets',  'style':"f", 'linethickNess':0, 'errorBars':False, 'color':7, 'markerStyle':None, 'markerSize':None}
       style_DY           = {'legendText':'DY + Jets',  'style':"f", 'linethickNess':0, 'errorBars':False,       'color':8, 'markerStyle':None, 'markerSize':None}
-    #  style_TTVH         = {'legendText':'t#bar{t} + W/Z/H',  'style':"f", 'linethickNess':0, 'errorBars':False, 'color':color("TTVH"), 'markerStyle':None, 'markerSize':None}
-    #  style_diBoson         = {'legendText':'t#bar{t} + W/Z/H',  'style':"f", 'linethickNess':0, 'errorBars':False, 'color':ROOT.kGreen-5, 'markerStyle':None, 'markerSize':None}
+      style_TTX          = {'legendText':'t#bar{t} + W/Z/H',  'style':"f", 'linethickNess':0, 'errorBars':False, 'color':ROOT.kYellow+2, 'markerStyle':None, 'markerSize':None}
+      style_diBoson         = {'legendText':'WW/WZ/ZZ',  'style':"f", 'linethickNess':0, 'errorBars':False, 'color':ROOT.kGreen-5, 'markerStyle':None, 'markerSize':None}
       style_QCD          = {'legendText':'QCD',  'style':"f", 'linethickNess':0, 'errorBars':False,             'color':46, 'markerStyle':None, 'markerSize':None}
       style_singleTop    = {'legendText':'single top',  'style':"f", 'linethickNess':0, 'errorBars':False,      'color':40, 'markerStyle':None, 'markerSize':None}
       
       data               = plot(var, binning, cut, sample=dataSample,       style=style_Data)
-      MC_TTJets          = plot(var, binning, cut, sample=TTJets_25ns,       style=style_TTJets,    weightString="weight", weightFunc=puReweighting)
+      MC_TTJets          = plot(var, binning, cut, sample=TTLep_25ns,       style=style_TTJets,    weightString="weight", weightFunc=puReweighting)
       MC_WJetsToLNu      = plot(var, binning, cut, sample=WJetsToLNu_25ns,   style=style_WJets,     weightString="weight", weightFunc=puReweighting)
       MC_DY              = plot(var, binning, cut, sample=DY_25ns,           style=style_DY,        weightString="weight", weightFunc=puReweighting)
       MC_singleTop       = plot(var, binning, cut, sample=singleTop_25ns,    style=style_singleTop, weightString="weight", weightFunc=puReweighting)
       MC_QCD             = plot(var, binning, cut, sample=QCDMu_25ns,        style=style_QCD,       weightString="weight", weightFunc=puReweighting)
-    #  MC_diBoson         = plot(var, binning, cut, sample=diBosons_25ns,     style=style_diBoson, weight={'string':'weight'})
+      MC_TTX             = plot(var, binning, cut, sample=TTX_25ns,          style=style_TTX, weightString="weight", weightFunc=puReweighting)
+      MC_diBoson         = plot(var, binning, cut, sample=diBosons_25ns,     style=style_diBoson, weightString="weight", weightFunc=puReweighting)
 
-      mcStack = [MC_TTJets, MC_DY,  MC_QCD, MC_singleTop, MC_WJetsToLNu]
-    #  mcStack = []
+      mcStack = [MC_TTJets, MC_DY,  MC_QCD, MC_singleTop, MC_WJetsToLNu, MC_diBoson, MC_TTX]
       for s in mcStack:
     #    print s,s.sample
         s.sample['scale'] = lumiScaleFac*scaleFac
 
       plotLists = [mcStack, [data]]
+#      plotLists = [mcStack]
 
       for pL in plotLists:
         for p in pL:
@@ -281,7 +284,7 @@ for i in range(len(cuts)+1):
 
     metZoomed_stack  = getStack(
         labels={'x':'#slash{E}_{T} (GeV)','y':'Number of Events / 10 GeV'},
-        var={'name':'metZoomed','leaf':'met', 'overFlow':'upper'},
+        var={'name':'metZoomed','leaf':'met_pt', 'overFlow':'upper'},
         binning={'binning':[22,0,220]},
         cut={'string':cutString,'func':cutFunc,'dataCut':dataCut},
         )
@@ -289,7 +292,7 @@ for i in range(len(cuts)+1):
 
     met_stack  = getStack(
         labels={'x':'#slash{E}_{T} (GeV)','y':'Number of Events / 50 GeV'},
-        var={'name':'met','leaf':'met', 'overFlow':'upper'},
+        var={'name':'met','leaf':'met_pt', 'overFlow':'upper'},
         binning={'binning':[1050/50,0,1050]},
         cut={'string':cutString,'func':cutFunc,'dataCut':dataCut},
         )
@@ -310,6 +313,14 @@ for i in range(len(cuts)+1):
         binning={'binning':[2600/100,0,2600]},
         cut={'string':cutString,'func':cutFunc, 'dataCut':dataCut})
     allStacks.append(ht_stack)
+
+    ht_zoomed_stack  = getStack(
+        labels={'x':'H_{T} (GeV)','y':'Number of Events / 30 GeV'},
+    #    var={'name':'ht_zoomed','leaf':'ht_zoomedJet40ja', 'overFlow':'upper'},
+        var={'name':'ht_zoomed','TTreeFormula':'Sum$(Jet_pt*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id))', 'overFlow':'upper'},
+        binning={'binning':[390/15,0,390]},
+        cut={'string':cutString,'func':cutFunc, 'dataCut':dataCut})
+    allStacks.append(ht_zoomed_stack)
 
     cosMetJet0phi_stack  = getStack(
         labels={'x':'Cos(#phi(#slash{E}_{T}, Jet[0]))','y':'Number of Events'},
@@ -368,26 +379,26 @@ for i in range(len(cuts)+1):
         cut={'string':cutString,'func':cutFunc, 'dataCut':dataCut})
     allStacks.append(jet4pt_stack)
 
-    nbtags_stack  = getStack(
-        labels={'x':'number of b-tags (CSVM)','y':'Number of Events'},
-        var={'name':'nBTags','TTreeFormula':"Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)", 'overFlow':'upper'},
-        binning={'binning':[8,0,8]},
-        cut={'string':cutString,'func':cutFunc, 'dataCut':dataCut})
-    allStacks.append(nbtags_stack)
-
-    njets_stack  = getStack(
-        labels={'x':'number of jets','y':'Number of Events'},
-        var={'name':'njets','TTreeFormula':'Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)', 'overFlow':'upper'},
-        binning={'binning':[14,0,14]},
-        cut={'string':cutString,'func':cutFunc, 'dataCut':dataCut})
-    allStacks.append(njets_stack)
-
-    nVert_stack  = getStack(
-        labels={'x':'vertex multiplicity','y':'Number of Events'},
-        var={'name':'nVert','leaf':"nVert", 'overFlow':'upper'},
-        binning={'binning':[50,0,50]},
-        cut={'string':cutString,'func':cutFunc, 'dataCut':dataCut})
-    allStacks.append(nVert_stack)
+#    nbtags_stack  = getStack(
+#        labels={'x':'number of b-tags (CSVM)','y':'Number of Events'},
+#        var={'name':'nBTags','TTreeFormula':"Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.890)", 'overFlow':'upper'},
+#        binning={'binning':[8,0,8]},
+#        cut={'string':cutString,'func':cutFunc, 'dataCut':dataCut})
+#    allStacks.append(nbtags_stack)
+#
+#    njets_stack  = getStack(
+#        labels={'x':'number of jets','y':'Number of Events'},
+#        var={'name':'njets','TTreeFormula':'Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)', 'overFlow':'upper'},
+#        binning={'binning':[14,0,14]},
+#        cut={'string':cutString,'func':cutFunc, 'dataCut':dataCut})
+#    allStacks.append(njets_stack)
+#
+#    nVert_stack  = getStack(
+#        labels={'x':'vertex multiplicity','y':'Number of Events'},
+#        var={'name':'nVert','leaf':"nVert", 'overFlow':'upper'},
+#        binning={'binning':[50,0,50]},
+#        cut={'string':cutString,'func':cutFunc, 'dataCut':dataCut})
+#    allStacks.append(nVert_stack)
 
     loopAndFill(allStacks)
 
