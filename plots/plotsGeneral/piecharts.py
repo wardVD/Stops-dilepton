@@ -14,21 +14,28 @@ from StopsDilepton.tools.mt2Calculator import mt2Calculator
 mt2Calc = mt2Calculator()
 
 
-#preselection: MET>40, njets>=2, n_bjets>=1, n_lep>=2
-#For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
-preselection = 'met_pt>40&&Sum$(LepGood_pt>20)==2'
-
 
 #######################################################
 #        SELECT WHAT YOU WANT TO DO HERE              #
 #######################################################
-reduceStat = 1 #recude the statistics, i.e. 10 is ten times less samples to look at
+reduceStat = 1000 #recude the statistics, i.e. 10 is ten times less samples to look at
+btagcoeff = 0.89
+metcut = '40'
+metsignifcut = 0.
+dphicut = 0.
+luminosity = 10000
+
+#preselection: MET>40, njets>=2, n_bjets>=1, n_lep>=2
+#For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
+preselection = 'met_pt>'+metcut+'&&Sum$(LepGood_pt>20)==2'
+
 
 #######################################################
 #                 load all the samples                #
 #######################################################
-from StopsDilepton.samples.cmgTuples_Spring15_50ns_postProcessed import *
-backgrounds = [singleTop_50ns,QCDMu_50ns,DY_50ns,TTJets_50ns]
+from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
+#backgrounds = [diBosons_50ns,WJetsToLNu_50ns,singleTop_50ns,QCDMu_50ns,DYHT_50ns,TTJets_50ns]
+backgrounds = [diBosons_25ns,WJetsToLNu_25ns,singleTop_25ns,QCDMu_25ns,DYHT_25ns,TTJets_25ns]
 #signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
 signals = []
 data=[]
@@ -90,8 +97,7 @@ for s in backgrounds+signals:
     #event weight (L= 4fb^-1)
     weight = reduceStat*getVarValue(chain, "weight")
 
-    if s not in data: weight = weight*(10000./4000.)
-    if s in data:     weight = weight*(10000./42.)
+    if s not in data: weight = weight*(luminosity/1000.)
 
     #MET
     met = getVarValue(chain, "met_pt")
@@ -145,8 +151,8 @@ for s in backgrounds+signals:
         mt2ll = mt2Calc.mt2ll()
         jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(chain))
         ht = sum([j['pt'] for j in jets])
-        bjetspt = filter(lambda j:j['btagCSV']>0.814, jets)
-        nobjets = filter(lambda j:j['btagCSV']<0.814, jets)
+        bjetspt = filter(lambda j:j['btagCSV']>btagcoeff, jets)
+        nobjets = filter(lambda j:j['btagCSV']<btagcoeff, jets)
         njets = len(jets)
         nbjets = len(bjetspt)
         nmuons = len(muons)
@@ -202,7 +208,7 @@ def makefigure(piechart,mt2llcut):
   fig1 = plt.figure(figsize=(10,10))
   gridx=len(piechart["SF"])+1
   gridy=4  #jet multiplicity, SF and OF and add one for legend
-  colors = ['yellowgreen', 'gold', 'lightskyblue', 'lightcoral','mediumblue','gold','red']
+  colors = ['yellowgreen', 'gold', 'lightskyblue', 'lightcoral','mediumblue','red']
   colors = colors[:len(piechart["SF"])]
   for ikey,key in enumerate(piechart.keys()):
     plt.subplot(gridx,gridy,ikey+2)
@@ -232,8 +238,11 @@ def makefigure(piechart,mt2llcut):
   gold_patch = mpatches.Patch(color="gold",label=bkgs[1])
   lightskyblue_patch = mpatches.Patch(color="lightskyblue",label=bkgs[2])
   lightcoral_patch = mpatches.Patch(color="lightcoral",label=bkgs[3])
-  
-  plt.legend([yellowgreen_patch,gold_patch,lightskyblue_patch,lightcoral_patch],bkgs)
+  mediumblue_patch = mpatches.Patch(color='mediumblue',label=bkgs[4])
+  red_patch = mpatches.Patch(color='red',label=bkgs[5])
+
+
+  plt.legend([yellowgreen,gold,lightskyblue,lightcoral,mediumblue,red],bkgs)
   plt.axis('off')
   plt.savefig('./piecharts/piecharts_mt2llcut_'+str(mt2llcut)+'.png')
   
