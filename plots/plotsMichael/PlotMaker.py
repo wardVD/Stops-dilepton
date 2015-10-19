@@ -23,7 +23,7 @@ for process in range(len(dataset_name)):
 	#lumi = 0.2042
 	lumi = 10.  
 
-	f = ROOT.TFile.Open("ntuples/"+dataset_name[process]+".root")
+	f = ROOT.TFile.Open("~/public/4Nicolas/v4/"+dataset_name[process]+".root")
 	plot = TH1D("plot", "plot", 50, 0, 10000) 
 
 	for event in f.anaTree :
@@ -67,12 +67,14 @@ plot.SetMinimum(10**-1.5)
 plot.Draw()
 plot.GetXaxis().SetTitle("Title")
 plot.GetYaxis().SetTitle("Events")
+plot.GetYaxis().SetTitleOffset(1.4)
+plot.GetXaxis().SetNdivisions(8)
 c1.SetLogy()
 pad1.RedrawAxis()
 c1.cd()
 l1 = ROOT.TLatex()
 l1.SetTextAlign(12)
-l1.SetTextSize(0.043)
+l1.SetTextSize(0.042)
 l1.SetNDC()
 l1.DrawLatex(0.18, 0.98, "CMS preliminary, L = 0.2 fb^{-1}")
 l1.DrawLatex(0.7, 0.98, "#sqrt{s} = 13 TeV")
