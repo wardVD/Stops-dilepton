@@ -24,12 +24,12 @@ cuts=[
  ("mll20", "dl_mass>20"), 
  ("met80", "met_pt>80"), 
  ("metSig5", "met_pt/sqrt(Sum$(Jet_pt*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)))>5"), 
- ("dPhiJet0-dPhiJet1", "abs(cos(met_phi-Jet_phi[0]))<cos(0.25)&&abs(cos(met_phi-Jet_phi[1]))<cos(0.25)"), 
+# ("dPhiJet0-dPhiJet1", "abs(cos(met_phi-Jet_phi[0]))<cos(0.25)&&abs(cos(met_phi-Jet_phi[1]))<cos(0.25)"), 
  ("isOS","isOS==1"),
  ("SFOF","( (isMuMu==1||isEE==1)&&abs(dl_mass-90.2)>=15 || isEMu==1 )"), 
   ]
 preselection = "&&".join(c[1] for c in cuts)
-prefix = "3D_step50"
+prefix = "3D_step50_noDPhiJetMET"
 ##Set preselection cut
 #print "Setting event list for samples... "
 #for i, c in enumerate([c_bkg] + [s['chain'] for s in signals]):
@@ -49,6 +49,7 @@ variables = [
 {'name':'dl_mt2blbl', 'thresholds':[0, 50, 100, 150, 200, 250, 300]},
 ]
 
+prefix+="_"+"_".join(v['name'] for v in variables)
 
 #Helper: returns cut string for given variable and bin
 def cutString(varName, bin):
@@ -80,7 +81,7 @@ def findBinning(variables=variables, selection=('(1)', []), prefix=""):
 
     thisSelection=(selection[0]+"&&"+cut_str,selection[1]+[{'name':var['name'], 'cut': (t, upperCut)}])
     #Is the region large enough?
-    print " "*len(prefix)+"Cut:", cut
+#    print " "*len(prefix)+"Cut:", cut
     print " "*len(prefix)+"Found bkg",bkgYield, "sig.:", signalYields.values()
     if regionCondition(bkgYield, signalYields):
       #Yes -> split it with the next variable
@@ -99,6 +100,13 @@ def findBinning(variables=variables, selection=('(1)', []), prefix=""):
     regions.append({'cuts':thisSelection[1], 'sigYields':signalYields,'bkgYield':bkgYield})
 
 findBinning()
+#Adding default cuts which need not be found by the loop:
+for r in regions:
+  for v in variables:
+    if v['name'] not in [c['name'] for c in r['cuts']]:
+      r['cuts'].append({'name':v['name'],'cut':(v['thresholds'][0],-1)})
 
 import pickle
+fname = '/afs/hephy.at/data/rschoefbeck01/StopsDilepton/regions/'+prefix+'.pkl'
 pickle.dump(regions, file('/afs/hephy.at/data/rschoefbeck01/StopsDilepton/regions/'+prefix+'.pkl','w'))
+print "Written file %s"%fname
