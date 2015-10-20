@@ -8,23 +8,25 @@ import numpy as n
 from math import *
 import string
 
-from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue, genmatching, latexmaker_1, piemaker, getWeight, deltaPhi
+#from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue, genmatching, latexmaker_1, piemaker, getWeight, deltaPhi
 
 
 
-#dataset_name 		= ["T2ttS425N325", "T2ttS650N325", "TTJets", "WJets", "QCDMu", "DrellYan", "QCDMu", "singleTop", "DoubleElec", "DoubleMuon", "MuonElec"] 
-dataset_name 		= ["TTJets2L2Nu"] 
+
+backgrounds = ["TTJets2L2Nu", "WJets", "QCDMu", "DrellYanInclusive", "QCDMu", "singleTop", "DoubleElec", "DoubleMuon", "MuonElec"]
+signals = ["T2ttS650N325"] 
+data = ["DoubleElec", "DoubleMuon", "MuonElec"] 
 
 
 
-for process in range(len(dataset_name)):
-	print dataset_name[process]
+for process in range(len(backgrounds)):
+	print backgrounds[process]
 
 	#lumi = 0.2042
 	lumi = 10.  
 
-	f = ROOT.TFile.Open("~/public/4Nicolas/v4/"+dataset_name[process]+".root")
-	plot = TH1D("plot", "plot", 50, 0, 10000) 
+	f = ROOT.TFile.Open("~/public/4Nicolas/v4/"+backgrounds[process]+".root")
+	histo+backgrounds[process] = TH1D(backgrounds[process], backgrounds[process], 50, 0, 10000) 
 
 	for event in f.anaTree :
 
@@ -51,10 +53,17 @@ for process in range(len(dataset_name)):
 
 
 #	print event.xsecWeight*lumi
-	print plot.GetEntries()
+#	print plot.GetEntries()
 #	print plot.Integral()
 
 
+bkg_stack = ROOT.THStack("bkgs","bkgs")
+
+THStack *stack= new THStack("stack", "");
+bkg_stack.Add(Others);
+bkg_stack.Add(WJets);
+bkg_stack.Add(TTBar2l);
+bkg_stack.Add(TTBar1l);
 
 c1 = ROOT.TCanvas("c1","example",650,700)
 pad1 = ROOT.TPad("pad1","pad1",0,0.29,1,0.97)
