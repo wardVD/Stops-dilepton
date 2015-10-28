@@ -9,5 +9,5 @@ if os.environ['USER'] in ['schoef', 'rschoefbeck', 'schoefbeck']:
   plotDir = "/afs/hephy.at/user/r/rschoefbeck/www/"
   dataDir = "/data/rschoefbeck/cmgTuples/postProcessed_Spring15_pass2/dilep/" 
 if os.environ['USER'] in ['sigamani']:
-  plotDir = "/afs/cern.ch/user/s/sigamani/www/php-plots/2LeptonStops13TeV"
+  plotDir = "/afs/cern.ch/user/s/sigamani/www/php-plots/2LeptonStops13TeV/"
   dataDir = "/afs/cern.ch/work/w/wvandrie/public/STOPS/ANALYSIS/CMSSW_7_4_7_patch1/src/StopsDilepton/samplesCopyWard_Spring15_new/"

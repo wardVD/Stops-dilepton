@@ -18,10 +18,3 @@ To run:
 cd StopsDilepton/plots/plotsWard/
 
 python plot.py
-
-** To compile TMVA **
-cd TMVA/test; source setup.[c]sh; 
-cd ..
-make
-******************** 
-
