@@ -5,7 +5,7 @@ import numpy
 
 from math import *
 from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue, genmatching, latexmaker_1, piemaker, getWeight, deltaPhi
-from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets, getGenParts
+from StopsDilepton.tools.objectSelection import getLeptons, looseMuID, looseEleID, getJets, getGenParts, getGoodLeptons, getGoodElectrons, getGoodMuons
 from StopsDilepton.tools.localInfo import *
 from StopsDilepton.tools.mt2Calculator import mt2Calculator
 mt2Calc = mt2Calculator()
@@ -14,29 +14,29 @@ mt2Calc = mt2Calculator()
 #######################################################
 #        SELECT WHAT YOU WANT TO DO HERE              #
 #######################################################
-reduceStat = 100 #recude the statistics, i.e. 10 is ten times less samples to look at
+reduceStat = 1 #recude the statistics, i.e. 10 is ten times less samples to look at
 makedraw1D = True
 makedraw2D = False
 makelatextables = False #Ignore this if you're not Ward
-metcut = '40'     #USED IN LINE 28
-metsignifcut = 7.    #USED IN LINE 401
-luminosity = 10000.    #USED IN LINES 345-346
+metcut = '40'     
+metsignifcut = 0.
+luminosity = 10000.
 mt2llcut = 0.
 btagcoeff = 0.89
 
 #preselection: MET>40, njets>=2, n_bjets>=1, n_lep>=2
 #See here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
 #preselection = 'met_pt>'+metcut+'&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>0.89)>=1&&Sum$(LepGood_pt>20)==2'
-preselection = 'met_pt>'+metcut+'&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=1&&Sum$(LepGood_pt>20)==2'
+preselection = 'met_pt>'+metcut+'&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=1&&Sum$(LepGood_pt>20)>=2&&met_pt/sqrt(Sum$(Jet_pt*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)))>'+str(metsignifcut)
 
 #######################################################
 #                 load all the samples                #
 #######################################################
 from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
-backgrounds = [diBosons_25ns,WJetsToLNu_25ns,singleTop_25ns,QCDMu_25ns,DYHT_25ns,TTJets_25ns]
-#backgrounds = [TTJets_25ns]
+backgrounds = [WJetsToLNu_25ns,diBosons_25ns,TTX_25ns,singleTop_25ns,QCDMu_25ns,DY_25ns,TTLep_25ns]
+#backgrounds = [diBosons_25ns]
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
-#signals = []
+#signals = [SMS_T2tt_2J_mStop425_mLSP325]
 #data = [DoubleEG_25ns,DoubleMuon_25ns,MuonEG_25ns]
 data = []
 
@@ -50,6 +50,8 @@ for s in backgrounds+signals+data:
 #           define binning of 1D histograms           #
 #######################################################
 mt2llbinning = [25,0,300]
+mt2bbbinning = [25,70,370]
+mt2blblbinning = [25,0,300]
 metbinning = [20,0,800]
 kinMetSigbinning = [25,0,25]
 njetsbinning = [15,0,15]
@@ -62,6 +64,8 @@ dphibinning = [20,0,pi]
 plots = {\
   'mumu':{\
   'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': mt2llbinning, 'histo':{}},
+  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'MT2bb', 'binning': mt2bbbinning, 'histo':{}},
+  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'MT2blbl', 'binning': mt2blblbinning, 'histo':{}},
   'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': metbinning, 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': kinMetSigbinning, 'histo':{}},
   'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
@@ -70,6 +74,8 @@ plots = {\
   },
   'ee':{\
   'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': mt2llbinning, 'histo':{}},
+  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'MT2bb', 'binning': mt2bbbinning, 'histo':{}},
+  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'MT2blbl', 'binning': mt2blblbinning, 'histo':{}},
   'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': metbinning, 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': kinMetSigbinning, 'histo':{}},
   'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
@@ -78,6 +84,8 @@ plots = {\
   },
   'emu':{\
   'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': mt2llbinning, 'histo':{}},
+  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'MT2bb', 'binning': mt2bbbinning, 'histo':{}},
+  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'MT2blbl', 'binning': mt2blblbinning, 'histo':{}},
   'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': metbinning, 'histo':{}},
   'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': kinMetSigbinning, 'histo':{}},
   'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
@@ -91,6 +99,14 @@ plots = {\
 #######################################################
 plotsSF = {\
   'SF':{\
+  'mt2ll': {'title':'M_{T2ll} (GeV)', 'name':'MT2ll', 'binning': mt2llbinning, 'histo':{}},
+  'mt2bb':{'title':'M_{T2bb} (GeV)', 'name':'MT2bb', 'binning': mt2bbbinning, 'histo':{}},
+  'mt2blbl':{'title':'M_{T2blbl} (GeV)', 'name':'MT2blbl', 'binning': mt2blblbinning, 'histo':{}},
+  'met': {'title':'E^{miss}_{T} (GeV)', 'name':'MET', 'binning': metbinning, 'histo':{}},
+  'kinMetSig':{'title':'MET/#sqrt{H_{T}} (GeV^{1/2})', 'name':'kinMetSig', 'binning': kinMetSigbinning, 'histo':{}},
+  'njets': {'title': 'njets', 'name':'njets', 'binning': njetsbinning, 'histo':{}},
+  'nbjets': {'title': 'nbjets', 'name':'nbjets', 'binning': nbjetsbinning, 'histo':{}},
+  'dPhi': {'title': 'dPhi(MET,jet1|jet2)', 'name': 'dphi', 'binning': dphibinning, 'histo':{}},
   },
 }
 
@@ -102,7 +118,7 @@ for s in backgrounds+signals+data:
   #construct 1D histograms
   for pk in plots.keys():
     for plot in plots[pk].keys():
-      plots[pk][plot]['histo'][s["name"]] = ROOT.TH1F(plots[pk][plot]['name']+"_"+s["name"]+"_"+pk, plots[pk][plot]['name']+"_"+s["name"]+"_"+pk, *plots[pk][plot]['binning'])
+      plots[pk][plot]['histo'][s["name"]] = ROOT.TH1D(plots[pk][plot]['name']+"_"+s["name"]+"_"+pk, plots[pk][plot]['name']+"_"+s["name"]+"_"+pk, *plots[pk][plot]['binning'])
       plots[pk][plot]['histo'][s["name"]].Sumw2()
 
   chain = s["chain"]
@@ -136,6 +152,12 @@ for s in backgrounds+signals+data:
   chain.SetBranchStatus("Jet_btagCSV",1)
   chain.SetBranchStatus("Jet_id",1)
   chain.SetBranchStatus("weight",1)
+  chain.SetBranchStatus("l1_pt",1)
+  chain.SetBranchStatus("l2_pt",1)
+  chain.SetBranchStatus("dl_mass",1)
+  chain.SetBranchStatus("dl_mt2ll",1)
+  chain.SetBranchStatus("dl_mt2bb",1)
+  chain.SetBranchStatus("dl_mt2blbl",1)
   if s not in data: 
     chain.SetBranchStatus("genWeight",1)
     chain.SetBranchStatus("Jet_mcMatchFlav",1)
@@ -148,9 +170,6 @@ for s in backgrounds+signals+data:
   eList = getEList(chain, preselection) 
   nEvents = eList.GetN()/reduceStat
   print "Found %i events in %s after preselection %s, looping over %i" % (eList.GetN(),s["name"],preselection,nEvents)
-
-
-  jetlencounter = 0
 
 
  
@@ -174,11 +193,16 @@ for s in backgrounds+signals+data:
     #jetpt
     leadingjetpt = getVarValue(chain, "Jet_pt",0)
     subleadingjetpt = getVarValue(chain, "Jet_pt",1)
+    #leptons
+    l0pt = getVarValue(chain, "l1_pt")
+    l1pt = getVarValue(chain, "l2_pt")
+    mll = getVarValue(chain,"dl_mass")
+          
     #Leptons 
-    allLeptons = getLeptons(chain) 
-    muons = filter(looseMuID, allLeptons)    
-    electrons = filter(looseEleID, allLeptons)
-
+    allLeptons = getGoodLeptons(chain)
+    muons = getGoodMuons(chain)
+    electrons = getGoodElectrons(chain)
+    
     #SF and OF channels
     leptons = {\
       'mu':   {'name': 'mumu', 'file': muons},
@@ -190,28 +214,13 @@ for s in backgrounds+signals+data:
       twoleptons = False
       #Same Flavor
       if lep != 'emu':
-        if len(leptons[lep]['file'])==2 and leptons[lep]['file'][0]['pdgId']*leptons[lep]['file'][1]['pdgId']<0:
-          #genmatching(leptons[lep]['file'][0],genparticles)
+        if len(leptons[lep]['file'])==2 and (len(muons)+len(electrons))==2 and leptons[lep]['file'][0]['pdgId']*leptons[lep]['file'][1]['pdgId']<0:
           twoleptons = True
-          l0pt, l0eta, l0phi = leptons[lep]['file'][0]['pt'],  leptons[lep]['file'][0]['eta'],  leptons[lep]['file'][0]['phi']
-          l1pt, l1eta, l1phi = leptons[lep]['file'][1]['pt'],  leptons[lep]['file'][1]['eta'],  leptons[lep]['file'][1]['phi']
-          leadingleptonpt = l0pt
-          subleadingleptonpt = l1pt
-          mll = sqrt(2.*l0pt*l1pt*(cosh(l0eta-l1eta)-cos(l0phi-l1phi)))
           zveto = True
       #Opposite Flavor
       if lep == 'emu':
         if len(leptons[lep]['file'][0])==1 and len(leptons[lep]['file'][1])==1 and leptons[lep]['file'][0][0]['pdgId']*leptons[lep]['file'][1][0]['pdgId']<0:
           twoleptons = True
-          l0pt, l0eta, l0phi = leptons[lep]['file'][0][0]['pt'],  leptons[lep]['file'][0][0]['eta'],  leptons[lep]['file'][0][0]['phi']
-          l1pt, l1eta, l1phi = leptons[lep]['file'][1][0]['pt'],  leptons[lep]['file'][1][0]['eta'],  leptons[lep]['file'][1][0]['phi']
-          if l1pt > l0pt :
-            leadingleptonpt = l1pt
-            subleadingleptonpt = l0pt
-          else:
-            leadingleptonpt = l0pt
-            subleadingleptonpt = l1pt
-          mll = sqrt(2.*l0pt*l1pt*(cosh(l0eta-l1eta)-cos(l0phi-l1phi)))
           zveto = False
       if (twoleptons and mll>20 and not zveto) or (twoleptons and mll > 20 and zveto and abs(mll-90.2)>15):
         jets = filter(lambda j:j['pt']>30 and abs(j['eta'])<2.4 and j['id'], getJets(chain))
@@ -224,34 +233,32 @@ for s in backgrounds+signals+data:
         if PhiMetJet1 <= PhiMetJet2: PhiMetJet_small = PhiMetJet1
         else:                        PhiMetJet_small = PhiMetJet2
 
-        mt2Calc.setMet(met,metPhi)
-        mt2Calc.setLeptons(l0pt, l0eta, l0phi, l1pt, l1eta, l1phi)
+        mt2ll = getVarValue(chain,"dl_mt2ll")
+
+        if mt2ll>mt2llbinning[-1]:  mt2ll = mt2llbinning[-1]-1 #overflow bin
           
-        mt2ll = mt2Calc.mt2ll()
-
-        print PhiMetJet_small, PhiMetJet1, PhiMetJet2
-
         Jet_phi_0 = getVarValue(chain, "Jet_phi",0)
         Jet_phi_1 = getVarValue(chain, "Jet_phi",1)
-
-        if PhiMetJet_small >= 0.25:
           
-          if not (abs(cos(metPhi-Jet_phi_0))<cos(0.25) and abs(cos(metPhi-Jet_phi_1))<cos(0.25)):
-            print "met, jet1, jet2: ", metPhi, Jet_phi_0, Jet_phi_1
-
         if mt2ll >= mt2llcut:
+          mt2bb = getVarValue(chain, "dl_mt2bb")
+          mt2blbl = getVarValue(chain, "dl_mt2blbl")
           
-          if met>40:
-
-            plots[leptons[lep]['name']]['njets']['histo'][s["name"]].Fill(len(jets),weight)
-            plots[leptons[lep]['name']]['nbjets']['histo'][s["name"]].Fill(len(bjetspt),weight)
-            if len(jets)>=2 and len(bjetspt)>=1:
-              if ev<100: print ev, mt2ll, weight
-              plots[leptons[lep]['name']]['mt2ll']['histo'][s["name"]].Fill(mt2ll,weight)
-              plots[leptons[lep]['name']]['kinMetSig']['histo'][s["name"]].Fill(met/sqrt(ht), weight)
-              plots[leptons[lep]['name']]['met']['histo'][s["name"]].Fill(met, weight)
-              plots[leptons[lep]['name']]['dPhi']['histo'][s["name"]].Fill(PhiMetJet_small, weight)
-            
+          if mt2bb>mt2bbbinning[-1]:  mt2bb = mt2bbbinning[-1] - 1 #overflow bin
+          if mt2bb<mt2bbbinning[-2]:  mt2bb = mt2bbbinning[-2] + 1 #underflow bin
+          if mt2blbl>mt2blblbinning[-1]:  mt2blbl = mt2blblbinning[-1] - 1 #overflow bin
+          if mt2blbl<mt2blblbinning[-2]:  mt2blbl = mt2blblbinning[-2] + 1 #underflow bin
+          
+          plots[leptons[lep]['name']]['njets']['histo'][s["name"]].Fill(len(jets),weight)
+          plots[leptons[lep]['name']]['nbjets']['histo'][s["name"]].Fill(len(bjetspt),weight)
+          if len(jets)>=2 and len(bjetspt)>=1:
+            plots[leptons[lep]['name']]['mt2ll']['histo'][s["name"]].Fill(mt2ll,weight)
+            plots[leptons[lep]['name']]['mt2bb']['histo'][s["name"]].Fill(mt2bb,weight)
+            plots[leptons[lep]['name']]['mt2blbl']['histo'][s["name"]].Fill(mt2blbl,weight)
+            plots[leptons[lep]['name']]['kinMetSig']['histo'][s["name"]].Fill(met/sqrt(ht), weight)
+            plots[leptons[lep]['name']]['met']['histo'][s["name"]].Fill(met, weight)
+            plots[leptons[lep]['name']]['dPhi']['histo'][s["name"]].Fill(PhiMetJet_small, weight)
+  
   #Add overflow bin to last bin
   for pk in plots.keys():
     for plot in plots[pk].keys():
@@ -264,24 +271,22 @@ for s in backgrounds+signals+data:
   del eList
 
 
-#print plots['emu']['mt2ll']['histo'][TTJets_50ns['name']].Integral()
-#print plots['mumu']['mt2ll']['histo'][TTJets_50ns['name']].Integral()
-
-
 #######################################################
 #             Drawing done here                       #
 #######################################################
 #Some coloring
 
-TTJets_25ns["color"]=7
-DYHT_25ns["color"]=8
+TTLep_25ns["color"]=7
+DY_25ns["color"]=8
 QCDMu_25ns["color"]=46
 singleTop_25ns["color"]=40
 diBosons_25ns["color"]=ROOT.kOrange
 WJetsToLNu_25ns['color']=ROOT.kRed-10
+TTX_25ns['color']=ROOT.kPink
+
 #Plotvariables
 signal = {'path': ["SMS_T2tt_2J_mStop425_mLSP325","SMS_T2tt_2J_mStop500_mLSP325","SMS_T2tt_2J_mStop650_mLSP325","SMS_T2tt_2J_mStop850_mLSP100"], 'name': ["T2tt(425,325)","T2tt(500,325)","T2tt(650,325)","T2tt(850,100)"]}
-yminimum = luminosity/1000
+yminimum = luminosity/100000
 ymaximum = 100
 legendtextsize = 0.028
 signalscaling = 100
@@ -379,7 +384,7 @@ if makedraw1D:
       #ratio.GetXaxis().SetLabelSize(0.18)
       #ratio.Draw("pe")
       #c1.cd()
-      c1.Print(plotDir+"/test/nminone/"+plots[pk][plot]['name']+"_"+pk+"_mt2llcut_"+str(mt2llcut)+".png")
+      c1.Print(plotDir+"/test/nminone/"+plots[pk][plot]['name']+"_"+pk+"_mt2llcut_"+str(int(mt2llcut))+".png")
     
   for plot in plotsSF['SF'].keys():
     bkg_stack_SF = ROOT.THStack("bkgs_SF","bkgs_SF")
@@ -431,7 +436,7 @@ if makedraw1D:
     signalPlot_3.SetLineColor(ROOT.kMagenta)
     signalPlot_1.SetLineWidth(3)
     signalPlot_2.SetLineWidth(3)
-    signalPlot_3.SetLineWidht(3)
+    signalPlot_3.SetLineWidth(3)
     signalPlot_1.Draw("HISTsame")
     signalPlot_2.Draw("HISTsame")
     signalPlot_3.Draw("HISTsame")
@@ -471,4 +476,4 @@ if makedraw1D:
     # ratio.GetXaxis().SetLabelSize(0.18)
     # ratio.Draw("pe")
     # c1.cd()
-    c1.Print(plotDir+"/test/nminone/"+plotsSF['SF'][plot]['name']+"_SF_mt2llcut_"+str(mt2llcut)+".png")
+    c1.Print(plotDir+"/test/nminone/"+plotsSF['SF'][plot]['name']+"_SF_mt2llcut_"+str(int(mt2llcut))+".png")

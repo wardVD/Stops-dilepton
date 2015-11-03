@@ -1,7 +1,7 @@
 import ROOT
 ROOT.gROOT.LoadMacro("$CMSSW_BASE/src/StopsDilepton/tools/scripts/tdrstyle.C")
 ROOT.setTDRStyle()
-import numpy
+import numpy, os, glob
 
 from math import *
 from StopsDilepton.tools.helpers import getChain, getObjDict, getEList, getVarValue, genmatching, latexmaker_1, piemaker, getWeight, deltaPhi
@@ -20,8 +20,8 @@ makedraw2D = False
 makelatextables = False #Ignore this if you're not Ward
 mt2llcuts = {'0':0.,'80':80., '100':100., '110':110., '120':120., '130':130., '140':140., '150':150.} #make plots named mt2llwithcutat..... I.E. lines 134-136
 btagcoeff = 0.89
-metcut = '80'
-metsignifcut = 5.
+metcut = '140'
+metsignifcut = 8.
 dphicut = 0.25
 luminosity = 10000
 
@@ -34,12 +34,12 @@ preselection = 'met_pt>'+metcut+'&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet
 #######################################################
 #from StopsDilepton.samples.cmgTuplesPostProcessed_PHYS14 import *
 from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
-backgrounds = [diBosons_25ns,WJetsToLNu_25ns,singleTop_25ns,QCDMu_25ns,Rare_25ns,DY_25ns,TTLep_25ns]
-backgrounds = [TTLep_25ns]
+backgrounds = [diBosons_25ns,WJetsToLNu_25ns,TTX_25ns,singleTop_25ns,QCDMu_25ns,DY_25ns,DYHT_25ns,TTLep_25ns]
+backgrounds = []
 signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
-signals = []
+#signals = []
 data = [DoubleEG_25ns,DoubleMuon_25ns,MuonEG_25ns]
-data = []
+#data = []
 
 #######################################################
 #            get the TChains for each sample          #
@@ -284,6 +284,15 @@ threedimensionalSF={\
   },
 }
 
+######################################################
+#	   Remove old trees_met histograms           #
+######################################################
+treefiles = glob.glob('./trees_metcut'+metcut+'/*')
+for f in treefiles:
+  os.remove(f)
+
+
+
 #######################################################
 #            Start filling in the histograms          #
 #######################################################
@@ -348,7 +357,11 @@ for s in backgrounds+signals+data:
   #Using Event loop
   #get EList after preselection
   print '\n', "Looping over %s" % s["name"]
-  eList = getEList(chain, preselection) 
+
+
+  if s == DY_25ns: eList = getEList(chain, preselection+"&&Sum$(Jet_pt)<150")
+  else: eList = getEList(chain, preselection)
+
   nEvents = eList.GetN()/reduceStat
   print "Found %i events in %s after preselection %s, looping over %i" % (eList.GetN(),s["name"],preselection,nEvents)
  
@@ -426,7 +439,10 @@ for s in backgrounds+signals+data:
     
           mt2ll = getVarValue(chain,"dl_mt2ll")
 
-          if mt2ll>mt2llbinning[-1]:  mt2ll = mt2llbinning[-1]-1 #overflow bin
+          if mt2ll>mt2llbinning[-1]:  
+            print mt2ll
+            mt2ll = mt2llbinning[-1]-1 #overflow bin
+                    
           if mt2ll<mt2llbinning[-2]:  mt2ll = mt2llbinning[-2]+1 #underflow bin
 
           plots[leptons[lep]['name']]['mt2ll']['histo'][s["name"]].Fill(mt2ll, weight)
@@ -466,8 +482,8 @@ for s in backgrounds+signals+data:
           plots[leptons[lep]['name']]['nbjets']['histo'][s["name"]].Fill(len(bjetspt),weight)
           plots[leptons[lep]['name']]['ht']['histo'][s["name"]].Fill(ht,weight)
 
-          mt2bb = getVarValue(chain, "dl_mt2bb",0)
-          mt2blbl = getVarValue(chain, "dl_mt2blbl",0)
+          mt2bb = getVarValue(chain, "dl_mt2bb")
+          mt2blbl = getVarValue(chain, "dl_mt2blbl")
 
           if mt2bb>mt2bbbinning[-1]:  mt2bb = mt2bbbinning[-1] - 1 #overflow bin
           if mt2bb<mt2bbbinning[-2]:  mt2bb = mt2bbbinning[-2] + 1 #underflow bin
@@ -496,26 +512,26 @@ for s in backgrounds+signals+data:
    # ##########################################
    #     bins with negative events to 0       #
    # ##########################################
-   #   for i in range(nXbins):
-   #     if plots[pk][plot]['histo'][s['name']].GetBinContent(i+1) < 0: plots[pk][plot]['histo'][s['name']].SetBinContent(i+1,0.)
+     for i in range(nXbins):
+       if plots[pk][plot]['histo'][s['name']].GetBinContent(i+1) < 0: plots[pk][plot]['histo'][s['name']].SetBinContent(i+1,0.)
    
-   # for plot in dimensional[pk].keys():
-   #   nXbins = dimensional[pk][plot]['histo'][s['name']].GetNbinsX()
-   #   nYbins = dimensional[pk][plot]['histo'][s['name']].GetNbinsY()
-   #   for i in range(nXbins):
-   #     for j in range(nYbins):
-   #       bin = dimensional[pk][plot]['histo'][s['name']].GetBin(i+1,j+1)
-   #       if dimensional[pk][plot]['histo'][s['name']].GetBinContent(bin) < 0: dimensional[pk][plot]['histo'][s['name']].SetBinContent(bin,0.)
+   for plot in dimensional[pk].keys():
+     nXbins = dimensional[pk][plot]['histo'][s['name']].GetNbinsX()
+     nYbins = dimensional[pk][plot]['histo'][s['name']].GetNbinsY()
+     for i in range(nXbins):
+       for j in range(nYbins):
+         bin = dimensional[pk][plot]['histo'][s['name']].GetBin(i+1,j+1)
+         if dimensional[pk][plot]['histo'][s['name']].GetBinContent(bin) < 0: dimensional[pk][plot]['histo'][s['name']].SetBinContent(bin,0.)
 
-   # for plot in threedimensional[pk].keys():
-   #   nXbins = threedimensional[pk][plot]['histo'][s['name']].GetNbinsX()
-   #   nYbins = threedimensional[pk][plot]['histo'][s['name']].GetNbinsY()
-   #   nZbins = threedimensional[pk][plot]['histo'][s['name']].GetNbinsZ()
-   #   for i in range(nXbins):
-   #     for j in range(nYbins):
-   #       for k in range(nZbins):
-   #         bin = threedimensional[pk][plot]['histo'][s['name']].GetBin(i+1,j+1,k+1)
-   #         if threedimensional[pk][plot]['histo'][s['name']].GetBinContent(bin) < 0: threedimensional[pk][plot]['histo'][s['name']].SetBinContent(bin,0.)
+   for plot in threedimensional[pk].keys():
+     nXbins = threedimensional[pk][plot]['histo'][s['name']].GetNbinsX()
+     nYbins = threedimensional[pk][plot]['histo'][s['name']].GetNbinsY()
+     nZbins = threedimensional[pk][plot]['histo'][s['name']].GetNbinsZ()
+     for i in range(nXbins):
+       for j in range(nYbins):
+         for k in range(nZbins):
+           bin = threedimensional[pk][plot]['histo'][s['name']].GetBin(i+1,j+1,k+1)
+           if threedimensional[pk][plot]['histo'][s['name']].GetBinContent(bin) < 0: threedimensional[pk][plot]['histo'][s['name']].SetBinContent(bin,0.)
 
   #############################################
   #            Write out trees                #
@@ -549,9 +565,9 @@ for s in backgrounds+signals+data:
 
 
 
-#print plots['emu']['mt2ll']['histo'][TTLep_25ns['name']].Integral()
-#print plots['emu']['met']['histo'][TTLep_25ns['name']].Integral()
-#print plots['mumu']['mt2ll']['histo'][TTJets_50ns['name']].Integral()
+#print plots['emu']['mt2ll']['histo'][DY_25ns['name']].Integral()
+#print plots['ee']['mt2ll']['histo'][DY_25ns['name']].Integral()
+#print plots['mumu']['mt2ll']['histo'][DY_25ns['name']].Integral()
 
 #######################################################
 #           provide tables from histograms            #
@@ -569,14 +585,15 @@ if makelatextables:
 
 TTLep_25ns["color"]=7
 DY_25ns["color"]=8
+DYHT_25ns["color"]=9
 QCDMu_25ns["color"]=46
 singleTop_25ns["color"]=40
 diBosons_25ns["color"]=ROOT.kOrange
-Rare_25ns['color']=ROOT.kPink
+TTX_25ns['color']=ROOT.kPink
 WJetsToLNu_25ns['color']=ROOT.kRed-10
 #Plotvariables
 signal = {'path': ["SMS_T2tt_2J_mStop425_mLSP325","SMS_T2tt_2J_mStop500_mLSP325","SMS_T2tt_2J_mStop650_mLSP325","SMS_T2tt_2J_mStop850_mLSP100"], 'name': ["T2tt(425,325)","T2tt(500,325)","T2tt(650,325)","T2tt(850,100)"]}
-yminimum = luminosity/1000
+yminimum = 0.1
 ymaximum = 100
 legendtextsize = 0.028
 signalscaling = 100
@@ -629,10 +646,10 @@ if makedraw1D:
       signalPlot_2.SetLineWidth(3)
       signalPlot_1.Draw("HISTsame")
       signalPlot_2.Draw("HISTsame")
-      if len(data)!= 0:datahist.Draw("peSAME")
+      #if len(data)!= 0:datahist.Draw("peSAME")
       l.AddEntry(signalPlot_1, signal['name'][0]+" x " + str(signalscaling), "l")
       l.AddEntry(signalPlot_2, signal['name'][2]+" x " + str(signalscaling), "l")
-      if len(data)!= 0: l.AddEntry(datahist, "data", "pe")
+      #if len(data)!= 0: l.AddEntry(datahist, "data", "pe")
       l.Draw()
       channeltag = ROOT.TPaveText(0.4,0.75,0.59,0.85,"NDC")
       firstlep, secondlep = pk[:len(pk)/2], pk[len(pk)/2:]
@@ -718,10 +735,10 @@ if makedraw1D:
     signalPlot_2.SetLineWidth(3)
     signalPlot_1.Draw("HISTsame")
     signalPlot_2.Draw("HISTsame")
-    if len(data)!= 0: datahist.Draw("peSAME")
+    #if len(data)!= 0: datahist.Draw("peSAME")
     l.AddEntry(signalPlot_1, signal['name'][0]+" x " + str(signalscaling), "l")
     l.AddEntry(signalPlot_2, signal['name'][2]+" x " + str(signalscaling), "l")
-    if len(data)!= 0: l.AddEntry(datahist, "data", "pe")
+    #if len(data)!= 0: l.AddEntry(datahist, "data", "pe")
     l.Draw()
     channeltag = ROOT.TPaveText(0.4,0.75,0.59,0.85,"NDC")
     channeltag.AddText("SF")

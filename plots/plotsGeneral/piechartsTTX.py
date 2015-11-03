@@ -28,24 +28,19 @@ luminosity = 10000
 #preselection: MET>40, njets>=2, n_bjets>=1, n_lep>=2
 #For now see here for the Sum$ syntax: https://root.cern.ch/root/html/TTree.html#TTree:Draw@2
 #preselection = 'met_pt>'+metcut+'&&Sum$(LepGood_pt>20)>=2&&met_pt/sqrt(Sum$(Jet_pt*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)))>'+str(metsignifcut)
-preselection = 'met_pt>'+metcut+'&&Sum$(LepGood_pt>20)>=2'
+preselection = 'met_pt>'+metcut+'&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id&&Jet_btagCSV>'+str(btagcoeff)+')>=1&&Sum$(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)>=2&&Sum$(LepGood_pt>20)>=2&&met_pt/sqrt(Sum$(Jet_pt*(Jet_pt>30&&abs(Jet_eta)<2.4&&Jet_id)))>'+str(metsignifcut)
 
 
 #######################################################
 #                 load all the samples                #
 #######################################################
 from StopsDilepton.samples.cmgTuples_Spring15_25ns_postProcessed import *
-#backgrounds = [diBosons_50ns,WJetsToLNu_50ns,singleTop_50ns,QCDMu_50ns,DYHT_50ns,TTJets_50ns]
-#backgrounds = [diBosons_25ns,WJetsToLNu_25ns,TTX_25ns,singleTop_25ns,QCDMu_25ns,DY_25ns,DYHT_25ns,TTLep_25ns]
-backgrounds = [diBosons_25ns,WJetsToLNu_25ns,TTX_25ns,singleTop_25ns,QCDMu_25ns,DY_25ns,TTLep_25ns]
-#signals = [SMS_T2tt_2J_mStop425_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop850_mLSP100]
-signals = []
-data=[]
+backgrounds = [TTW_25ns,TTZ_All_25ns,TTH_25ns]
 
 #######################################################
 #            get the TChains for each sample          #
 #######################################################
-for s in backgrounds+signals:
+for s in backgrounds:
   s['chain'] = getChain(s,histname="")
 
 
@@ -57,17 +52,9 @@ piechart = {}
 for cut in mt2llcuts:
   piechart[str(cut)] = {\
     "OF":{\
-      "(0,0)" :{},
-      "(1,0)" :{},
-      "(1,1)" :{},
-      "(>=2,0)" :{},
       "(>=2,>=1)" :{},
     },
     "SF":{\
-      "(0,0)" :{},
-      "(1,0)" :{},
-      "(1,1)" :{},
-      "(>=2,0)" :{},
       "(>=2,>=1)" :{},
     }
 }
@@ -75,7 +62,7 @@ for cut in mt2llcuts:
 #######################################################
 #            Start filling in the histograms          #
 #######################################################
-for s in backgrounds+signals:
+for s in backgrounds:
   for cut in piechart.keys():
     for flavor in piechart[cut].keys():
       for piece in piechart[cut][flavor].keys():
@@ -117,21 +104,18 @@ for s in backgrounds+signals:
   chain.SetBranchStatus("dl_mt2ll",1)
   chain.SetBranchStatus("dl_mt2bb",1)
   chain.SetBranchStatus("dl_mt2blbl",1)
-  if s not in data: 
-    chain.SetBranchStatus("genWeight",1)
-    chain.SetBranchStatus("Jet_mcMatchFlav",1)
-    chain.SetBranchStatus("xsec",1)
-    chain.SetBranchStatus("Jet_partonId",1)
+  chain.SetBranchStatus("genWeight",1)
+  chain.SetBranchStatus("Jet_mcMatchFlav",1)
+  chain.SetBranchStatus("xsec",1)
+  chain.SetBranchStatus("Jet_partonId",1)
 
   #Using Event loop
   #get EList after preselection
   print '\n', "Looping over %s" % s["name"]
-
-  if s == DY_25ns: eList = getEList(chain, preselection+"&&Sum$(Jet_pt)<150")
-  else: eList = getEList(chain, preselection)
-
+  eList = getEList(chain, preselection) 
   nEvents = eList.GetN()/reduceStat
   print "Found %i events in %s after preselection %s, looping over %i" % (eList.GetN(),s["name"],preselection,nEvents)
+
  
   for ev in range(nEvents):
 
@@ -145,7 +129,7 @@ for s in backgrounds+signals:
     #event weight (L= 4fb^-1)
     weight = reduceStat*getVarValue(chain, "weight")
 
-    if s not in data: weight = weight*(luminosity/1000.)
+    weight = weight*(luminosity/1000.)
 
     #MET
     met = getVarValue(chain, "met_pt")
@@ -162,7 +146,6 @@ for s in backgrounds+signals:
     allLeptons = getGoodLeptons(chain)
     muons = getGoodMuons(chain)
     electrons = getGoodElectrons(chain)
-
 
     #SF and OF channels
     leptons = {\
@@ -199,46 +182,19 @@ for s in backgrounds+signals:
           PhiMetJet1 = deltaPhi(metPhi,getVarValue(chain, "Jet_phi",0))
           PhiMetJet2 = deltaPhi(metPhi,getVarValue(chain, "Jet_phi",1))
 
-          if PhiMetJet1 <= PhiMetJet2: PhiMetJet_small = PhiMetJet1
-          else:                        PhiMetJet_small = PhiMetJet2
-
+          PhiMetJet_small = min(PhiMetJet1,PhiMetJet2)
+          
         for cut in mt2llcuts:
 
-          if mt2ll >= cut and (njets==0 or njets>0 and met/sqrt(ht) > metsignifcut):
+          if mt2ll >= cut and PhiMetJet_small > dphicut:
             if (nmuons == 1 and nelectrons == 1):
-          
-              if njets == 0: 
-                if nbjets == 0:
-                  piechart[str(cut)]["OF"]["(0,0)"][s["name"]]+=weight
-              elif njets == 1:
-                if nbjets == 0: 
-                  piechart[str(cut)]["OF"]["(1,0)"][s["name"]]+=weight
-                elif nbjets == 1: 
-                  piechart[str(cut)]["OF"]["(1,1)"][s["name"]]+=weight
-              elif njets >= 2 and PhiMetJet_small>dphicut:
-                if nbjets == 0: 
-                  piechart[str(cut)]["OF"]["(>=2,0)"][s["name"]]+=weight
-                else:
-                  piechart[str(cut)]["OF"]["(>=2,>=1)"][s["name"]]+=weight
+              piechart[str(cut)]["OF"]["(>=2,>=1)"][s["name"]]+=weight
             else:
-              if njets == 0:
-                if nbjets == 0:
-                  piechart[str(cut)]["SF"]["(0,0)"][s["name"]]+=weight
-              elif njets == 1:
-                if nbjets == 0: 
-                  piechart[str(cut)]["SF"]["(1,0)"][s["name"]]+=weight
-                elif nbjets == 1: 
-                  piechart[str(cut)]["SF"]["(1,1)"][s["name"]]+=weight
-              elif njets >= 2 and PhiMetJet_small>dphicut:
-                if nbjets == 0: 
-                  piechart[str(cut)]["SF"]["(>=2,0)"][s["name"]]+=weight
-                else: 
-                  piechart[str(cut)]["SF"]["(>=2,>=1)"][s["name"]]+=weight
-
+              piechart[str(cut)]["SF"]["(>=2,>=1)"][s["name"]]+=weight
   del eList
 
 
-for s in backgrounds+signals:
+for s in backgrounds:
   for cut in piechart.keys():
     for flavor in piechart[cut].keys():
       for piece in piechart[cut][flavor].keys():
@@ -246,21 +202,13 @@ for s in backgrounds+signals:
 
 def makefigure(piechart,mt2llcut):
 
-  print piechart["0.0"]["SF"]
-  
-
-  diBosons_25ns["color"]   = "yellow"
-  WJetsToLNu_25ns["color"] = "lightsalmon"
-  TTX_25ns["color"]        = "deeppink"
-  singleTop_25ns["color"]  = "grey"
-  QCDMu_25ns["color"]      = "darkred"
-  DY_25ns["color"]         = "yellowgreen"
-  TTLep_25ns["color"]      = "cyan"
-
+  TTW_25ns["color"]     = "yellow"
+  TTH_25ns["color"]     = "grey"
+  TTZ_All_25ns["color"] = "cyan"
 
   piechart = piechart[str(mt2llcut)]
 
-  fig1 = plt.figure(figsize=(11,11))
+  fig1 = plt.figure(figsize=(13,4))
   gridx=len(piechart["SF"])+1
   gridy=4  #jet multiplicity, SF and OF and add one for legend
   #colors = ['yellowgreen', 'gold', 'lightskyblue', 'lightcoral','mediumblue','red','magenta']
@@ -302,7 +250,7 @@ def makefigure(piechart,mt2llcut):
   #plt.legend([yellowgreen_patch,gold_patch,lightskyblue_patch,lightcoral_patch,mediumblue_patch,red_patch,magenta_patch],bkgs)
   plt.legend(patches,bkgs)
   plt.axis('off')
-  plt.savefig('/afs/cern.ch/user/w/wvandrie/www/Stops/test/piecharts/piecharts_mt2llcut_'+str(int(mt2llcut))+'.png')
+  plt.savefig('/afs/cern.ch/user/w/wvandrie/www/Stops/test/piechartsTTX/piecharts_mt2llcut_'+str(int(mt2llcut))+'.png')
   
 for cut in mt2llcuts:
   makefigure(piechart,cut)

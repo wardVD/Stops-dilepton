@@ -271,11 +271,12 @@ def latexmaker_2(piechart,mt2llcut,channel):
   
   output.write("\\begin{tabular}{|c|c|c|c|c|c|}" + '\n')
   output.write("\\hline" + '\n')
-  output.write("$M_{T2}$ cut at " + str(mt2llcut)  + " (GeV) & Count \\\\"+ '\n')
+  output.write("$M_{T2}$ cut at " + str(mt2llcut)  + " (GeV) \\textcolor{red}{\\textbf{" +channel+ "}} & Count \\\\"+ '\n')
   output.write("\\hline" + '\n')
   output.write("\\hline" + '\n')
 
-  sortedhist = sorted(mt2ll.items(),key=lambda l:l[1])
+  #sortedhist = sorted(mt2ll.items(),key=lambda l:l[1])
+  sortedhist = mt2ll.items()
   for item in sortedhist:
     samplename = item[0].replace("_","\_")
     output.write(samplename + " & " + str(round(item[1],2)) + "\\\\" + '\n')

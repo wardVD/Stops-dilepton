@@ -97,7 +97,7 @@ DY_25ns={\
 'dir' : dataDir,
 }
 DYHT_25ns={\
-"name" : "DY",
+"name" : "DY_HT",
 "bins" : [
 "DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2",
 "DYJetsToLL_M-50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2",
@@ -200,9 +200,19 @@ TTZ_QQ_25ns={\
 ],
 'dir' :dir
 }
+
 TTZ_Lep_25ns={\
 "name": "TTZ_LLorNuNu",
 "bins": [
+"TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
+],
+'dir' :dir
+}
+
+TTZ_All_25ns={\
+"name": "TTZ",
+"bins": [
+"TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 "TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1",
 ],
 'dir' :dir
